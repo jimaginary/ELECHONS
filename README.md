@@ -1,2 +1,16 @@
-# ELECHONS
-ELEC Honours Thesis
+# ELEC Honours Thesis Work
+This is a repo for my electrical engineering honours thesis at UNSW.
+The subject matter is graph signal processing.
+
+## Todo
+- Look at Moodle how-to guide
+- Look at Moodle scoring sheet
+- Review IEEE Signal Processing Magazine articles (optionally)
+- Find graph temperature data sets for east coast Australia (or US or elsewhere if needed)
+
+### Long run investigation ideas
+- Stochastic signals on graphs
+- Methods for constructing sparse graphs that give good results (dimensionality reduction)
+
+### Tips
+- Work on two things at once
