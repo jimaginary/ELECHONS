@@ -14,3 +14,6 @@ The subject matter is graph signal processing.
 
 ### Tips
 - Work on two things at once
+
+### Data modifications
+- Acorn data station 048027 min has some -999degC entries which are clearly invalid. These have been removed.

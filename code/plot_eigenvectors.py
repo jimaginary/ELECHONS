@@ -60,7 +60,7 @@ def load_and_plot_stations(adj_matrix_file, eigenvector_file):
 
     # Create scatter plot with eigenvector coloring
     plt.figure(figsize=(12, 8))
-    scatter = plt.scatter(longitudes, latitudes, c=eigenvector, s=50, alpha=0.6, cmap='viridis')
+    scatter = plt.scatter(longitudes, latitudes, c=eigenvector, s=50, alpha=1, cmap='bwr', zorder=10)
     plt.colorbar(scatter, label='Eigenvector Value')
 
     # Add edges
@@ -69,7 +69,7 @@ def load_and_plot_stations(adj_matrix_file, eigenvector_file):
             if adj_matrix[i, j] == 1:
                 plt.plot([longitudes[i], longitudes[j]], 
                          [latitudes[i], latitudes[j]], 
-                         'k-', alpha=0.2, linewidth=0.5)
+                         'k-', alpha=0.7, linewidth=0.5, zorder=0)
 
     # Customize plot
     plt.title(f'Weather Stations (Colored by Eigenvector for Eigenvalue {selected_eigenvalue:.3f})', fontsize=14)
