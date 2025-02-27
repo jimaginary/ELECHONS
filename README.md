@@ -17,3 +17,4 @@ The subject matter is graph signal processing.
 
 ### Data modifications
 - Acorn data station 048027 min has some -999degC entries which are clearly invalid. These have been removed.
+- Removed data files from stations without latitutde and longtitude data in the metadata set

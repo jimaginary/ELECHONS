@@ -2,23 +2,11 @@ import numpy as np
 import argparse
 
 def haversine(lat1, lon1, lat2, lon2):
-    """
-    Calculate the great-circle distance between two points on Earth using the Haversine formula.
-    
-    Parameters:
-        lat1, lon1 (float): Latitude and longitude of the first point (in degrees).
-        lat2, lon2 (float): Latitude and longitude of the second point (in degrees).
-    
-    Returns:
-        float: Distance in kilometers.
-    """
-    # Earth's mean radius in kilometers
+    # Earth radius
     R = 6371.0
 
-    # Convert degrees to radians
     lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
 
-    # Differences in coordinates
     dlat = lat2 - lat1
     dlon = lon2 - lon1
 
@@ -38,7 +26,6 @@ def main():
     parser.add_argument('lon2', type=float, help='Longitude of the second point (e.g., 144.9700)')
     args = parser.parse_args()
 
-    # Compute distance
     distance = haversine(args.lat1, args.lon1, args.lat2, args.lon2)
     print(f"Distance between ({args.lat1}, {args.lon1}) and ({args.lat2}, {args.lon2}): {distance:.2f} km")
 
