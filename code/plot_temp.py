@@ -7,7 +7,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Plot temp timeseries')
 parser.add_argument('station', type=str, help='Station id')
 parser.add_argument('stat', choices=['max','mean','min'], help='Stat desired to plot')
-parser.add_argument('--save-png', action='store_true', help='Save the plot as a PNG file instead of displaying it')
+parser.add_argument('--save-png', action='store_true', help='Save the plot as a PNG file')
 parser.add_argument('--average', choices=['month', 'year'], help='Average data by month or year instead of daily')
 parser.add_argument('--year', type=int, help='Plot only data for the specified year')
 args = parser.parse_args()
