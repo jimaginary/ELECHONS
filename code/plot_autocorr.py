@@ -9,7 +9,7 @@ import station_handler
 def plot_autocorrelation(station, stat):
     df = station_handler.get_timeseries(station, stat)
     df['date'] = pd.to_datetime(df['date'])
-    temps = df[f'{stat}imum temperature (degC)'].dropna().to_numpy()
+    temps = df[f'{stat}imum temperature (degC)'].to_numpy()
     
     max_lag = min(3 * 365, len(temps) - 1)  # Max 3 years or series length
     lags = np.arange(max_lag + 1)

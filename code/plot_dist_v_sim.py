@@ -10,14 +10,13 @@ def plot_dist_vs_sim(file_path):
     similarities = df['sim']
 
     plt.scatter(distances, similarities, s=2)
-    plt.title(f'Distance vs. RMS Temperature Difference ({file_path.split("_")[0].capitalize()})', fontsize=14)
-    plt.xlabel('Distance (km)', fontsize=12)
-    plt.ylabel('RMS Distance (°C)', fontsize=12)
+    plt.title(f'Distance vs. RMS Temperature Difference ({file_path.split("_")[0].capitalize()})')
+    plt.xlabel('Distance (km)')
+    plt.ylabel('RMS Distance (°C)')
     plt.tight_layout()
     plt.show()
 
 def main():
-    """Command-line interface to plot distance vs. similarity based on a statistic."""
     parser = argparse.ArgumentParser(description='Plot distance vs. RMS temperature difference.')
     parser.add_argument('stat', choices=['max', 'mean', 'min'], help='Statistic to plot (max, mean, min)')
     args = parser.parse_args()

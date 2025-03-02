@@ -29,9 +29,6 @@ def plot_stations():
     plt.show()
 
 def main():
-    """Command-line interface to plot stations from a CSV file."""
-    parser = argparse.ArgumentParser(description='Plot weather stations interactively from a CSV file.')
-
     plot_stations()
 
 if __name__ == '__main__':

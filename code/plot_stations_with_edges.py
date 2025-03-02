@@ -42,7 +42,6 @@ def plot_stations_with_edges(adj_matrix_file):
     plt.show()
 
 def main():
-    """Command-line interface to plot stations with edges from an adjacency matrix."""
     parser = argparse.ArgumentParser(description='Plot weather stations with edges from a binary adjacency matrix.')
     parser.add_argument('adj_matrix_file', type=str, help='Path to the binary adjacency matrix CSV (e.g., binary_distance_matrix.csv)')
     args = parser.parse_args()

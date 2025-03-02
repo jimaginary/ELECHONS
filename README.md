@@ -3,10 +3,8 @@ This is a repo for my electrical engineering honours thesis at UNSW.
 The subject matter is graph signal processing.
 
 ## Todo
-- Look at Moodle how-to guide
-- Look at Moodle scoring sheet
-- Review IEEE Signal Processing Magazine articles (optionally)
-- Find graph temperature data sets for east coast Australia (or US or elsewhere if needed)
+- Review IEEE Signal Processing Magazine articles
+- Implement kronecker time-series/spatial graph product GFT and replicate compression results
 
 ### Long run investigation ideas
 - Stochastic signals on graphs
@@ -18,3 +16,4 @@ The subject matter is graph signal processing.
 ### Data modifications
 - Acorn data station 048027 min has some -999degC entries which are clearly invalid. These have been removed.
 - Removed data files from stations without latitutde and longtitude data in the metadata set
+- Backfilled, then forwardfilled data in filled_* folders in datasets for ease of use.

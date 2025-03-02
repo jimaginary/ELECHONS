@@ -56,7 +56,6 @@ def plot_stations_with_eigenvector(adj_matrix_file, eigenvector_file):
     plt.show()
 
 def main():
-    """Command-line interface to plot stations with edges and eigenvector coloring."""
     parser = argparse.ArgumentParser(description='Plot weather stations with edges and eigenvector coloring.')
     parser.add_argument('adj_matrix_file', type=str, help='Path to the binary adjacency matrix CSV (e.g., binary_distance_matrix.csv)')
     parser.add_argument('eigenvector_file', type=str, help='Path to the eigenvectors CSV (e.g., eigenvectors.csv)')

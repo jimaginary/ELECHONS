@@ -15,7 +15,7 @@ def get_station(station):
 def get_timeseries(station, stat):
     station = str(station)
     station = '0'*(6 - len(station)) + station
-    return pd.read_csv(f'{git_root}/datasets/acorn_sat_v2.5.0_daily_t{stat}/t{stat}.{station}.daily.csv')
+    return pd.read_csv(f'{git_root}/datasets/filled_acorn_sat_v2.5.0_daily_t{stat}/t{stat}.{station}.daily.csv')
 
 def get_full_stat_name(stat):
     return {
