@@ -29,12 +29,21 @@ The subject matter is graph signal processing.
 - In our case, we FFT each time series, then for each frequency GFT the graph data, giving an output 104x17838 size spectra
 - Below we have coefficient fraction vs RMSE for each compressed stat, with worse but similar results to Moura
 - Note that the results are identical due to Moura (2014) for graph Cartesian, Strong, and Kronecker products
-max data compression RMSE
+	max data compression RMSE
 1/50,	1/20,	1/15,	1/10,	1/7,	1/5,	1/3,	1/2,	1/1,	
+Time-only Compression:
+11.80,	10.46,	9.89,	8.93,	7.93,	6.86,	4.98,	3.29,	0.00,	
+Time and Space Compression:
 8.86,	7.33,	6.85,	6.15,	5.49,	4.82,	3.64,	2.51,	0.00,	
-min data compression RMSE
+	min data compression RMSE
 1/50,	1/20,	1/15,	1/10,	1/7,	1/5,	1/3,	1/2,	1/1,	
+Time-only Compression:
+19.00,	16.96,	16.09,	14.64,	13.12,	11.48,	8.52,	5.74,	0.00,	
+Time and Space Compression:
 15.23,	13.02,	12.28,	11.16,	10.06,	8.90,	6.79,	4.72,	0.00,	
-mean data compression RMSE
+	mean data compression RMSE
 1/50,	1/20,	1/15,	1/10,	1/7,	1/5,	1/3,	1/2,	1/1,	
-8.54,	6.95,	6.47,	5.80,	5.18,	4.54,	3.43,	2.36,	0.00,
+Time-only Compression:
+11.79,	10.33,	9.71,	8.69,	7.65,	6.55,	4.69,	3.09,	0.00,	
+Time and Space Compression:
+8.54,	6.95,	6.47,	5.80,	5.18,	4.54,	3.43,	2.36,	0.00,	
