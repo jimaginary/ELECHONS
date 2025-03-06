@@ -1,14 +1,15 @@
 import pandas as pd
 import numpy as np
 import station_handler as sh
+import edge_computations as ec
 import matplotlib.pyplot as plt
 import sys
 
 time_eigs = np.exp(-complex(0,1)*2*np.pi*np.fft.fftfreq(sh.overlap_length))
 
-graph_eigen_df = pd.read_csv('eigvecs.csv', index_col=0)
-graph_eigenvalues = graph_eigen_df.columns.astype(float).tolist()
-graph_eigenvectors = graph_eigen_df.to_numpy()
+# graph_eigen_df = pd.read_csv('eigvecs.csv', index_col=0)
+graph_eigenvalues, graph_eigenvectors = np.linalg.eigh(ec.laplacian_matrix(sh.stations, 8))#graph_eigen_df.columns.astype(float).tolist()
+# graph_eigenvectors = graph_eigen_df.to_numpy()
 
 compression_factors = [50, 20, 15, 10, 7, 5, 3, 2, 1]
 

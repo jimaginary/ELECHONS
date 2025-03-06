@@ -46,7 +46,7 @@ def filtered_distance_matrix(stations, K):
 def closeness(v, scale):
     return np.sqrt(np.sum(np.exp(-np.pow(v[v != 0]/scale,2))))
 
-def weight_matrix(stations, scale, K):
+def closeness_matrix(stations, scale, K):
     n = len(stations)
     M = filtered_distance_matrix(stations, K)
     vertex_weights = np.array([closeness(np.array(v), scale) for v in M.tolist()])
@@ -57,3 +57,15 @@ def weight_matrix(stations, scale, K):
             if M[i,j] != 0:
                 W[i,j] = closeness(M[i,j], scale)**2/(vertex_weights[i]*vertex_weights[j])
     return W
+
+def laplacian_matrix(stations, K):
+    n = len(stations)
+    A = filtered_distance_matrix(stations, K)
+    M = np.zeros((n,n))
+    for i in range(n):
+        for j in range(n):
+            if A[i,j] != 0:
+                M[i,j] = 1 / A[i,j]
+            
+    D = np.diag(np.sum(M, 0))
+    return D - M
