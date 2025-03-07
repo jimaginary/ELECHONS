@@ -15,13 +15,8 @@ compression_factors = [50, 20, 15, 10, 7, 5, 3, 2, 1]
 
 for stat in ['max', 'min', 'mean']:
     print(f'\t{stat} data compression RMSE')
-    stat_stations_spectra = []
-    stat_stations_timeseries = []
-    for i, station in enumerate(sh.stations['station number']):
-        stat_stations_spectra.append([complex(c) for c in sh.get_fft(station, stat)['component']])
-        stat_stations_timeseries.append(sh.get_timeseries(station, stat)[f'{sh.get_full_stat_name(stat)} temperature (degC)'][-sh.overlap_length:])
-    stat_stations_spectra = np.array(stat_stations_spectra)
-    stat_stations_timeseries = np.array(stat_stations_timeseries)
+    stat_stations_timeseries = sh.get_series_matrix(stat)
+    stat_stations_spectra = np.fft.fft(stat_stations_timeseries, axis=1)
 
     N = np.prod(stat_stations_timeseries.shape)
 

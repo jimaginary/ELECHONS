@@ -26,6 +26,18 @@ def get_fft(station, stat):
     station = str(int(station))
     return pd.read_csv(f'{git_root}/datasets/fft_t{stat}/t{stat}.{station}.csv')
 
+def get_series_matrix(stat):
+    timeseries = []
+    for station in stations['station number']:
+        timeseries.append(get_timeseries(station, stat)[f'{get_full_stat_name(stat)} temperature (degC)'])
+    return np.array(timeseries)
+
+def get_was_nan_matrix(stat):
+    was_nan = []
+    for station in stations['station number']:
+        was_nan.append(get_timeseries(station, stat)[f'was nan'])
+    return np.array(was_nan)
+
 def get_full_stat_name(stat):
     return {
         'max': 'maximum',
