@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 import scipy.stats as stats
+import sys
 
 stat = None
 lat = sh.stations['lat'].to_numpy()
@@ -197,22 +198,45 @@ def plot_autoregression_partial_corrs(max_delay = 20):
     plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_partial_corr_by_delay_{max_delay}.png', bbox_inches='tight', dpi=300)
     plt.close()
 
-
 def plot_correlation_v_dist():
     if not _INIT:
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
+    
+    def exp_model(params, d):
+        return params[0]*np.exp(-params[1]*d)
+    
+    def cov_1d_model(params, d):
+        return (params[0] / (params[1]**2)) * (1 + params[1]*d) * np.exp(-params[1]*d)
+    
+    def least_squares(params, func, d, p):
+        return np.sum(np.pow(p - func(params, d), 2))/len(d)
 
     space_error_correlation = np.corrcoef(regression_error).flatten()
     dist = ec.distance_matrix(sh.stations).flatten()
 
-    plt.scatter(dist, space_error_correlation, s=2)
+    exp_model_min_obj = minimize(least_squares, np.array([0,0]), args=(exp_model, dist, space_error_correlation), method='Nelder-Mead')
+    if not exp_model_min_obj.success:
+        print(f'failed to minimise with exp model')
+    exp_model_params = exp_model_min_obj.x
+
+    cov_1d_model_min_obj = minimize(least_squares, np.array([0.01,0.01]), args=(cov_1d_model, dist, space_error_correlation), method='Nelder-Mead')
+    if not cov_1d_model_min_obj.success:
+        print(f'failed to minimise with cov 1d model')
+    cov_1d_model_params = cov_1d_model_min_obj.x
+
+    order = dist.argsort()
+    plt.plot(dist[order], exp_model(exp_model_params, dist)[order], label=f'exp model cost {least_squares(exp_model_params, exp_model, dist, space_error_correlation):.4f}', c='r')
+    plt.plot(dist[order], cov_1d_model(cov_1d_model_params, dist)[order], label=f'cov 1d model cost {least_squares(cov_1d_model_params, cov_1d_model, dist, space_error_correlation):.4f}', c='g')
+
+    plt.scatter(dist, space_error_correlation, s=2, c='b', alpha=0.1)
     plt.xlabel('distance (km)')
     plt.ylabel('correlation coefficient')
     plt.title(f'{stat} temp dist v Pearson correlation for regression error')
+    plt.legend()
     
     plt.tight_layout()
-    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_error_corr_by_dist.png', bbox_inches='tight')
+    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_error_corr_by_dist.png', bbox_inches='tight', dpi=300)
     plt.close()
 
 def plot_regression_coeff_v_dist():
@@ -264,4 +288,76 @@ def plot_partial_corr_v_dist():
 
     plt.tight_layout()
     plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_nearest_error_partial_corr_by_dist.png', bbox_inches='tight', dpi=300)
+    plt.close()
+
+def plot_autoreg_residues():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    merged_valid = valid[:,1:]*valid[:,:-1]
+    station_error = np.array([np.sqrt(np.sum(np.pow(error,2)*merged_valid[i]) / np.sum(merged_valid[i])) for i, error in enumerate(regression_error)])
+
+    scatter = plt.scatter(long, lat, c=station_error, cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='RMSE (degC)')
+    plt.title(f'error after autoregression for {stat} temp data by location')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_RMSE_by_loc.png', bbox_inches='tight')
+    plt.close()
+
+def explicit_spatial_fit():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    def exp_model(params, d):
+        return params[0]*np.exp(-params[1]*d)
+    
+    def least_squares(params, func, d, p):
+        return np.sum(np.pow(p - func(params, d), 2))/len(d)
+
+    space_error_correlation = np.corrcoef(regression_error).flatten()
+    dist = ec.distance_matrix(sh.stations).flatten()
+
+    exp_model_min_obj = minimize(least_squares, np.array([0,0]), args=(exp_model, dist, space_error_correlation), method='Nelder-Mead')
+    if not exp_model_min_obj.success:
+        print(f'failed to minimise with exp model')
+    exp_model_params = exp_model_min_obj.x
+
+    P = exp_model(exp_model_params, ec.distance_matrix(sh.stations))
+    np.fill_diagonal(P, 0)
+
+    prev_errors = regression_error[:,:-1]
+    betas = []
+    for station, post_errors in enumerate(regression_error[:,1:]):
+        c = prev_errors.T @ P[station]
+        if (np.dot(c,c) == 0):
+            betas.append(0)
+        else:
+            betas.append((P[station].T @ prev_errors @ post_errors) / (np.dot(c,c)))
+    
+    betas = np.array(betas)
+    print(f'spatial fit betas: max {np.max(betas):.4f}, min {np.min(betas):.4f}, mean {np.mean(betas):.4f}, std {np.std(betas):.4f}')
+
+    error_pred = []
+    for temp in prev_errors.T:
+        error_pred.append(betas * (P @ temp))
+    error_pred = np.array(error_pred)
+
+    merged_valid = valid.T[1:,:]*valid.T[:-1,:]
+    valids = np.sum(merged_valid)
+
+    spatial_cost = np.sqrt(np.sum(np.pow(error_pred - regression_error.T[1:,:],2)*merged_valid[1:,:]) / valids)
+    print(f'cost: {spatial_cost:.4f} degC')
+    
+    prior_cost = np.sqrt(np.sum(np.pow(regression_error.T[1:,:], 2)*merged_valid[1:,:]) / valids)
+    print(f'prior cost: {prior_cost:.4f} degC')
+
+    scatter = plt.scatter(long, lat, c=betas, cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='spatial autoregression coefficient')
+    plt.title(f'spatial autoregression coefficient for {stat} temp data by location, fit cost={spatial_cost:.4f} degC')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_space_coeff_by_loc.png', bbox_inches='tight')
     plt.close()
