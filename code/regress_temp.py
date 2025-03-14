@@ -14,7 +14,6 @@ temps = None
 valid = None
 days = None
 means = None
-temps_mean_adj = None
 params = None
 temps_mean_sin_adj = None
 regression_coefficients = None
@@ -32,26 +31,17 @@ def cost_function(params, t, y, v):
 
 _INIT = False
 def init(_stat):
-    global _INIT, stat, temps, valid, days, means, temps_mean_adj, params, temps_mean_sin_adj, regression_coefficients, regression_error
+    global _INIT, stat, temps, valid, days, means, params, temps_mean_sin_adj, regression_coefficients, regression_error
     _INIT = True
     stat = _stat
     temps = sh.get_series_matrix(stat)
     valid = ~sh.get_was_nan_matrix(stat)
     days = np.arange(temps.shape[1])
 
-    # incorporate average component
-    means = np.sum(temps*valid, axis=1) / np.sum(valid, axis=1)
-    temps_mean_adj = temps - np.tile(means, (temps.shape[1], 1)).T
-
-    params = np.zeros((temps.shape[0], 2))
-    for i in range(temps.shape[0]):
-        min_obj = minimize(cost_function, np.array([0, 0]), args=(days, temps_mean_adj[i], valid[i]), method='Nelder-Mead')
-        if not min_obj.success:
-            print(f'Got a minimisation failure at station {sh.stations.iloc[i]['station number']}!')
-            print(f'params: {min_obj.x}')
-        params[i] = min_obj.x
-
-    temps_mean_sin_adj = temps_mean_adj - np.array([sin_model(params[i], days) for i in range(temps.shape[0])])
+    X = np.array([[1 for _ in range(temps.shape[1])], np.sin(w*days), np.cos(w*days)]).T
+    proj = np.linalg.inv(X.T @ X) @ X.T
+    params = proj @ temps.T
+    temps_mean_sin_adj = temps - params.T @ X.T
 
     def auto_regress(y, v):
         V = v[1:]*v[:-1]
@@ -60,6 +50,34 @@ def init(_stat):
     regression_coefficients = np.array([auto_regress(temps_mean_sin_adj[i], valid[i]) for i in range(temps.shape[0])])
 
     regression_error = np.array([temps_mean_sin_adj[i][1:] - regression_coefficients[i]*temps_mean_sin_adj[i][:-1] for i in range(temps.shape[0])])
+
+def plot_all():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    print('plotting save_hist_qq_subplots')
+    save_hist_qq_subplots()
+    print('plotting plot_dist_by_loc')
+    plot_dist_by_loc()
+    print('plotting plot_seasonality_by_loc')
+    plot_seasonality_by_loc()
+    print('plotting plot_autoregression_by_loc')
+    plot_autoregression_by_loc()
+    print('plotting plot_autoregression_partial_corrs delay 20')
+    plot_autoregression_partial_corrs()
+    print('plotting plot_autoregression_partial_corrs delay 5')
+    plot_autoregression_partial_corrs(5)
+    print('plotting plot_correlation_v_dist')
+    plot_correlation_v_dist()
+    print('plotting plot_regression_coeff_v_dist')
+    plot_regression_coeff_v_dist()
+    print('plotting plot_partial_corr_v_dist')
+    plot_partial_corr_v_dist()
+    print('plotting plot_autoreg_residues')
+    plot_autoreg_residues()
+    print('plotting explicit_spatial_fit')
+    explicit_spatial_fit()
 
 def save_hist_qq_subplots():
     if not _INIT:
@@ -71,8 +89,8 @@ def save_hist_qq_subplots():
         # Rice's rule: bins = 2*cbrt(obsv)
         no_bins = int(2*np.cbrt(temps.shape[1]))
 
-        axes[0,0].hist(temps_mean_adj[st], bins=no_bins)
-        axes[0,0].set_title(f'mean-adjusted {stat} temperature distribution for station {sh.stations.iloc[st]['station number']}')
+        axes[0,0].hist(temps[st], bins=no_bins)
+        axes[0,0].set_title(f'{stat} temperature distribution for station {sh.stations.iloc[st]['station number']}')
         axes[0,0].set_xlabel('degC')
         axes[0,0].set_ylabel('no. samples')
 
@@ -81,8 +99,8 @@ def save_hist_qq_subplots():
         axes[0,1].set_xlabel('degC')
         axes[0,1].set_ylabel('no. samples')
 
-        stats.probplot(temps_mean_adj[st], plot=axes[1,0])
-        axes[1,0].set_title(f'mean-adj {stat} temp q-q plot')
+        stats.probplot(temps[st], plot=axes[1,0])
+        axes[1,0].set_title(f'{stat} temp q-q plot')
 
         stats.probplot(temps_mean_sin_adj[st], plot=axes[1,1])
         axes[1,1].set_title(f'sin-adj {stat} temp q-q plot')
@@ -97,7 +115,7 @@ def test_normality(st):
         return
 
     print(f'Anderson-Darling test results for temp data at station: {sh.stations.iloc[st]['station number']}')
-    and_r = stats.anderson(temps_mean_adj[st], dist='norm')
+    and_r = stats.anderson(temps[st], dist='norm')
     print(and_r.statistic)
     print(and_r.critical_values)
     print(and_r.significance_level)
@@ -113,9 +131,6 @@ def plot_dist_by_loc():
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
 
-    # temps_var = np.var(temps_mean_adj, axis=1)
-    # temps_skew = stats.skew(temps_mean_adj, axis=1)
-    # temps_kurt = stats.kurtosis(temps_mean_adj, axis=1)
     temps_var = np.var(temps_mean_sin_adj, axis=1)
     temps_skew = stats.skew(temps_mean_sin_adj, axis=1)
     temps_kurt = stats.kurtosis(temps_mean_sin_adj, axis=1)
@@ -145,10 +160,9 @@ def plot_seasonality_by_loc():
 
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10,4))
 
-    # normalise phase/amp: add half a year when amplitude is negative
     # subtract 2/12 from phase because our data starts in march
-    phase = ((params[:,1]+0.5*(params[:,0] < 0) + 2/12) % 1)/(2*np.pi)
-    amp = np.abs(params[:,0])
+    phase = np.arctan(- params[1,:] / params[2,:]) / (2 * np.pi) - (2 / 12)
+    amp = np.sqrt(np.pow(params[1,:],2) + np.pow(params[2,:],2))
     
     scatter = axes[0].scatter(long, lat, c=phase, cmap='rainbow', zorder=5)
     plt.colorbar(scatter, label='Phase (years)')
