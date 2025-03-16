@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 import scipy.stats as stats
-import sys
+from matplotlib.colors import TwoSlopeNorm
 
 stat = None
 lat = sh.stations['lat'].to_numpy()
@@ -374,4 +374,49 @@ def explicit_spatial_fit():
 
     plt.tight_layout()
     plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_space_coeff_by_loc.png', bbox_inches='tight')
+    plt.close()
+
+def direct_error_regressed_on_spatial_data():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    data = temps_mean_sin_adj.T[1:,:]
+    X = temps_mean_sin_adj.T[:-1,:]
+    proj = np.linalg.inv(X.T @ X) @ X.T
+    spatial_params = proj @ data
+    pred = X @ spatial_params
+    spatial_error = data - pred
+
+    RMSE = np.sqrt(np.average(np.pow(spatial_error,2)))
+
+    vmax = np.max(np.abs(spatial_params))
+    norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(5, 12))
+
+    im1 = ax1.imshow(spatial_params, cmap='RdBu', norm=norm)
+    plt.colorbar(im1, ax=ax1, label='Regression Coefficient')
+    ax1.set_xlabel('Column Index')
+    ax1.set_ylabel('Row Index')
+    ax1.set_title(f'Spatial Regression Matrix, fit RMSE = {RMSE:.4f}')
+
+    np.fill_diagonal(spatial_params, 0)
+    vmax = np.max(np.abs(spatial_params))
+    norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
+
+    im2 = ax2.imshow(spatial_params, cmap='RdBu', norm=norm)
+    plt.colorbar(im2, ax=ax2, label='Regression Coefficient')
+    ax2.set_xlabel('Column Index')
+    ax2.set_ylabel('Row Index')
+    ax2.set_title(f'Spatial Regression Matrix w/out autoregression (main diagonal)')
+
+    im3 = ax3.imshow(ec.distance_matrix(sh.stations), cmap='RdBu')
+    plt.colorbar(im3, ax=ax3, label='Distances')
+    ax3.set_xlabel('Column Index')
+    ax3.set_ylabel('Row Index')
+    ax3.set_title('Distances Matrix')
+
+    plt.tight_layout()
+    fig.savefig(f'../plts/spatial_fit_imgs/{stat}_error_regressed_on_spatial_data.png', bbox_inches='tight', dpi=300)
     plt.close()
