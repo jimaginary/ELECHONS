@@ -14,6 +14,9 @@ The subject matter is graph signal processing.
 - Stochastic signals on graphs
 - Methods for constructing sparse graphs that give good results (dimensionality reduction)
 
+### Working on convolution of screened poisson problem green's functions
+- see https://physics.stackexchange.com/questions/581052/yukawa-potential-in-higher-dimensions for general green's function.
+
 ### Tips
 - Work on two things at once
 

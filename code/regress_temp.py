@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 import scipy.stats as stats
 from matplotlib.colors import TwoSlopeNorm
+import scipy.special as special
+import yeo_johnson_transform as yj
 
 stat = None
 lat = sh.stations['lat'].to_numpy()
@@ -176,6 +178,30 @@ def plot_seasonality_by_loc():
     fig.savefig(f'../plts/sin_fit_imgs/{stat}_params_by_loc.png', bbox_inches='tight')
     plt.close()
 
+def plot_autoregression_by_loc_post_yj_transform():
+    station_skews = stats.skew(temps_mean_sin_adj, axis=1)
+    # skew ~ 1.9(l-1):
+    station_lambdas = 1 + station_skews/1.9
+
+    yj_data = np.array([yj.yj(temps_mean_sin_adj[i], station_lambdas[i]) for i in range(temps.shape[0])])
+    yj_autoreg_coeffs = np.array([np.dot(yj_data[i, :-1], yj_data[i, 1:]) / np.dot(yj_data[i, :-1], yj_data[i, :-1]) for i in range(temps.shape[0])])
+    yj_autoreg_fit = np.array([yj_autoreg_coeffs[i] * yj_data[i,:-1] for i in range(temps.shape[0])])
+    autoreg_error = np.array([temps_mean_sin_adj[i,1:] - yj.yj_inv(yj_autoreg_fit[i], station_lambdas[i]) for i in range(temps.shape[0])])
+    
+    RMSE = np.sqrt(np.sum(np.pow(autoreg_error, 2), axis=1) / temps.shape[1])
+
+    RMSE_tot = np.sqrt(np.sum(np.pow(RMSE,2))/temps.shape[0])
+
+    scatter = plt.scatter(long, lat, c=RMSE, cmap='rainbow')
+    plt.title(f'RMSE from autoreg via YJ skew adjustment. Total RMSE={RMSE_tot:.4f}')
+    plt.xlabel('long')
+    plt.ylabel('lat')
+    plt.colorbar(scatter, label='RMSE (degC)')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/YJ/{stat}_RMSE_by_loc.png', bbox_inches='tight')
+    plt.close()
+
 def plot_autoregression_by_loc():
     if not _INIT:
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
@@ -220,11 +246,13 @@ def plot_correlation_v_dist():
     def exp_model(params, d):
         return params[0]*np.exp(-params[1]*d)
     
-    def cov_1d_model(params, d):
-        return (params[0] / (params[1]**2)) * (1 + params[1]*d) * np.exp(-params[1]*d)
+    def cov_2d_model(params, d):
+        # return np.where(d<1e-12, (params[0] ** 2 / (4 * np.pi * params[1] ** 2)), (d * params[0] ** 2 / (4 * np.pi * params[1])) * special.kv(1, params[1] * d))
+        # normlised for regression coeff
+        return np.where(d<1e-12, 1, d * params[0] * special.kv(1, d * params[0]))
     
     def least_squares(params, func, d, p):
-        return np.sum(np.pow(p - func(params, d), 2))/len(d)
+        return np.sqrt(np.sum(np.pow(p - func(params, d), 2))/len(d))
 
     space_error_correlation = np.corrcoef(regression_error).flatten()
     dist = ec.distance_matrix(sh.stations).flatten()
@@ -234,19 +262,19 @@ def plot_correlation_v_dist():
         print(f'failed to minimise with exp model')
     exp_model_params = exp_model_min_obj.x
 
-    cov_1d_model_min_obj = minimize(least_squares, np.array([0.01,0.01]), args=(cov_1d_model, dist, space_error_correlation), method='Nelder-Mead')
-    if not cov_1d_model_min_obj.success:
+    cov_2d_model_min_obj = minimize(least_squares, np.array([0.01]), args=(cov_2d_model, dist, space_error_correlation), method='Nelder-Mead')
+    if not cov_2d_model_min_obj.success:
         print(f'failed to minimise with cov 1d model')
-    cov_1d_model_params = cov_1d_model_min_obj.x
+    cov_2d_model_params = cov_2d_model_min_obj.x
 
     order = dist.argsort()
     plt.plot(dist[order], exp_model(exp_model_params, dist)[order], label=f'exp model cost {least_squares(exp_model_params, exp_model, dist, space_error_correlation):.4f}', c='r')
-    plt.plot(dist[order], cov_1d_model(cov_1d_model_params, dist)[order], label=f'cov 1d model cost {least_squares(cov_1d_model_params, cov_1d_model, dist, space_error_correlation):.4f}', c='g')
+    plt.plot(dist[order], cov_2d_model(cov_2d_model_params, dist)[order], label=f'cov 2d model cost {least_squares(cov_2d_model_params, cov_2d_model, dist, space_error_correlation):.4f}', c='g')
 
     plt.scatter(dist, space_error_correlation, s=2, c='b', alpha=0.1)
     plt.xlabel('distance (km)')
     plt.ylabel('correlation coefficient')
-    plt.title(f'{stat} temp dist v Pearson correlation for regression error')
+    plt.title(f'{stat} temp dist v Pearson correlation for regression error, fitted λ={cov_2d_model_params[0]:.4f}')
     plt.legend()
     
     plt.tight_layout()
