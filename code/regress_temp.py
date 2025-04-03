@@ -8,50 +8,80 @@ import scipy.stats as stats
 from matplotlib.colors import TwoSlopeNorm
 import scipy.special as special
 import yeo_johnson_transform as yj
+import datetime
+import spatial_methods as s
+from statsmodels.tsa.arima.model import ARIMA
 
 stat = None
 lat = sh.stations['lat'].to_numpy()
 long = sh.stations['long'].to_numpy()
+ids = np.array([int(i) for i in sh.stations['station number'].to_numpy()])
 temps = None
 valid = None
 days = None
-means = None
 params = None
 temps_mean_sin_adj = None
 regression_coefficients = None
 regression_error = None
 
-# for each series, we want to fit on non-nans a function of form a+bsin(2pi*t/365+phi)
-# params are b, phi in order
 w = 2*np.pi/365.25
-def sin_model(params, t):
-    return params[0]*np.sin(w*t + params[1])
-
-def cost_function(params, t, y, v):
-    y_pred = sin_model(params, t)
-    return np.sum(np.pow(y - y_pred, 2)*v)
 
 _INIT = False
-def init(_stat):
-    global _INIT, stat, temps, valid, days, means, params, temps_mean_sin_adj, regression_coefficients, regression_error
+def init(_stat, remove_backfills_above=10000, delay=2):
+    global _INIT, stat, temps, valid, ids, days, params, temps_mean_sin_adj, regression_coefficients, regression_error, lat, long
     _INIT = True
     stat = _stat
     temps = sh.get_series_matrix(stat)
     valid = ~sh.get_was_nan_matrix(stat)
     days = np.arange(temps.shape[1])
 
-    X = np.array([[1 for _ in range(temps.shape[1])], np.sin(w*days), np.cos(w*days)]).T
+    small_backfills = np.array([s.get_largest_backfill(v) <= remove_backfills_above for v in valid])
+    temps = temps[small_backfills]
+    valid = valid[small_backfills]
+    lat = lat[small_backfills]
+    long = long[small_backfills]
+    ids = ids[small_backfills]
+
+    X = np.array([[1 for _ in range(temps.shape[1])], np.sin(w*days), np.cos(w*days), np.sin(2*w*days), np.cos(2*w*days)]).T
     proj = np.linalg.inv(X.T @ X) @ X.T
     params = proj @ temps.T
     temps_mean_sin_adj = temps - params.T @ X.T
 
-    def auto_regress(y, v):
-        V = v[1:]*v[:-1]
-        return np.dot(V*y[1:],V*y[:-1])/np.dot(V*y[:-1],V*y[:-1])
+    print(f'seasonality RMSE {s.rmse(temps_mean_sin_adj):.4f}')
 
-    regression_coefficients = np.array([auto_regress(temps_mean_sin_adj[i], valid[i]) for i in range(temps.shape[0])])
+    regression_coefficients = []
+    regression_fits = []
+    for temp in temps_mean_sin_adj:
+        regression = s.auto_regress(temp, delay)
+        regression_coefficients.append(regression[0])
+        regression_fits.append(regression[1])
+    regression_coefficients = np.array(regression_coefficients)
+    regression_error = temps_mean_sin_adj[:, delay:] - np.array(regression_fits)
 
-    regression_error = np.array([temps_mean_sin_adj[i][1:] - regression_coefficients[i]*temps_mean_sin_adj[i][:-1] for i in range(temps.shape[0])])
+    print(f'season-adjusted regression RMSE {s.rmse(regression_error):.4f}')
+
+    regression_coefficients_simple = []
+    regression_fits_simple = []
+    for temp in temps:
+        regression = s.auto_regress(temp, delay)
+        regression_coefficients_simple.append(regression[0])
+        regression_fits_simple.append(regression[1])
+    regression_coefficients_simple = np.array(regression_coefficients_simple)
+    regression_error_simple = temps[:, delay:] - np.array(regression_fits_simple)
+
+    print(f'simple regression RMSE {s.rmse(regression_error_simple):.4f}')
+
+    delays = np.array([1, 2, 181, 182, 183, 184, 363, 364, 365, 366, 367])
+    regression_coefficients_simple = []
+    regression_fits_simple = []
+    for temp in temps:
+        regression = s.auto_regress_long(temp, delays)
+        regression_coefficients_simple.append(regression[0])
+        regression_fits_simple.append(regression[1])
+    regression_coefficients_simple = np.array(regression_coefficients_simple)
+    regression_error_simple = temps[:, np.max(delays) + 1:] - np.array(regression_fits_simple)
+
+    print(f'long regression RMSE {s.rmse(regression_error_simple):.4f}')
 
 def plot_all():
     if not _INIT:
@@ -78,8 +108,6 @@ def plot_all():
     plot_partial_corr_v_dist()
     print('plotting plot_autoreg_residues')
     plot_autoreg_residues()
-    print('plotting explicit_spatial_fit')
-    explicit_spatial_fit()
 
 def save_hist_qq_subplots():
     if not _INIT:
@@ -140,7 +168,7 @@ def plot_dist_by_loc():
     fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(6,10))
 
     scatter = axes[0].scatter(long, lat, c=temps_var, cmap='rainbow', zorder=5)
-    plt.colorbar(scatter, label='Var')
+    plt.colorbar(scatter, label='Var (degC^2)')
     axes[0].set_title(f'variance in sin-adj {stat} temp data by location')
 
     scatter = axes[1].scatter(long, lat, c=temps_skew, cmap='rainbow', zorder=5)
@@ -169,28 +197,239 @@ def plot_seasonality_by_loc():
     scatter = axes[0].scatter(long, lat, c=phase, cmap='rainbow', zorder=5)
     plt.colorbar(scatter, label='Phase (years)')
     axes[0].set_title(f'seasonal phase of {stat} temp data by location')
+    axes[0].set_xlabel('long (deg)')
+    axes[0].set_ylabel('lat (deg)')
 
     scatter = axes[1].scatter(long, lat, c=amp, cmap='rainbow', zorder=5)
     plt.colorbar(scatter, label='Amplitude (degC)')
     axes[1].set_title(f'seasonal amplitude of {stat} temp data by location')
+    axes[1].set_xlabel('long (deg)')
+    axes[1].set_ylabel('lat (deg)')
 
     plt.tight_layout()
     fig.savefig(f'../plts/sin_fit_imgs/{stat}_params_by_loc.png', bbox_inches='tight')
     plt.close()
 
-def plot_autoregression_by_loc_post_yj_transform():
+def plot_autocorrs(max_delay = 1000):
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+
+    for st in range(temps.shape[0]):
+        days = np.arange(0, max_delay + 1)
+        autocorr = s.autocorr(temps[st], max_delay)
+        autocorr_model_min_obj = minimize(s.least_squares, np.array([0.7, 0.01, 0.2, 0.0]), args=(s.seasonal_autocorr_model, days, autocorr), method='Nelder-Mead')
+        if not autocorr_model_min_obj.success:
+            print(f'failed to minimise with cov 1d model')
+        autocorr_model_params = autocorr_model_min_obj.x
+
+        plt.plot(days, autocorr, 'b', label='true')
+        plt.plot(days, s.seasonal_autocorr_model(autocorr_model_params, days), 'r', label='fit')
+        plt.xlabel('delay (days)')
+        plt.ylabel('autocorrelation')
+        plt.title(f'autocorrelation v time for station {sh.stations.iloc[st]['station number']}, with fit RMSE {s.least_squares(autocorr_model_params, s.seasonal_autocorr_model, days, autocorr):.4f}')
+        plt.legend()
+
+        plt.tight_layout()
+        plt.savefig(f'../plts/autocorr_levinson/{stat}_autocorr_{sh.stations.iloc[st]['station number']}.png', bbox_inches='tight')
+        plt.close()
+
+        autoreg = s.gohberg_inverse(s.seasonal_autocorr_model(autocorr_model_params, days))
+        autoreg = -autoreg / autoreg[0]
+        plt.plot(days[2:], autoreg[2:])
+        plt.xlabel('delay (days)')
+        plt.ylabel('autoreg')
+        plt.title(f'autoreg v time for station {sh.stations.iloc[st]['station number']}, with fitted autocorr')
+
+        plt.tight_layout()
+        plt.savefig(f'../plts/autocorr_levinson/{stat}_autoreg_{sh.stations.iloc[st]['station number']}.png', bbox_inches='tight')
+        plt.close()
+
+def fit_arima():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    for temp in temps:
+        model = ARIMA(temp, order=(4, 0, 4))
+        fit = model.fit()
+
+        predictions = fit.fittedvalues
+
+        print(f'ARMA 4,4 RMSE {s.rmse(predictions - temp)}')
+
+def plot_mean_v_variance():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    temps_mean = params[0, :]
+    temps_var = np.var(temps_mean_sin_adj, axis=1)
+
+    plt.scatter(temps_mean, temps_var, s=1)
+    plt.xlabel('mean (degC)')
+    plt.ylabel('var (degC^2)')
+    plt.title(f'{stat} Daily Temperature Mean v Variance')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/distribution_imgs/{stat}_mean_v_var', bbox_inches='tight')
+    plt.close()
+
+def plot_windowed_regression_v_time(station, W=182, overlap=164):
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+
+    idx = np.where(ids == station)
+    if len(idx) == 0:
+        print(f'No such station!')
+        return
+    idx = idx[0]
+
+    windowed_regression_coefficients = np.array([auto_regress(temps_mean_sin_adj[idx, j*(W-overlap):j*(W-overlap)+W][0]) for j in range((temps.shape[1] - W) // (W-overlap))])
+    years = (W - overlap) * np.arange(len(windowed_regression_coefficients[:, 0])) / 365
+
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(6,7))
+    
+    axes[0].plot(years, windowed_regression_coefficients[:, 0])
+    axes[0].set_title(f'delay = 2 days regression coefficients vs time at station {station} with window size {W}')
+    axes[0].set_xlabel('years')
+    axes[0].set_ylabel('autoregression coefficient')
+
+    axes[1].plot(years, windowed_regression_coefficients[:, 1])
+    axes[1].set_title(f'delay = 1 days regression coefficients vs time at station {station} with window size {W}')
+    axes[1].set_xlabel('years')
+    axes[1].set_ylabel('autoregression coefficient')
+
+    plt.tight_layout()
+    fig.savefig(f'../plts/autoregression_fit_imgs/{station}_{stat}_autoreg_v_time', bbox_inches='tight', dpi=300)
+    plt.close()
+
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(6,7))
+
+    f = np.linspace(0, 365 / (W - overlap), len(windowed_regression_coefficients[:, 0]))
+    
+    axes[0].plot(f, np.abs(np.fft.fft(windowed_regression_coefficients[:, 0])))
+    axes[0].set_title(f'delay = 2 days regression coefficients vs time at station {station} with window size {W}')
+    axes[0].set_xlabel('/years')
+    axes[0].set_ylabel('autoregression coefficient')
+
+    axes[1].plot(f, np.abs(np.fft.fft(windowed_regression_coefficients[:, 1])))
+    axes[1].set_title(f'delay = 1 days regression coefficients vs time at station {station} with window size {W}')
+    axes[1].set_xlabel('/years')
+    axes[1].set_ylabel('autoregression coefficient')
+
+    plt.tight_layout()
+    fig.savefig(f'../plts/autoregression_fit_imgs/{station}_{stat}_autoreg_v_time_fft', bbox_inches='tight', dpi=300)
+    plt.close()
+
+def fit_seasonal_autoregression():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    def seasonal_model(y):
+        return np.array([y[:-2], y[1:-1], y[:-2]*np.sin(w*days)[:-2], y[1:-1]*np.cos(w*days)[2:], y[:-2]*np.sin(w*days)[2:], y[1:-1]*np.cos(w*days)[2:]]).T
+
+    def seasonal_autoregress(y):
+        X = seasonal_model(y)
+        proj = np.linalg.pinv(X.T @ X) @ X.T
+        params = proj @ y[2:].T
+        return params
+    
+    regression_coefficients = np.array([seasonal_autoregress(temps_mean_sin_adj[i]) for i in range(temps.shape[0])])
+
+    regression_error = np.array([temps_mean_sin_adj[i][2:] - seasonal_model(temps_mean_sin_adj[i]) @ regression_coefficients[i] for i in range(temps.shape[0])])
+
+    print(regression_coefficients)
+    print(s.rmse(regression_error))
+
+def plot_windowed_regression_std(W=182):
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+
+    windowed_regression_coefficients = np.array([[auto_regress(temps_mean_sin_adj[i][j*W:(j+1)*W]) for i in range(temps.shape[0])] for j in range(temps.shape[1] // W)])
+    regression_std = np.std(windowed_regression_coefficients, axis=0)
+
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(6,7))
+
+    scatter = axes[0].scatter(long, lat, c=regression_std[:, 0], cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='Std')
+    axes[0].set_title(f'Std of delay = 2 days regression coefficients over {W} day windows by location')
+    axes[0].set_xlabel('long')
+    axes[0].set_ylabel('lat')
+
+    scatter = axes[1].scatter(long, lat, c=regression_std[:, 1], cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='Std')
+    axes[1].set_title(f'Std of delay = 1 day regression coefficients over {W} day windows by location')
+    axes[1].set_xlabel('long')
+    axes[1].set_ylabel('lat')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_regression_std_by_loc.png', bbox_inches='tight')
+    plt.close()
+    
+    # we expect stds to be ~ 1 - \xi_2^2, so we compare.
+    expected_regression_std = np.sqrt((1 - np.pow(regression_coefficients[:, 0], 2))/W)
+    delay_2_ratio = np.divide(regression_std[:, 0], expected_regression_std)
+    delay_1_ratio = np.divide(regression_std[:, 1], expected_regression_std)
+
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(6,7))
+
+    scatter = axes[0].scatter(long, lat, c=delay_2_ratio, cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='Std / Expected Std')
+    axes[0].set_title(f'delay = 2 days std/(expected std) by location')
+    axes[0].set_xlabel('long')
+    axes[0].set_ylabel('lat')
+
+    scatter = axes[1].scatter(long, lat, c=delay_1_ratio, cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='Std / Expected Std')
+    axes[1].set_title(f'delay = 1 days std/(expected std) by location')
+    axes[1].set_xlabel('long')
+    axes[1].set_ylabel('lat')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_regression_std_ratio_by_loc.png', bbox_inches='tight')
+    plt.close()
+
+def plot_largest_backfill():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    backfills = np.array([s.get_largest_backfill(v) for v in valid])
+
+    scatter = plt.scatter(long, lat, c=backfills, cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='Backfill (days)')
+    plt.title(f'largest backfill of {stat} temp data by location')
+    plt.xlabel('long (deg)')
+    plt.ylabel('lat (deg)')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_backfills_by_loc.png', bbox_inches='tight')
+    plt.close()
+            
+
+def autoregression_with_yj_transform(skew_coeff=0.25):
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+
     station_skews = stats.skew(temps_mean_sin_adj, axis=1)
-    # skew ~ 1.9(l-1):
-    station_lambdas = 1 + station_skews/1.9
+    station_lambdas = 1 - skew_coeff*station_skews
 
     yj_data = np.array([yj.yj(temps_mean_sin_adj[i], station_lambdas[i]) for i in range(temps.shape[0])])
-    yj_autoreg_coeffs = np.array([np.dot(yj_data[i, :-1], yj_data[i, 1:]) / np.dot(yj_data[i, :-1], yj_data[i, :-1]) for i in range(temps.shape[0])])
-    yj_autoreg_fit = np.array([yj_autoreg_coeffs[i] * yj_data[i,:-1] for i in range(temps.shape[0])])
-    autoreg_error = np.array([temps_mean_sin_adj[i,1:] - yj.yj_inv(yj_autoreg_fit[i], station_lambdas[i]) for i in range(temps.shape[0])])
+    yj_means = np.mean(yj_data, axis=1)
+    yj_mean_adj_data = np.array([yj_data[i] - yj_means[i] for i in range(temps.shape[0])])
+
+    yj_autoreg_coeffs = np.array([auto_regress(yj_mean_adj_data[i]) for i in range(temps.shape[0])])
+    yj_autoreg_fit = np.array([yj_means[i] + yj_autoreg_coeffs[i, 0] * yj_mean_adj_data[i,:-2] + yj_autoreg_coeffs[i, 1] * yj_mean_adj_data[i,1:-1] for i in range(temps.shape[0])])
+    autoreg_error = np.array([temps_mean_sin_adj[i,2:] - yj.yj_inv(yj_autoreg_fit[i], station_lambdas[i]) for i in range(temps.shape[0])])
     
     RMSE = np.sqrt(np.sum(np.pow(autoreg_error, 2), axis=1) / temps.shape[1])
 
-    RMSE_tot = np.sqrt(np.sum(np.pow(RMSE,2))/temps.shape[0])
+    RMSE_tot = np.sqrt(np.sum(np.pow(RMSE,2)) / temps.shape[0])
 
     scatter = plt.scatter(long, lat, c=RMSE, cmap='rainbow')
     plt.title(f'RMSE from autoreg via YJ skew adjustment. Total RMSE={RMSE_tot:.4f}')
@@ -202,16 +441,36 @@ def plot_autoregression_by_loc_post_yj_transform():
     plt.savefig(f'../plts/YJ/{stat}_RMSE_by_loc.png', bbox_inches='tight')
     plt.close()
 
+    temps_skew = stats.skew(yj_data, axis=1)
+
+    scatter = plt.scatter(long, lat, c=temps_skew, cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='Skew')
+    plt.title(f'skew in Yeo-Johnson transformed {stat} temp data by location')
+    plt.xlabel('long')
+    plt.ylabel('lat')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/YJ/{stat}_dists_by_loc.png', bbox_inches='tight')
+    plt.close()
+
 def plot_autoregression_by_loc():
     if not _INIT:
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
 
-    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6,4))
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10,4))
 
-    scatter = axes.scatter(long, lat, c=regression_coefficients, cmap='rainbow', zorder=5)
+    scatter = axes[0].scatter(long, lat, c=regression_coefficients[:, 0], cmap='rainbow', zorder=5)
     plt.colorbar(scatter, label='autoregression coefficient')
-    axes.set_title(f'autoregression coefficient for {stat} temp data by location')
+    axes[0].set_title(f'delay = 2 day autoreg coefficient for {stat} temp')
+    axes[0].set_xlabel('long (deg)')
+    axes[0].set_ylabel('lat (deg)')
+
+    scatter = axes[1].scatter(long, lat, c=regression_coefficients[:, 1], cmap='rainbow', zorder=5)
+    plt.colorbar(scatter, label='autoregression coefficient')
+    axes[1].set_title(f'delay = 1 day autoreg coefficient for {stat} temp')
+    axes[1].set_xlabel('long (deg)')
+    axes[1].set_ylabel('lat (deg)')
 
     plt.tight_layout()
     fig.savefig(f'../plts/autoregression_fit_imgs/{stat}_coeff_by_loc.png', bbox_inches='tight')
@@ -229,7 +488,8 @@ def plot_autoregression_partial_corrs(max_delay = 20):
         T_precision = np.linalg.inv(T_cov)
         T_partials[j] = np.array([-T_precision[0, i] / np.sqrt(T_precision[0, 0] * T_precision[i, i]) for i in range(1, max_delay+1)])
     for row, partials in enumerate(T_partials.T):
-        plt.scatter((row+1)*np.ones_like(partials), partials, s=1, c='b')
+        plt.scatter((row + 1)*np.ones_like(partials), partials, s=1, c='b')
+    
     plt.xlabel('Delay')
     plt.ylabel('Partial Correlation')
     plt.title(f'{stat} temp autoregression partial correlations for max delay = {max_delay}')
@@ -238,43 +498,113 @@ def plot_autoregression_partial_corrs(max_delay = 20):
     plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_partial_corr_by_delay_{max_delay}.png', bbox_inches='tight', dpi=300)
     plt.close()
 
+def plot_kriging_from_cov_model(t=0, l=0.0030625):
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+    
+    dist = ec.distance_matrix(sh.stations)
+    krig_matrix = np.zeros([temps.shape[0] + 1, temps.shape[0] + 1])
+    corr = np.array(s.cov_2d_model(l, dist))
+
+    var = np.var(temps_mean_sin_adj, axis=1)
+    model_cov = corr * np.outer(np.sqrt(var), np.sqrt(var))
+    model_var = np.mean(var)
+    
+    krig_matrix = np.block([[corr, np.ones([temps.shape[0], 1])], [np.ones([1, temps.shape[0]]), np.zeros([1, 1])]])
+    krig_inv = np.linalg.inv(krig_matrix)
+
+    corrs = lambda lat1, long1: np.array([cov_2d_model(l, ec.earth_distance(lat1, long1, lat[i], long[i])) for i in range(temps.shape[0])])
+    weights = lambda lat1, long1: krig_inv @ np.block([corrs(lat1, long1), np.ones(1)])
+
+    day_temp = temps[:, 0]
+
+    la_left = -45
+    la_right = -10
+    lo_left = 110
+    lo_right = 155
+    lats = np.linspace(la_left, la_right, (la_right - la_left)*4)
+    longs = np.linspace(lo_left, lo_right, (lo_right - lo_left)*4)
+    
+    interpolation = np.zeros([len(lats), len(longs)])
+    interpolation_variance = np.zeros([len(lats), len(longs)])
+
+    for i, lo in enumerate(longs):
+        if i % 10 == 0:
+            print(f'i={i}')
+        for j, la in enumerate(lats):
+            w = weights(la, lo)
+            
+            interpolation[-1-j, i] = np.dot(w[:-1], day_temp)
+
+            c = np.array([corrs(la, lo) * np.sqrt(var) * np.sqrt(model_var)])
+            var_block = np.block([[model_cov, c.T], [c, np.array([[model_var]])]])
+            var_vec = np.block([w[:-1], np.array([1])])
+            interpolation_variance[-1-j, i] = np.sqrt(var_vec.T @ var_block @ var_vec)
+    
+    # Kriging estimate
+
+    fig, ax = plt.subplots(figsize=(6,4))
+
+    im = ax.imshow(interpolation, cmap='rainbow', interpolation='none', extent=[lo_left, lo_right, la_left, la_right], zorder=0)
+    plt.colorbar(im, ax=ax, label="Temp (degC)")
+
+    ax.scatter(long, lat, c=day_temp, cmap='rainbow', edgecolors="black", linewidths=0.5, s=3, zorder=5)
+
+    date = (datetime.datetime.strptime(sh.latest_start, "%Y-%m-%d") + datetime.timedelta(days=t)).strftime('%d/%m/%Y')
+
+    ax.set_title(f'Kriging estimate of Australian {stat} temperature on {date}')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/kriging/{stat}_temp_model_krig.png', bbox_inches='tight', dpi=300)
+    plt.close()
+
+    # Kriging error
+
+    fig, ax = plt.subplots(figsize=(6,4))
+
+    im = ax.imshow(interpolation_variance, cmap='rainbow', interpolation='none', extent=[lo_left, lo_right, la_left, la_right], zorder=0)
+    plt.colorbar(im, ax=ax, label="Temp (degC)")
+
+    ax.scatter(long, lat, c='black', s=3, zorder=5)
+
+    date = (datetime.datetime.strptime(sh.latest_start, "%Y-%m-%d") + datetime.timedelta(days=t)).strftime('%d/%m/%Y')
+
+    ax.set_title(f'Kriging standard error of Australian {stat} temperature on {date}')
+
+    plt.tight_layout()
+    plt.savefig(f'../plts/kriging/{stat}_temp_model_krig_error.png', bbox_inches='tight', dpi=300)
+    plt.close()
+
 def plot_correlation_v_dist():
     if not _INIT:
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
     
     def exp_model(params, d):
-        return params[0]*np.exp(-params[1]*d)
-    
-    def cov_2d_model(params, d):
-        # return np.where(d<1e-12, (params[0] ** 2 / (4 * np.pi * params[1] ** 2)), (d * params[0] ** 2 / (4 * np.pi * params[1])) * special.kv(1, params[1] * d))
-        # normlised for regression coeff
-        return np.where(d<1e-12, 1, d * params[0] * special.kv(1, d * params[0]))
-    
-    def least_squares(params, func, d, p):
-        return np.sqrt(np.sum(np.pow(p - func(params, d), 2))/len(d))
+        return np.exp(-params[0]*d)
 
     space_error_correlation = np.corrcoef(regression_error).flatten()
     dist = ec.distance_matrix(sh.stations).flatten()
 
-    exp_model_min_obj = minimize(least_squares, np.array([0,0]), args=(exp_model, dist, space_error_correlation), method='Nelder-Mead')
+    exp_model_min_obj = minimize(s.least_squares, np.array([0.01]), args=(exp_model, dist, space_error_correlation), method='Nelder-Mead')
     if not exp_model_min_obj.success:
         print(f'failed to minimise with exp model')
     exp_model_params = exp_model_min_obj.x
 
-    cov_2d_model_min_obj = minimize(least_squares, np.array([0.01]), args=(cov_2d_model, dist, space_error_correlation), method='Nelder-Mead')
+    cov_2d_model_min_obj = minimize(s.least_squares, np.array([0.01]), args=(s.cov_2d_model, dist, space_error_correlation), method='Nelder-Mead')
     if not cov_2d_model_min_obj.success:
         print(f'failed to minimise with cov 1d model')
     cov_2d_model_params = cov_2d_model_min_obj.x
-
+    
     order = dist.argsort()
-    plt.plot(dist[order], exp_model(exp_model_params, dist)[order], label=f'exp model cost {least_squares(exp_model_params, exp_model, dist, space_error_correlation):.4f}', c='r')
-    plt.plot(dist[order], cov_2d_model(cov_2d_model_params, dist)[order], label=f'cov 2d model cost {least_squares(cov_2d_model_params, cov_2d_model, dist, space_error_correlation):.4f}', c='g')
+    plt.plot(dist[order], exp_model(exp_model_params, dist)[order], label=f'exp model RMSE {s.least_squares(exp_model_params, exp_model, dist, space_error_correlation):.4f}, λ={exp_model_params[0]:.4f}', c='r')
+    plt.plot(dist[order], s.cov_2d_model(cov_2d_model_params, dist)[order], label=f'cov 2d model RMSE {s.least_squares(cov_2d_model_params, s.cov_2d_model, dist, space_error_correlation):.4f}, λ={cov_2d_model_params[0]:.4f}', c='g')
 
     plt.scatter(dist, space_error_correlation, s=2, c='b', alpha=0.1)
     plt.xlabel('distance (km)')
     plt.ylabel('correlation coefficient')
-    plt.title(f'{stat} temp dist v Pearson correlation for regression error, fitted λ={cov_2d_model_params[0]:.4f}')
+    plt.title(f'{stat} temp dist v Pearson correlation for regression error')
     plt.legend()
     
     plt.tight_layout()
@@ -338,7 +668,7 @@ def plot_autoreg_residues():
         return
     
     merged_valid = valid[:,1:]*valid[:,:-1]
-    station_error = np.array([np.sqrt(np.sum(np.pow(error,2)*merged_valid[i]) / np.sum(merged_valid[i])) for i, error in enumerate(regression_error)])
+    station_error = np.array([s.rmse(error) for error in regression_error])
 
     scatter = plt.scatter(long, lat, c=station_error, cmap='rainbow', zorder=5)
     plt.colorbar(scatter, label='RMSE (degC)')
@@ -348,61 +678,63 @@ def plot_autoreg_residues():
     plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_RMSE_by_loc.png', bbox_inches='tight')
     plt.close()
 
-def explicit_spatial_fit():
+def spatial_spectra(l=0.0030625):
     if not _INIT:
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
     
-    def exp_model(params, d):
-        return params[0]*np.exp(-params[1]*d)
-    
-    def least_squares(params, func, d, p):
-        return np.sum(np.pow(p - func(params, d), 2))/len(d)
+    dist = ec.distance_matrix(sh.stations)
+    space_model_cov = s.cov_2d_model(l, dist)
+    space_model_precision = np.linalg.inv(space_model_cov)
 
-    space_error_correlation = np.corrcoef(regression_error).flatten()
-    dist = ec.distance_matrix(sh.stations).flatten()
+    partial_corr = np.zeros_like(space_model_precision)
+    for i in range(temps.shape[0]):
+        for j in range(temps.shape[0]):
+            partial_corr[i, j] = -space_model_precision[i, j] / np.sqrt(space_model_precision[i, i] * space_model_precision[j, j])
+    # stochasticity
+    np.fill_diagonal(partial_corr, 0)
+    np.fill_diagonal(partial_corr, 1 - np.sum(partial_corr, axis = 0))
 
-    exp_model_min_obj = minimize(least_squares, np.array([0,0]), args=(exp_model, dist, space_error_correlation), method='Nelder-Mead')
-    if not exp_model_min_obj.success:
-        print(f'failed to minimise with exp model')
-    exp_model_params = exp_model_min_obj.x
+    eigvals, eigvecs = np.linalg.eigh(partial_corr)
 
-    P = exp_model(exp_model_params, ec.distance_matrix(sh.stations))
-    np.fill_diagonal(P, 0)
+    GFT = eigvecs.T
+    spectra = GFT @ temps_mean_sin_adj
 
-    prev_errors = regression_error[:,:-1]
-    betas = []
-    for station, post_errors in enumerate(regression_error[:,1:]):
-        c = prev_errors.T @ P[station]
-        if (np.dot(c,c) == 0):
-            betas.append(0)
-        else:
-            betas.append((P[station].T @ prev_errors @ post_errors) / (np.dot(c,c)))
-    
-    betas = np.array(betas)
-    print(f'spatial fit betas: max {np.max(betas):.4f}, min {np.min(betas):.4f}, mean {np.mean(betas):.4f}, std {np.std(betas):.4f}')
+    mean_spectra = np.mean(np.pow(spectra, 2), axis=1)
 
-    error_pred = []
-    for temp in prev_errors.T:
-        error_pred.append(betas * (P @ temp))
-    error_pred = np.array(error_pred)
+    plt.scatter(eigvals, mean_spectra, label='mean power spectrum')
 
-    merged_valid = valid.T[1:,:]*valid.T[:-1,:]
-    valids = np.sum(merged_valid)
+    plt.title('mean of signal\'s spatial power spectrum')
+    plt.xlabel('eigenvalue')
+    plt.ylabel('Power (degC^2)')
+    plt.legend()
 
-    spatial_cost = np.sqrt(np.sum(np.pow(error_pred - regression_error.T[1:,:],2)*merged_valid[1:,:]) / valids)
-    print(f'cost: {spatial_cost:.4f} degC')
-    
-    prior_cost = np.sqrt(np.sum(np.pow(regression_error.T[1:,:], 2)*merged_valid[1:,:]) / valids)
-    print(f'prior cost: {prior_cost:.4f} degC')
-
-    scatter = plt.scatter(long, lat, c=betas, cmap='rainbow', zorder=5)
-    plt.colorbar(scatter, label='spatial autoregression coefficient')
-    plt.title(f'spatial autoregression coefficient for {stat} temp data by location, fit cost={spatial_cost:.4f} degC')
-
-    plt.tight_layout()
-    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_space_coeff_by_loc.png', bbox_inches='tight')
+    plt.savefig(f'../plts/autoregression_fit_imgs/{stat}_spatial_spectra.png', bbox_inches='tight')
     plt.close()
+
+    noise_spectra = GFT @ np.random.normal(size=temps.shape)
+
+    mean_noise_spectra = np.mean(np.pow(noise_spectra, 2), axis=1)
+
+    plt.scatter(eigvals, mean_noise_spectra, label='mean power spectrum')
+
+    plt.title('mean of noise\'s spatial power spectra')
+    plt.xlabel('eigenvalue')
+    plt.ylabel('Power (degC^2)')
+    plt.ylim([0, 1.5])
+    plt.legend()
+
+    plt.savefig(f'../plts/autoregression_fit_imgs/noise_spatial_spectra.png', bbox_inches='tight')
+    plt.close()
+
+    temp_rmse = s.rmse(temps_mean_sin_adj)
+    noise_percent = np.array([1, 5, 10, 20, 50, 100])
+    for per in noise_percent:
+        wiener_filter = np.divide(mean_spectra, mean_spectra + (temp_rmse * per / 100) ** 2)
+        noise = np.random.normal(scale=(temp_rmse * per / 100), size=temps.shape)
+        spectrum = GFT @ (temps_mean_sin_adj + noise)
+        reconstructed = GFT.T @ (spectrum * wiener_filter[:, np.newaxis])
+        print(f'noise {per:.2f}%,\t RMSE {100*s.rmse(temps_mean_sin_adj - reconstructed) / temp_rmse:.2f}%')
 
 def direct_error_regressed_on_spatial_data():
     if not _INIT:
@@ -411,12 +743,9 @@ def direct_error_regressed_on_spatial_data():
     
     data = temps_mean_sin_adj.T[1:,:]
     X = temps_mean_sin_adj.T[:-1,:]
-    proj = np.linalg.inv(X.T @ X) @ X.T
-    spatial_params = proj @ data
-    pred = X @ spatial_params
-    spatial_error = data - pred
+    spatial_params, pred = s.regress(X, data)
 
-    RMSE = np.sqrt(np.average(np.pow(spatial_error,2)))
+    RMSE = s.rmse(data - pred)
 
     vmax = np.max(np.abs(spatial_params))
     norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)

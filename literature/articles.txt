@@ -3,3 +3,4 @@ https://en.wikipedia.org/wiki/Geary%27s_C
 https://en.wikipedia.org/wiki/Kriging
 https://en.wikipedia.org/wiki/Akaike_information_criterion
 https://en.wikipedia.org/wiki/Bayesian_information_criterion
+https://en.wikipedia.org/wiki/Power_transform#Yeo%E2%80%93Johnson_transformation

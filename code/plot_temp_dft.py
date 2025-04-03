@@ -14,11 +14,11 @@ df = sh.get_fft(args.station, args.stat)
 
 full_stat = sh.get_full_stat_name(args.stat)
 
-freqs = df['f (/days)'].to_numpy()
+freqs = df['f (/years)'].to_numpy()
 mags = [np.abs(complex(c)) for c in df['component'].to_numpy()]
 
-plt.scatter(freqs, 20*np.log10(mags), s=1)
-plt.xlabel('f (/days)')
+plt.scatter(freqs, 20*np.log10(mags), s=10)
+plt.xlabel('f (/years)')
 plt.ylabel('Magnitude (dB)')
 plt.title(f'Frequency spectrum of {sh.get_full_stat_name(args.stat)} temperature data for station {args.station}')
 

@@ -14,5 +14,5 @@ for stat in ['max', 'min', 'mean']:
         timeseries = sh.get_timeseries(station, stat)[f'{sh.get_full_stat_name(stat)} temperature (degC)']
         fft = np.fft.fft(timeseries[-sh.overlap_length:])
 
-        df = pd.DataFrame({'f (/days)': freqs, 'component': fft})
+        df = pd.DataFrame({'f (/years)': 365.25*freqs, 'component': fft})
         df.to_csv(f'{sh.git_root}/datasets/fft_t{stat}/t{stat}.{station}.csv')

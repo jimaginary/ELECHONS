@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import station_handler
-import mplcursors
 import argparse
 
 def plot_stations():
@@ -15,17 +14,15 @@ def plot_stations():
     names = df['station name'].to_numpy()
     ids = df['station number'].to_numpy()
 
-    scatter = plt.scatter(long, lat, c='blue')
+    plt.scatter(long, lat, s=10)
+
+    for i, id in enumerate(ids):
+       plt.annotate(id, (long[i], lat[i]), size=10)
 
     plt.title('Weather Stations in Australia')
     plt.xlabel('Longitude (°E)')
     plt.ylabel('Latitude (°S)')
 
-    cursor = mplcursors.cursor(scatter, hover=True)
-    @cursor.connect("add")
-    def on_add(sel):
-        index = int(sel.index)
-        sel.annotation.set_text(f"Station: {names[index]}\nID: {ids[index]}")
     plt.show()
 
 def main():

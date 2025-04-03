@@ -5,6 +5,9 @@ import edge_computations as ec
 import matplotlib.pyplot as plt
 import sys
 
+def rmse(x):
+    return np.sqrt(np.mean(np.pow(np.real(x), 2)))
+
 time_eigs = np.exp(-complex(0,1)*2*np.pi*np.fft.fftfreq(sh.overlap_length))
 
 # graph_eigen_df = pd.read_csv('eigvecs.csv', index_col=0)
@@ -15,44 +18,33 @@ compression_factors = [50, 20, 15, 10, 7, 5, 3, 2, 1]
 
 for stat in ['max', 'min', 'mean']:
     print(f'\t{stat} data compression RMSE')
-    stat_stations_timeseries = sh.get_series_matrix(stat)
-    stat_stations_spectra = np.fft.fft(stat_stations_timeseries, axis=1)
+    stations_timeseries = sh.get_series_matrix(stat)
+    stations_timespectra = np.fft.fft(stations_timeseries, axis=1)
 
-    N = np.prod(stat_stations_timeseries.shape)
-
-    total_power = np.sum(np.pow(np.abs(stat_stations_timeseries),2))
+    N = np.prod(stations_timeseries.shape)
 
     [print(f'1/{C},\t', end='') for C in compression_factors]
     print()
     print('Time-only Compression:')
-    rows, cols = np.unravel_index(np.argsort(np.abs(stat_stations_spectra).flatten())[::-1], stat_stations_spectra.shape)
+    rows, cols = np.unravel_index(np.argsort(np.abs(stations_timespectra).flatten())[::-1], stations_timespectra.shape)
     ordered_args = list(zip(rows, cols))
     for C in compression_factors:
-        compressed_spectra = np.zeros_like(stat_stations_spectra)
+        compressed_spectra = np.zeros_like(stations_timespectra)
         for i in range(N // C):
-            compressed_spectra[*ordered_args[i]] = stat_stations_spectra[*ordered_args[i]]
-        compressed_data = []
-        for time_spectra in compressed_spectra:
-            compressed_data.append(np.fft.ifft(time_spectra))
-        compressed_data = np.array(compressed_data)
-        rmse = np.sqrt(np.sum(np.pow(np.abs((stat_stations_timeseries - compressed_data)),2))/total_power)
-        print(f'{rmse*100:.2f},\t', end='')
+            compressed_spectra[*ordered_args[i]] = stations_timespectra[*ordered_args[i]]
+        compressed_data = np.fft.ifft(compressed_spectra, axis=1)
+        print(f'{100 * rmse(stations_timeseries - compressed_data) / rmse(stations_timeseries):.2f},\t', end='')
     print()
 
     print('Time and Space Compression:')
-    spectra = graph_eigenvectors.T @ stat_stations_spectra
-    rows, cols = np.unravel_index(np.argsort(np.abs(spectra).flatten())[::-1], spectra.shape)
+    stations_spacespectra = graph_eigenvectors.T @ stations_timespectra
+    rows, cols = np.unravel_index(np.argsort(np.abs(stations_spacespectra).flatten())[::-1], stations_spacespectra.shape)
     ordered_args = list(zip(rows, cols))
     for C in compression_factors:
-        compressed_spectra = np.zeros_like(spectra)
+        compressed_spectra = np.zeros_like(stations_spacespectra)
         for i in range(N // C):
-            compressed_spectra[*ordered_args[i]] = spectra[*ordered_args[i]]
+            compressed_spectra[*ordered_args[i]] = stations_spacespectra[*ordered_args[i]]
         compressed_time_spectra = graph_eigenvectors @ compressed_spectra
-        compressed_data = []
-        for time_spectra in compressed_time_spectra:
-            compressed_data.append(np.fft.ifft(time_spectra))
-        compressed_data = np.array(compressed_data)
-        rmse = np.sqrt(np.sum(np.pow(np.abs((stat_stations_timeseries - compressed_data)),2))/total_power)
-        print(f'{rmse*100:.2f},\t', end='')
+        compressed_data = np.fft.ifft(compressed_time_spectra, axis=1)
+        print(f'{100 * rmse(stations_timeseries - compressed_data) / rmse(stations_timeseries):.2f},\t', end='')
     print()
-
