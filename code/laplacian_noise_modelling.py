@@ -4,7 +4,7 @@ import scipy.special as special
 
 def one_D_cov(length = 1000, samples = 5000, l=0.5, g=1, mean_of_means=10, var_of_means=2):
     dist = lambda x,y: min(np.abs(x-y), length - np.abs(x-y))
-    model = lambda r: (g**2 / (4 * l ** 3)) * (1 + l*r)*np.exp(-l*r)
+    model = lambda r: (1 + l*r)*np.exp(-l*r)#(g**2 / (4 * l ** 3)) * (1 + l*r)*np.exp(-l*r)
     mean_model = g * mean_of_means / l ** 2
 
     dists = np.zeros((length, length))
@@ -32,7 +32,7 @@ def one_D_cov(length = 1000, samples = 5000, l=0.5, g=1, mean_of_means=10, var_o
 
     result = solution @ stim
 
-    cov = np.cov(result)
+    cov = np.corrcoef(result)
 
     dist_range = np.arange(length // 2)
 
@@ -45,9 +45,9 @@ def one_D_cov(length = 1000, samples = 5000, l=0.5, g=1, mean_of_means=10, var_o
     plt.plot(dist_range, cov_means - 1.96*std, 'k--', zorder=0)
     plt.plot(dist_range, model(dist_range), 'r', zorder=5, label="model prediction")
 
-    plt.title(f"cov v dist, λ={l}, γ={g}")
+    plt.title(f"correlation v dist, λ={l}, γ={g}")
     plt.xlabel("dist")
-    plt.ylabel("cov")
+    plt.ylabel("correlation")
     plt.legend()
     
     plt.savefig(f'../plts/laplacian_noise_modelling/one_D_cov_modelling_l{l}_g{g}.png', dpi=300)
@@ -69,7 +69,7 @@ def two_D_cov(n = 50, samples = 5000, l=0.5, g=1):
     single_to_tuple = lambda i: (i // n, i % n)
     # model = lambda r: (g**2 / (4 * np.pi * l ** 2)) * (l * r * special.kv(1, l * r) - special.kv(0, l * r))
     # model = lambda r: (g**2 / (4 * np.pi * l ** 2)) * (1 + l * r) * np.exp(-l * r)
-    model = lambda r: (r * g ** 2 / (4 * np.pi * l)) * special.kv(1, l * r)
+    model = lambda r: l * r * special.kv(1, l * r) #(r * g ** 2 / (4 * np.pi * l)) * special.kv(1, l * r)
 
     def singles_to_dist(i, j):
         t1 = single_to_tuple(i)
@@ -95,7 +95,7 @@ def two_D_cov(n = 50, samples = 5000, l=0.5, g=1):
     solution = np.linalg.inv(screened_poisson)
     stim = -g * np.random.normal(size=(n ** 2, samples))
     result = solution @ stim
-    cov = np.cov(result)
+    cov = np.corrcoef(result)
 
     dist_set = np.sort(np.unique(dist))
 
@@ -110,9 +110,9 @@ def two_D_cov(n = 50, samples = 5000, l=0.5, g=1):
     plt.plot(dist_set, means - 1.96*std, 'k--', zorder=0)
     plt.plot(dist_set, model(dist_set), 'r', zorder=5, label="model prediction")
 
-    plt.title(f"cov v dist 2D, λ={l}, γ={g}")
+    plt.title(f"correlation v dist 2D, λ={l}, γ={g}")
     plt.xlabel("dist")
-    plt.ylabel("cov")
+    plt.ylabel("correlation")
     plt.legend()
     
     plt.savefig(f'../plts/laplacian_noise_modelling/two_D_cov_modelling_l{l}_g{g}.png', dpi=300)

@@ -15,7 +15,7 @@ def rmse(x):
 
 # least squares minimizer
 def least_squares(params, func, d, p):
-    return np.sqrt(np.sum(np.pow(p - func(params, d), 2))/len(d))
+    return np.sqrt(np.mean(np.pow(p - func(params, d), 2)))
 
 # takes in validity vector and reports largest contiguous invalidity
 def get_largest_backfill(v):
@@ -33,6 +33,9 @@ def get_largest_backfill(v):
 def cov_2d_model(l, d):
     # normalised for regression coeff
     return np.where(d<1e-12, 1, d * l * special.kv(1, d * l))
+
+def cov_3d_model(l, d):
+    return np.exp(-l * d)
 
 # X the matrix of data to regress against, y the data to regress
 # returns regression coefficients & fit
