@@ -66,7 +66,7 @@ plt.legend()
 
 # Output
 if args.save_png:
-    output_file = args.station + '.png'
+    output_file = args.stat + '.png'
     plt.savefig(output_file)
 else:
     plt.show()
