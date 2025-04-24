@@ -4,7 +4,7 @@ def compute_rmse(original, compressed):
     return np.sqrt(np.mean(np.square(original - compressed)))
 
 # compresses and decompresses data using k graph eigenvectors
-def compress_with_gft(data, eigvecs, k):
+def recompress_with_gft(data, eigvecs, k):
     spectrum = eigvecs.T @ data
     energies = np.sum(np.abs(spectrum)**2, axis=1)
     top_k_indices = np.argsort(energies)[-k:]
@@ -13,7 +13,7 @@ def compress_with_gft(data, eigvecs, k):
     return eigvecs @ mask
 
 # compresses and decompresses data using k DFT eigenvectors
-def compress_with_dft(data, dft_basis, k):
+def recompress_with_dft(data, dft_basis, k):
     spectrum = dft_basis.T @ data
     energies = np.sum(np.abs(spectrum)**2, axis=1)
     top_k_indices = np.argsort(energies)[-k:]
