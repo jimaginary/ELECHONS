@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import station_handler
+from elechons.data import station_handler as sh
+from elechons import config
 import argparse
 
 parser = argparse.ArgumentParser(description='Plot temp timeseries')
@@ -13,10 +14,10 @@ parser.add_argument('--first_year', type=int, help='Year to start plot')
 parser.add_argument('--last_year', type=int, help='Year to end plot')
 args = parser.parse_args()
 
-df = station_handler.get_timeseries(args.station, args.stat)
-df['date'] = pd.to_datetime(df['date'])
+full_stat = config.STAT_TYPES[args.stat]
 
-full_stat = station_handler.get_full_stat_name(args.stat)
+df = sh.get_timeseries(args.station, args.stat)
+df['date'] = pd.to_datetime(df['date'])
 
 # Filter
 if args.first_year:
@@ -56,7 +57,7 @@ plt.tight_layout()
 
 # Output
 if args.save_png:
-    output_file = args.station + '.png'
+    output_file = f'{config.PLOTS_DIR}/{args.station}.png'
     plt.savefig(output_file)
 else:
     plt.show()

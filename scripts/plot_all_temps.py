@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import station_handler as sh
+from elechons.data import station_handler as sh
+from elechons import config
 import argparse
 
 parser = argparse.ArgumentParser(description='Plot temp timeseries')
@@ -11,11 +12,11 @@ parser.add_argument('--average', choices=['month', 'year'], help='Average data b
 parser.add_argument('--year', type=int, help='Plot only data for the specified year')
 args = parser.parse_args()
 
-full_stat = sh.get_full_stat_name(args.stat)
+full_stat = config.STAT_TYPES[args.stat]
 
 timeseries = []
-for i, station in enumerate(sh.stations['station number']):
-    df = sh.get_timeseries(station, args.stat).iloc[-sh.overlap_length:]
+for i, station in enumerate(sh.STATIONS['station number']):
+    df = sh.get_timeseries(station, args.stat).iloc[-config.OVERLAP_LENGTH:]
     df['date'] = pd.to_datetime(df['date'])
 
     # Filter
@@ -66,7 +67,7 @@ plt.legend()
 
 # Output
 if args.save_png:
-    output_file = args.stat + '.png'
+    output_file = f'{config.PLOTS_DIR}/{args.stat}.png'
     plt.savefig(output_file)
 else:
     plt.show()

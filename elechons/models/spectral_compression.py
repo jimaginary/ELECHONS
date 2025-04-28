@@ -1,22 +1,35 @@
 import numpy as np
 
-def compute_rmse(original, compressed):
-    return np.sqrt(np.mean(np.square(original - compressed)))
+# compress data with gft retaining p% of graph eigenvectors
+def gft_compress(data, eigvecs, p):
+    gft_spectrum = eigvecs.T @ data
+    gft_energies = np.abs(gft_spectrum)
+    gft_threshold = np.percentile(gft_energies, p)
+    return np.where(gft_energies >= gft_threshold, gft_spectrum, 0)
 
-# compresses and decompresses data using k graph eigenvectors
-def recompress_with_gft(data, eigvecs, k):
-    spectrum = eigvecs.T @ data
-    energies = np.sum(np.abs(spectrum)**2, axis=1)
-    top_k_indices = np.argsort(energies)[-k:]
-    mask = np.zeros_like(spectrum)
-    mask[top_k_indices, :] = spectrum[top_k_indices, :]
-    return eigvecs @ mask
+# decompress gft data given eigenvectors
+def gft_decompress(gft_compressed, eigvecs):
+    return eigvecs @ gft_compressed
 
-# compresses and decompresses data using k DFT eigenvectors
-def recompress_with_dft(data, dft_basis, k):
-    spectrum = dft_basis.T @ data
-    energies = np.sum(np.abs(spectrum)**2, axis=1)
-    top_k_indices = np.argsort(energies)[-k:]
-    mask = np.zeros_like(spectrum)
-    mask[top_k_indices, :] = spectrum[top_k_indices, :]
-    return dft_basis @ mask
+# compress data with dft retaining p% of eigenvectors
+def dft_compress(data, p):
+    # DFT transform
+    dft_spectrum = np.fft.fft(data, axis=1)
+    dft_energies = np.abs(dft_spectrum)
+    dft_threshold = np.percentile(dft_energies, p)
+    return np.where(dft_energies >= dft_threshold, dft_spectrum, 0)
+
+# decompress data with dft
+def dft_decompress(dft_compressed):
+    return np.fft.ifft(dft_compressed, axis=1)
+
+# compress data with dft and gft retaining p% of eigenvectors
+def dgft_compress(data, eigvecs, p):
+    dgft_spectrum = eigvecs.T @ np.fft.fft(data, axis=1)
+    dgft_energies = np.abs(dgft_spectrum)
+    dgft_threshold = np.percentile(dgft_energies, p)
+    return np.where(dgft_energies >= dgft_threshold, dgft_spectrum, 0)
+
+# decompress data with dft and gft
+def dgft_decompress(dgft_compressed, eigvecs):
+    return np.fft.ifft(eigvecs @ dgft_compressed, axis=1)
