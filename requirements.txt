@@ -3,3 +3,6 @@ pandas
 matplotlib
 scipy
 statsmodels
+mplcursors
+ftplib
+tarfile

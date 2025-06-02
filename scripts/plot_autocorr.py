@@ -3,17 +3,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 from pathlib import Path
-import series_computations
-import station_handler
+from elechons import config
+from elechons.data import station_handler
+from elechons.processing import series
 
 def plot_autocorrelation(station, stat):
     df = station_handler.get_timeseries(station, stat)
     df['date'] = pd.to_datetime(df['date'])
-    temps = df[f'{stat}imum temperature (degC)'].to_numpy()
+
+    full_stat = config.STAT_TYPES[stat]
+    temps = df[f'{full_stat} temperature (degC)'].to_numpy()
     
     max_lag = min(3 * 365, len(temps) - 1)  # Max 3 years or series length
     lags = np.arange(max_lag + 1)
-    autocorr = series_computations.autocorr(temps, max_lag)
+    autocorr = series.autocorr(temps, max_lag)
     
     plt.plot(lags, autocorr)
     

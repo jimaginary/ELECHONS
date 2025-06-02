@@ -3,20 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mplcursors
 import argparse
-from pathlib import Path
-import station_handler
+from elechons.data import station_handler
+from elechons.processing import edges
+from elechons import config
 
-def plot_stations_with_eigenvector(adj_matrix_file, eigenvector_file):
-    stations_df = station_handler.stations
+def plot_stations_with_eigenvector(neighbours):
+    stations_df = station_handler.STATIONS
     stations_df['lat'] = stations_df['lat'].astype(float)
     stations_df['long'] = stations_df['long'].astype(float)
 
-    adj_df = pd.read_csv(adj_matrix_file, index_col=0)
-    adj_matrix = adj_df.to_numpy()
-
-    eigen_df = pd.read_csv(eigenvector_file, index_col=0)
-    eigenvalues = eigen_df.columns.astype(float).tolist()
-    eigenvectors = eigen_df.to_numpy()
+    adj_matrix = edges.K_nearest(edges.distance_matrix(stations_df), neighbours)
+    eigvals, eigvecs = np.linalg.eigh(edges.closeness_matrix(stations_df, config.SCALE_KM, neighbours))
 
     lat = stations_df['lat'].to_numpy()
     long = stations_df['long'].to_numpy()
@@ -24,13 +21,13 @@ def plot_stations_with_eigenvector(adj_matrix_file, eigenvector_file):
     ids = stations_df.index.to_numpy()
 
     print("Eigenvalues:")
-    for i, val in enumerate(eigenvalues):
-        print(f"{i}: {val:.3f}, ", end="")
+    for i, val in enumerate(eigvals):
+        print(f"{i}: {val:.3f}, \t", end="")
     print()
     choice = int(input("Enter the index of the eigenvalue to use: "))
     
-    selected_eigenvalue = eigenvalues[choice]
-    eigenvector = eigenvectors[:, choice]
+    selected_eigenvalue = eigvals[choice]
+    eigenvector = eigvecs[:, choice]
 
     scatter = plt.scatter(long, lat, c=eigenvector, cmap='bwr', zorder=5)
     plt.colorbar(scatter, label='Eigenvector Value')
@@ -55,16 +52,9 @@ def plot_stations_with_eigenvector(adj_matrix_file, eigenvector_file):
     plt.tight_layout()
     plt.show()
 
-def main():
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot weather stations with edges and eigenvector coloring.')
-    parser.add_argument('adj_matrix_file', type=str, help='Path to the binary adjacency matrix CSV (e.g., binary_distance_matrix.csv)')
-    parser.add_argument('eigenvector_file', type=str, help='Path to the eigenvectors CSV (e.g., eigenvectors.csv)')
+    parser.add_argument('--neighbours', type=int, help='number of nearest neighbour edge connections')
     args = parser.parse_args()
 
-    try:
-        plot_stations_with_eigenvector(args.adj_matrix_file, args.eigenvector_file)
-    except FileNotFoundError as e:
-        print(f"Error: File not found")
-
-if __name__ == '__main__':
-    main()
+    plot_stations_with_eigenvector(args.neighbours)

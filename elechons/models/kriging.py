@@ -1,5 +1,7 @@
 import numpy as np
 
+# WIP - not yet in use
+
 # data the sample
 # var the variances at each sample
 # pos the position vectors of the samples

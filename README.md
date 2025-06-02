@@ -2,8 +2,8 @@
 This is a repo for my electrical engineering honours thesis at UNSW.
 The subject matter is graph signal processing.
 
-## Reproduce Figs
-To reproduce the figures in the Thesis A report:
+## Reproducing Figures
+To reproduce the figures in the Thesis A report you will have to 
 1. Clone this repository
 2. Navigate to ELECHONS/code
 ```
