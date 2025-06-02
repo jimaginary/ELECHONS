@@ -9,7 +9,8 @@ Code used for thesis A report is mostly in elechons/code/regress\_temp.py.
 To reproduce the figures in the Thesis A report:
 1. Clone this repository
 2. Navigate to ELECHONS/code
-```$ python
+```
+$ python
 >>> import regress_temp as r
 >>> r.init('mean')
 >>> r.plot_all()
