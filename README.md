@@ -2,8 +2,11 @@
 This is a repo for my electrical engineering honours thesis at UNSW.
 The subject matter is graph signal processing.
 
-## Reproducing Figures
-To reproduce the figures in the Thesis A report you will have to 
+## Reproduce Figs
+Below not ready yet, code is interspersed, in the middle of a restructure.
+Code used for thesis A report is mostly in elechons/code/regress\_temp.py.
+
+To reproduce the figures in the Thesis A report:
 1. Clone this repository
 2. Navigate to ELECHONS/code
 ```
