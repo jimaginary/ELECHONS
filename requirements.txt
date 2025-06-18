@@ -6,3 +6,4 @@ statsmodels
 mplcursors
 ftplib
 tarfile
+scikit-learn

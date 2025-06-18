@@ -74,8 +74,8 @@ def gohberg_inverse(autocorr):
     en = np.zeros(len(autocorr))
     en[0] = -1
 
-    u = solve_toeplitz((autocorr, autocorr), e1)
-    v = solve_toeplitz((autocorr, autocorr), en)
+    u = solve_toeplitz(autocorr, e1)
+    v = solve_toeplitz(autocorr, en)
 
     inv = np.outer(u, v) - np.outer(v[::-1], u[::-1])
     return inv[0]
