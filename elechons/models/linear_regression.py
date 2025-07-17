@@ -62,33 +62,46 @@ def VAR_lasso(data, p, alpha):
         return ((Z.T @ A).T, A)
     return Prediction(data, predictor, np.sum(A != 0), delay=p)
 
-def VAR_l0_coord_descent(data, p, max_steps=100, threshhold=0.001):
+def VAR_l0_coord_descent(data, p, init, max_steps=1000, threshhold=10, alpha=0.01):
     Y = data[:, p:]
     Z = np.vstack([data[:,p-i-1:-i-1] for i in range(p)])
 
-    A = np.zeros([data.shape[0], data.shape[0]*p])
+    A = init.copy()
 
-    num_params = 0
+    obs = np.prod(Y.shape)
+    def BICa(B):
+        return obs * np.log(np.mean(np.pow(B @ Z - Y, 2))) + np.sum(B != 0) * np.log(obs)
+    def l0(B):
+        return np.mean(np.pow(B @ Z - Y, 2)) + np.sum(B != 0) * alpha
+
+    sigma_ZZ = (Z @ Z.T) / Y.shape[1]
+    sigma_YZ = (Y @ Z.T) / Y.shape[1]
     def coord_optimise(i, j):
-        opt1 = (np.sum(Y[i] * Z[j]) - np.sum(np.dot(A[i],Z) * Z[j]) + np.sum(A[i,j]*np.pow(Z[j],2))) / np.sum(np.pow(Z[j],2))
+        AiSZZj = np.dot(A[i], sigma_ZZ[j]) - A[i,j]*sigma_ZZ[j,j]
+        Aij_opt = (sigma_YZ[i,j] - AiSZZj) / sigma_ZZ[j,j]
+        err_with = Aij_opt**2 * sigma_ZZ[j,j] + 2 * Aij_opt * AiSZZj - 2 * Aij_opt * sigma_YZ[i,j] + alpha
+        err_without = 0
+        if err_with < err_without:
+            A[i,j] = Aij_opt
+        else:
+            A[i,j] = 0
 
     def optimize_array():
         for i in range(A.shape[0]):
-            print(f'i {i} ', end='')
-            if i % 10 == 0:
-                print()
             for j in range(A.shape[1]):
                 coord_optimise(i, j)
     
-    err = np.mean(np.pow((Z.T @ A).T,2))
+    bic = BICa(A)
     for i in range(max_steps):
-        print()
-        print(f'step {i}')
-        old_err = err
+        # print()
+        # print(f'step {i}')
+        old_bic = bic
         optimize_array()
-        err = np.mean(np.pow((Z.T @ A).T,2))
-        print(err)
-        if np.abs(old_err - err) < threshhold:
+        bic = BICa(A)
+        # print(bic)
+        # print(f'l0 norm {l0(A)}')
+        # print(np.sum(A != 0))
+        if np.abs(old_bic - bic) < threshhold:
             break
     
     print(f'finished after {i} steps')
@@ -96,7 +109,7 @@ def VAR_l0_coord_descent(data, p, max_steps=100, threshhold=0.001):
     def predictor(data):
         Z = np.vstack([data[:,p-i-1:-i] if i != 0 else data[:,p-1:] for i in range(p)])
 
-        return ((Z.T @ A).T, A)
+        return ((A @ Z), A)
     return Prediction(data, predictor, np.sum(A != 0), delay=p)
 
 def solve_VAR_with_mask(data, p, mask):

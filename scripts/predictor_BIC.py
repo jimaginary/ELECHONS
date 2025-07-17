@@ -18,9 +18,15 @@ N = r.temps_mean_sin_adj.shape[0]
 
 print()
 
-for i in range(1,3):
-    pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, i)
-    print(f'--- var {i} l0 model')
+for i in range(1,10):
+    p = 2
+    L = lr.VAR(r.temps_mean_sin_adj, p)
+    # L = lr.solve_VAR_with_mask(r.temps_mean_sin_adj, i, np.hstack([dist < 1200 for _ in range(i)]))
+    init = L.param_history.T
+    print(f'finished initialising with dist, rmse {L.rmse()}')
+    pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.001*i)
+    print(f'--- var {p} l0 model')
+    print(f'alpha={0.001*i:.4f}')
     print_info(pred)
 
 print()
