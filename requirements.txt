@@ -4,6 +4,4 @@ matplotlib
 scipy
 statsmodels
 mplcursors
-ftplib
-tarfile
 scikit-learn
