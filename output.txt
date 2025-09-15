@@ -1,0 +1,120 @@
+--- var 2 l=0.25 group lasso model
+rmse: 1.6462, rmse (%): 57.90
+BICa: 2161623.92, num params: 21632
+--- var 3 l=0.25 group lasso model
+rmse: 1.6324, rmse (%): 57.42
+BICa: 2286599.30, num params: 32448
+--- var 4 l=0.25 group lasso model
+rmse: 1.6252, rmse (%): 57.17
+BICa: 2426357.25, num params: 43264
+--- var 5 l=0.25 group lasso model
+rmse: 1.6189, rmse (%): 56.94
+BICa: 2568015.37, num params: 54080
+--- var 6 l=0.25 group lasso model
+rmse: 1.6131, rmse (%): 56.74
+BICa: 2710874.32, num params: 64896
+--- var 7 l=0.25 group lasso model
+rmse: 1.6076, rmse (%): 56.54
+BICa: 2854198.29, num params: 75712
+--- var 8 l=0.25 group lasso model
+rmse: 1.6021, rmse (%): 56.35
+BICa: 2997661.90, num params: 86528
+--- var 9 l=0.25 group lasso model
+rmse: 1.5963, rmse (%): 56.15
+BICa: 3140373.68, num params: 97344
+--- var 2 l=0.3 group lasso model
+rmse: 1.6462, rmse (%): 57.91
+BICa: 2161669.19, num params: 21632
+--- var 3 l=0.3 group lasso model
+rmse: 1.6324, rmse (%): 57.42
+BICa: 2286624.14, num params: 32448
+--- var 4 l=0.3 group lasso model
+rmse: 1.6252, rmse (%): 57.17
+BICa: 2426374.39, num params: 43264
+--- var 5 l=0.3 group lasso model
+rmse: 1.6189, rmse (%): 56.94
+BICa: 2568028.68, num params: 54080
+--- var 6 l=0.3 group lasso model
+rmse: 1.6131, rmse (%): 56.74
+BICa: 2710885.30, num params: 64896
+--- var 7 l=0.3 group lasso model
+rmse: 1.6076, rmse (%): 56.54
+BICa: 2854207.70, num params: 75712
+--- var 8 l=0.3 group lasso model
+rmse: 1.6021, rmse (%): 56.35
+BICa: 2997670.18, num params: 86528
+--- var 9 l=0.3 group lasso model
+rmse: 1.5963, rmse (%): 56.15
+BICa: 3140381.12, num params: 97344
+--- var 2 l=0.35 group lasso model
+rmse: 1.7013, rmse (%): 59.85
+BICa: 2283935.41, num params: 21632
+--- var 3 l=0.35 group lasso model
+rmse: 1.6541, rmse (%): 58.18
+BICa: 2335554.84, num params: 32448
+--- var 4 l=0.35 group lasso model
+rmse: 1.6295, rmse (%): 57.32
+BICa: 2436058.21, num params: 43264
+--- var 5 l=0.35 group lasso model
+rmse: 1.6190, rmse (%): 56.95
+BICa: 2568287.94, num params: 54080
+--- var 6 l=0.35 group lasso model
+rmse: 1.6132, rmse (%): 56.74
+BICa: 2710918.19, num params: 64896
+--- var 7 l=0.35 group lasso model
+rmse: 1.6076, rmse (%): 56.54
+BICa: 2854236.00, num params: 75712
+--- var 8 l=0.35 group lasso model
+rmse: 1.6021, rmse (%): 56.35
+BICa: 2997695.15, num params: 86528
+--- var 9 l=0.35 group lasso model
+rmse: 1.5964, rmse (%): 56.15
+BICa: 3140403.45, num params: 97344
+--- var 2 l=0.4 group lasso model
+rmse: 1.8059, rmse (%): 63.52
+BICa: 2481313.46, num params: 19968
+--- var 3 l=0.4 group lasso model
+rmse: 1.7771, rmse (%): 62.51
+BICa: 2592749.97, num params: 31824
+--- var 4 l=0.4 group lasso model
+rmse: 1.7574, rmse (%): 61.82
+BICa: 2710506.11, num params: 42848
+--- var 5 l=0.4 group lasso model
+rmse: 1.7302, rmse (%): 60.86
+BICa: 2807277.55, num params: 53560
+--- var 6 l=0.4 group lasso model
+rmse: 1.7079, rmse (%): 60.07
+BICa: 2922730.06, num params: 64896
+--- var 7 l=0.4 group lasso model
+rmse: 1.6916, rmse (%): 59.50
+BICa: 3043263.26, num params: 75712
+--- var 8 l=0.4 group lasso model
+rmse: 1.6772, rmse (%): 58.99
+BICa: 3167509.03, num params: 86528
+--- var 9 l=0.4 group lasso model
+rmse: 1.6645, rmse (%): 58.54
+BICa: 3295535.64, num params: 97344
+--- var 2 l=0.45 group lasso model
+rmse: 1.8921, rmse (%): 66.55
+BICa: 2612124.38, num params: 17056
+--- var 3 l=0.45 group lasso model
+rmse: 1.8626, rmse (%): 65.52
+BICa: 2699577.98, num params: 27144
+--- var 4 l=0.45 group lasso model
+rmse: 1.8475, rmse (%): 64.99
+BICa: 2811942.07, num params: 37024
+--- var 5 l=0.45 group lasso model
+rmse: 1.8233, rmse (%): 64.13
+BICa: 2934045.50, num params: 48880
+--- var 6 l=0.45 group lasso model
+rmse: 1.7899, rmse (%): 62.96
+BICa: 3087685.23, num params: 64272
+--- var 7 l=0.45 group lasso model
+rmse: 1.7607, rmse (%): 61.93
+BICa: 3181217.49, num params: 74984
+--- var 8 l=0.45 group lasso model
+rmse: 1.7383, rmse (%): 61.14
+BICa: 3300445.85, num params: 86528
+--- var 9 l=0.45 group lasso model
+rmse: 1.7202, rmse (%): 60.50
+BICa: 3417650.25, num params: 97344
