@@ -1,0 +1,57 @@
+--- var 4 l=0.3 group lasso model
+rmse: 1.6288, rmse (%): 57.29
+BICa: 2434543.05, num params: 43264
+--- var 4 l=0.6 group lasso model
+rmse: 1.6341, rmse (%): 57.48
+BICa: 2446637.33, num params: 43264
+--- var 4 l=1.2 group lasso model
+rmse: 1.6500, rmse (%): 58.04
+BICa: 2482468.14, num params: 43264
+--- var 4 l=2.4 group lasso model
+rmse: 1.6806, rmse (%): 59.12
+BICa: 2550651.21, num params: 43264
+--- var 4 l=2.7 group lasso model
+rmse: 1.6877, rmse (%): 59.36
+BICa: 2410114.85, num params: 32448
+--- var 4 l=3.0 group lasso model
+rmse: 1.6939, rmse (%): 59.58
+BICa: 2423881.08, num params: 32448
+--- var 4 l=3.3000000000000003 group lasso model
+rmse: 1.7003, rmse (%): 59.81
+BICa: 2437685.19, num params: 32448
+--- var 4 l=3.6 group lasso model
+rmse: 1.7068, rmse (%): 60.04
+BICa: 2451889.47, num params: 32448
+--- var 4 l=3.9000000000000004 group lasso model
+rmse: 1.7138, rmse (%): 60.28
+BICa: 2467149.52, num params: 32448
+--- var 4 l=4.2 group lasso model
+rmse: 1.7213, rmse (%): 60.55
+BICa: 2327172.47, num params: 21632
+--- var 4 l=4.5 group lasso model
+rmse: 1.7289, rmse (%): 60.82
+BICa: 2343617.88, num params: 21632
+--- var 4 l=4.8 group lasso model
+rmse: 1.7365, rmse (%): 61.08
+BICa: 2359881.89, num params: 21632
+--- var 4 l=9.6 group lasso model
+rmse: 1.8327, rmse (%): 64.46
+BICa: 2559842.73, num params: 21632
+--- var 4 l=19.2 group lasso model
+rmse: 1.9470, rmse (%): 68.49
+BICa: 2628245.82, num params: 10816
+--- var 4 l=40.0 group lasso model
+rmse: 2.1258, rmse (%): 74.78
+BICa: 2954235.47, num params: 10816
+--- var 4 l=80.0 group lasso model
+rmse: 2.4308, rmse (%): 85.51
+BICa: 3451737.82, num params: 10816
+--- var 4 l=160.0 group lasso model
+rmse: 2.8429, rmse (%): 100.00
+BICa: 3876631.40, num params: 0
+--- var 4 l=320.0 group lasso model
+rmse: 2.8429, rmse (%): 100.00
+BICa: 3876631.40, num params: 0
+--- var 4 l=640.0 group lasso model
+rmse: 2.8429, rmse (%): 100.00
+BICa: 3876631.40, num params: 0

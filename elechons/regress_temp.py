@@ -17,7 +17,7 @@ from statsmodels.stats.diagnostic import acorr_ljungbox
 stat = None
 lat = sh.STATIONS['lat'].to_numpy()
 long = sh.STATIONS['long'].to_numpy()
-ids = np.array([int(i) for i in sh.STATIONS['station number'].to_numpy()])
+ids = np.array([i for i in sh.STATIONS['station number'].to_numpy()])
 temps = None
 valid = None
 days = None
@@ -38,12 +38,12 @@ def init(_stat, remove_backfills_above=10000, delay=2):
     valid = ~sh.get_was_nan_matrix(stat)
     days = np.arange(temps.shape[1])
 
-    small_backfills = np.array([s.get_largest_backfill(v) <= remove_backfills_above for v in valid])
-    temps = temps[small_backfills]
-    valid = valid[small_backfills]
-    lat = lat[small_backfills]
-    long = long[small_backfills]
-    ids = ids[small_backfills]
+    # small_backfills = np.array([s.get_largest_backfill(v) <= remove_backfills_above for v in valid])
+    # temps = temps[small_backfills]
+    # valid = valid[small_backfills]
+    # lat = lat[small_backfills]
+    # long = long[small_backfills]
+    # ids = ids[small_backfills]
 
     X = np.array([[1 for _ in range(temps.shape[1])], np.sin(w*days), np.cos(w*days), np.sin(2*w*days), np.cos(2*w*days)]).T
     proj = np.linalg.inv(X.T @ X) @ X.T
@@ -495,7 +495,7 @@ def plot_autoregression_partial_corrs(max_delay = 20):
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
 
-    T_partials = np.zeros((104, max_delay))
+    T_partials = np.zeros((temps.shape[0], max_delay))
     for j, temp in enumerate(temps_mean_sin_adj):
         T = np.array([temp[max_delay+1-i:temp.shape[0]-i] for i in range(max_delay+1)])
         T_cov = np.cov(T)
@@ -597,6 +597,7 @@ def plot_correlation_v_dist():
 
     space_error_correlation = np.corrcoef(regression_error).flatten()
     dist = ec.distance_matrix(sh.STATIONS).flatten()
+    print(len(sh.STATIONS), temps_mean_sin_adj.shape, regression_error.shape, space_error_correlation.shape, dist.shape)
 
     cov_3d_model_min_obj = minimize(s.least_squares, np.array([0.01]), args=(s.cov_3d_model, dist, space_error_correlation), method='Nelder-Mead')
     if not cov_3d_model_min_obj.success:

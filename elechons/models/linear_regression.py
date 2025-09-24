@@ -43,6 +43,22 @@ def VAR(data, p, percentile=0):
         return ((Z.T @ A).T, A)
     return Prediction(data, predictor, np.sum(A != 0), delay=p)
 
+def CMI(data, p):
+    # Compute CMI matrix with entries CMI[i,j] = I(x_i; z_j | z_-j)
+    # using the formula:
+    #     0.5 * log(1 + (A[i,j]**2 / Sigma_e[i,i]) * ((Sigma_z^{-1})[j,j])**(-1))
+    Y = data[:, p:]
+    Z = np.vstack([data[:,p-i-1:-i-1] for i in range(p)])
+
+    A = (np.linalg.inv(Z @ Z.T) @ Z @ Y.T).T
+
+    sZ = np.cov(Z)
+    E = Y - A @ Z
+    sEii = np.diag(np.cov(E))
+    sZjj = np.reciprocal(np.diag(np.linalg.inv(sZ)))
+
+    return 0.5 * np.log(1 + np.pow(A,2) * sZjj[None, :] / sEii[:, None])
+
 def VAR_lasso(data, p, alpha):
     Y = data[:, p:]
     Z = np.vstack([data[:,p-i-1:-i-1] for i in range(p)])
@@ -108,6 +124,70 @@ def VAR_l0_coord_descent(data, p, init, max_steps=1000, threshhold=10, alpha=0.0
 
     def predictor(data):
         Z = np.vstack([data[:,p-i-1:-i] if i != 0 else data[:,p-1:] for i in range(p)])
+
+        return ((A @ Z), A)
+    return Prediction(data, predictor, np.sum(A != 0), delay=p)
+
+def VAR_group_l0(data, p, init, max_steps=1000, threshhold=10, alpha=0.01):
+    Y = data[:, p:]
+    Z = np.empty((p*data.shape[0], data.shape[1] - p), dtype=data.dtype)
+    for i in range(p):
+        Z[i::p] = data[:,p-i-1:-i-1]
+
+    A = init.copy()
+
+    obs = np.prod(Y.shape)
+    def BICa(B):
+        return obs * np.log(np.mean(np.pow(B @ Z - Y, 2))) + np.sum(B != 0) * np.log(obs)
+    def l0(B):
+        return np.mean(np.pow(B @ Z - Y, 2)) + np.sum(B != 0) * alpha
+    def m(M, i, j):
+        return M[i*p:(i+1)*p,j*p:(j+1)*p]
+    def v(M, i, j):
+        return M[i,j*p:(j+1)*p]
+
+    sigma_ZZ = (Z @ Z.T) / Y.shape[1]
+    sigma_YZ = (Y @ Z.T) / Y.shape[1]
+    def coord_optimise(i, j):
+        sYZij = v(sigma_YZ, i, j)
+        # print(f'sYZij {sYZij.shape}')
+        sZZjj = m(sigma_ZZ, j, j)
+        # print(f'sZZjj {sZZjj.shape}')
+        AiSZZj = np.sum([m(sigma_ZZ, j, l) @ v(A, i, l) for l in range(A.shape[0]) if l != j], axis=0)
+        # print(f'AiSZZj {AiSZZj.shape}')
+        Aij_opt = np.linalg.inv(sZZjj) @ (sYZij - AiSZZj)
+        # print(f'Aij_opt {Aij_opt.shape}')
+        err_with = Aij_opt.T @ sZZjj @ Aij_opt + 2 * Aij_opt.T @ AiSZZj - 2 * sYZij.T @ Aij_opt + alpha
+        err_without = 0
+        if err_with < err_without:
+            A[i,j*p:(j+1)*p] = Aij_opt
+        else:
+            A[i,j*p:(j+1)*p] = 0
+
+    def optimize_array():
+        for i in range(A.shape[0]):
+            for j in range(A.shape[1]):
+                coord_optimise(i, j)
+    
+    bic = BICa(A)
+    for i in range(max_steps):
+        # print()
+        # print(f'step {i}')
+        old_bic = bic
+        optimize_array()
+        bic = BICa(A)
+        # print(bic)
+        # print(f'l0 norm {l0(A)}')
+        # print(np.sum(A != 0))
+        if np.abs(old_bic - bic) < threshhold:
+            break
+    
+    print(f'finished after {i} steps')
+
+    def predictor(data):
+        Z = np.empty((p*data.shape[0], data.shape[1] - p + 1), dtype=data.dtype)
+        for i in range(p):
+            Z[i::p] = (data[:,p-i-1:-i] if i != 0 else data[:,p-1:])
 
         return ((A @ Z), A)
     return Prediction(data, predictor, np.sum(A != 0), delay=p)

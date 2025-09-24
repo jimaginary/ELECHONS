@@ -16,14 +16,14 @@ def plot_stations(neighbours):
     names = stations_df['station name'].to_numpy()
     ids = stations_df.index.to_numpy()
 
-    adj_matrix = edges.K_nearest(edges.distance_matrix(stations_df), neighbours)
+    # adj_matrix = edges.K_nearest(edges.distance_matrix(stations_df), neighbours)
 
-    for i in range(len(stations_df)):
-        for j in range(i + 1, len(stations_df)):  # Upper triangle to avoid duplicates
-            if adj_matrix[i, j] == 1:
-                plt.plot([long[i], long[j]], 
-                        [lat[i], lat[j]], 
-                        'k-', alpha=0.2, zorder=0)
+    # for i in range(len(stations_df)):
+    #     for j in range(i + 1, len(stations_df)):  # Upper triangle to avoid duplicates
+    #         if adj_matrix[i, j] == 1:
+    #             plt.plot([long[i], long[j]], 
+    #                     [lat[i], lat[j]], 
+    #                     'k-', alpha=0.2, zorder=0)
 
     scatter = plt.scatter(long, lat, zorder=5)
 
