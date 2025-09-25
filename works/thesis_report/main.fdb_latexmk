@@ -1,13 +1,14 @@
 # Fdb version 4
-["bibtex main"] 1758497173.566 "main.aux" "main.bbl" "main" 1758497179.0057 0
-  "./bibliography.bib" 1758497131.95757 7634 2b1bfe58fd3043a027194bb61d34b7b2 ""
+["bibtex main"] 1758777984.03009 "main.aux" "main.bbl" "main" 1758777989.54602 0
+  "./bibliography.bib" 1758777150.00021 8330 ecc9024426f02c3d7fcdcbb94c3b9cca ""
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/plain.bst" 1737590400 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1758497178.6307 21470 8edba5ab20d47e3969b9eea0b8178ca5 "pdflatex"
+  "main.aux" 1758777989.10577 20640 c6593f315d461c72b54e9c3962f2879b "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1758497173.67489 "main.tex" "main.pdf" "main" 1758497179.00595 2
+["pdflatex"] 1758777984.18219 "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" "main.pdf" "main" 1758777989.54638 0
+  "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" 1758777974.48574 110630 7203c4bb2f04e4f9dfe03dbdfa137e98 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1737590400 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
@@ -15,7 +16,6 @@
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmb7t.tfm" 1136768653 2172 fd0c924230362ff848a33632ed45dc23 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmb8r.tfm" 1136768653 4524 6bce29db5bc272ba5f332261583fee9c ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmr7t.tfm" 1136768653 2124 2601a75482e9426d33db523edf23570a ""
-  "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmr8c.tfm" 1136768653 1352 fa28a7e6d323c65ce7d13d5342ff6be2 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmr8r.tfm" 1136768653 4408 25b74d011a4c66b7f212c0cc3c90061b ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmri7t.tfm" 1136768653 2288 f478fc8fed18759effb59f3dad7f3084 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmri8r.tfm" 1136768653 4640 532ca3305aad10cc01d769f3f91f1029 ""
@@ -46,7 +46,6 @@
   "/usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb" 1136849748 45458 a3faba884469519614ca56ba5f6b1de1 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmb7t.vf" 1136768653 1372 788387fea833ef5963f4c5bffe33eb89 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmr7t.vf" 1136768653 1380 0ea3a3370054be6da6acd929ec569f06 ""
-  "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmr8c.vf" 1136768653 3556 8a9a6dcbcd146ef985683f677f4758a6 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmri7t.vf" 1136768653 1384 a9d8adaf491ce34e5fba99dc7bbe5f39 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/zptmcm7m.vf" 1136768653 1132 27520247d3fe18d4266a226b461885c2 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/zptmcm7t.vf" 1136768653 1108 d271d6f9de4122c3f8d3b65666167fac ""
@@ -176,7 +175,6 @@
   "/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd" 1137110629 329 c8cddcc90b6f567b28408eb374773c9c ""
   "/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd" 1137110629 961 15056f4a61917ceed3a44e4ac11fcc52 ""
   "/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd" 1137110629 329 aee7226812ba4138ac67a018466b488d ""
-  "/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd" 1137110629 619 96f56dc5d1ef1fe1121f1cfeec70ee0c ""
   "/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty" 1576624809 9878 9e94e8fa600d95f9c7731bb21dfb67a4 ""
   "/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty" 1657483315 9714 ba3194bd52c8499b3f1e3eb91d409670 ""
   "/usr/share/texlive/texmf-dist/tex/latex/setspace/setspace.sty" 1670275497 22490 8cac309b79a4c53a4ffce4b1b07aead0 ""
@@ -187,12 +185,11 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1758437073.17899 4602002 62dba5fc29055c16380d7393a2adb07a ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1758436586 7753794 0b6227a8726be7d4e63f1129d7541864 ""
   "7045_monthly.png" 1758401394 55266 d8932525308c7ffd5f37d69734fafb5d ""
-  "main.aux" 1758497178.6307 21470 8edba5ab20d47e3969b9eea0b8178ca5 "pdflatex"
-  "main.bbl" 1758497173.66568 5718 9d0c76ab599d2aefd801c638e27510c0 "bibtex main"
-  "main.out" 1758497178.6337 8415 1cda6ebdfb6408aa9410beb51438bc76 "pdflatex"
-  "main.tex" 1758497154.01963 111735 9fb7c5db7000fb47839f10bab701b0c8 ""
-  "main.toc" 1758497178.6337 4252 e2c89bfa91d374363a122603311e1a98 "pdflatex"
-  "mean_YJ_dists_by_loc.png" 1758401394 45485 200a6895604d17baacfcd2ba6b98d4f7 ""
+  "main.aux" 1758777989.10577 20640 c6593f315d461c72b54e9c3962f2879b "pdflatex"
+  "main.bbl" 1758777984.16801 6091 90cd95d1c720734e997bbb0fef736d88 "bibtex main"
+  "main.out" 1758777989.10777 8548 afec41fcc6731a36a6174bdd1dac6c40 "pdflatex"
+  "main.tex" 1758777974.48574 110630 7203c4bb2f04e4f9dfe03dbdfa137e98 ""
+  "main.toc" 1758777989.10922 4214 ae220a32d9a767f4309142d8ac7480ae "pdflatex"
   "mean_dist_7045.png" 1758401394 68209 a9aa52247ef70f8badeaf7010a33d107 ""
   "mean_dist_7045_dif.png" 1758401394 64791 e18c58297a34dfd97c9c59bd84b7cc56 ""
   "mean_dists_by_loc.png" 1758401394 124616 b017d23eee40ebd04311a0aa0dd20f24 ""
@@ -204,7 +201,6 @@
   "mean_nearest_error_precision_by_dist.png" 1758401394 357292 1bc684db458777485c7ec15b747adbdf ""
   "mean_params_by_loc.png" 1758401394 78353 a0c247cf1288d0cad9b50cd53cf6a104 ""
   "mean_partial_corr_by_delay_5.png" 1758401394 80162 516fae658253118085de59d620d31d2c ""
-  "mean_regression_std_ratio_by_loc.png" 1758401394 82295 d656831ad8f1d428eebd15c5eff856b1 ""
   "mean_temp_model_krig.png" 1758401394 159800 561ebedc3a0549846777bc58a77c7e1b ""
   "mean_temp_model_krig_error.png" 1758401394 170986 5cfa8abf91367ad87dc057cdba31a345 ""
   "one_D_cov_modelling_l0.03_g1.png" 1758401394 133808 70da85ca3413c180c1ce2cd3d79911e8 ""

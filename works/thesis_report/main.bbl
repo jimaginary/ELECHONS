@@ -23,35 +23,32 @@
 \bibitem{cressie}
 {Cressie N., Moores M.}
 \newblock Spatial statistics.
-\newblock {\em National Institute for Applied Statistics Research Australia},
-  2021.
+\newblock {\em National Institute for Applied Statistics Research Australia}, 2021.
 
 \bibitem{euler}
 {Euler L.}
 \newblock Solutio problematis ad geometriam situs pertinentis.
-\newblock {\em Commentarii Academiae Scientiarum Petropolitanae}, page
-  128–140, 1741.
+\newblock {\em Commentarii Academiae Scientiarum Petropolitanae}, pages 128--140, 1741.
 
 \bibitem{stats}
 {Freedman, David A.}
 \newblock {\em Statistical Models: Theory and Practice}.
 \newblock Cambridge University Press, 2009.
 
+\bibitem{friedmanglasso}
+{Friedman, Jerome and Hastie, Trevor and Tibshirani, Robert}.
+\newblock Sparse inverse covariance estimation with the graphical lasso.
+\newblock {\em Biostatistics}, 2008.
+
 \bibitem{grady_shah}
 {Grady L., Alvino C.}
-\newblock Reformulating and optimizing the mumford-shah functional on a graph
-  — a faster, lower energy solution.
+\newblock Reformulating and optimizing the mumford-shah functional on a graph — a faster, lower energy solution.
 \newblock {\em Siemens Corporate Research}, 2008.
 
 \bibitem{grady}
 {Grady L., Polimeni J.}
 \newblock Discrete calculus.
 \newblock {\em Springer}, 2010.
-
-\bibitem{hamilton}
-{Hamilton J.}
-\newblock {\em Time-Series Analysis}.
-\newblock Princeton University Press, 1994.
 
 \bibitem{imrich}
 {Imrich W., Peterin I.}
@@ -60,10 +57,8 @@
 
 \bibitem{krige}
 {Krige D.}
-\newblock A statistical approach to some basic mine valuation problems on the
-  witwatersrand.
-\newblock {\em Journal of the Chemical Metallurgical & Mining Society of South
-  Africa}, 1951.
+\newblock A statistical approach to some basic mine valuation problems on the witwatersrand.
+\newblock {\em Journal of the Chemical Metallurgical \& Mining Society of South Africa}, 1951.
 
 \bibitem{loan}
 {Loan C.}
@@ -85,20 +80,20 @@
 \newblock Big data analysis with signal processing on graphs.
 \newblock {\em IEEE Signal Processing Magazine}, pages 80--90, 2014.
 
+\bibitem{noaa}
+{NOAA}.
+\newblock Global surface temperature data, 2025.
+\newblock \url{https://www.ncei.noaa.gov/pub/data/ghcn/daily/}.
+
 \bibitem{bom}
 Bureau of~Meteorology.
 \newblock Acorn sat data set, 2023.
-\newblock \url{http://www.bom.gov.au/climate/data/acorn-sat/}, Accessed
-  22/03/2025.
+\newblock \url{http://www.bom.gov.au/climate/data/acorn-sat/}, Accessed 22/03/2025.
 
 \bibitem{page}
 {Page L.}
 \newblock The pagerank citation ranking: bringing order to the web.
 \newblock {\em Stanford Digital Library Project}, 1998.
-
-\bibitem{stack}
-{Samuels, S.}
-\newblock What is the standard error of the sample standard deviation?, 2015.
 
 \bibitem{shwarz}
 {Schwarz, Gideon E.}
@@ -117,14 +112,18 @@ Bureau of~Meteorology.
 
 \bibitem{linear}
 {Stigler, Stephen M.}
-\newblock {\em The History of Statistics: The Measurement of Uncertainty before
-  1900}.
+\newblock {\em The History of Statistics: The Measurement of Uncertainty before 1900}.
 \newblock Cambridge: Harvard, 1986.
 
 \bibitem{sun}
 {Sun M., et. al.}
 \newblock Graph neural networks: A review of methods and applications.
 \newblock {\em AI Open}, 2020.
+
+\bibitem{park}
+{T. Park, G. Casella}.
+\newblock The bayesian lasso.
+\newblock {\em Journal of the American Statistical Association}, 2008.
 
 \bibitem{taubin}
 {Taubin G., et. al.}
@@ -143,21 +142,18 @@ Bureau of~Meteorology.
 
 \bibitem{l1_min}
 {Tony C., et. al.}
-\newblock A constrained ℓ1 minimization approach to sparse precision matrix
-  estimation.
+\newblock A constrained l1 minimization approach to sparse precision matrix estimation.
 \newblock {\em arXiv:1102.2233v1}, 2011.
 
 \bibitem{dijkstra}
 {Various}.
 \newblock Dijkstra's algorithm, 2025.
-\newblock \url{https://en.wikipedia.org/wiki/Dijkstra's_algorithm, Accessed
-  20/04/2025}.
+\newblock \url{https://en.wikipedia.org/wiki/Dijkstra's_algorithm, Accessed 20/04/2025}.
 
 \bibitem{floyd}
 {Various}.
 \newblock Floyd-warshall algorithm, 2025.
-\newblock \url{https://en.wikipedia.org/wiki/Floyd-Warshall_algorithm, Accessed
-  20/04/2025}.
+\newblock \url{https://en.wikipedia.org/wiki/Floyd-Warshall_algorithm, Accessed 20/04/2025}.
 
 \bibitem{JPEG}
 {Various}.
@@ -167,37 +163,31 @@ Bureau of~Meteorology.
 \bibitem{mmse}
 {Various}.
 \newblock Minimum mean square error, 2025.
-\newblock \url{https://en.wikipedia.org/wiki/Minimum\_mean\_square\_error},
-  Accessed 12/04/2025.
+\newblock \url{https://en.wikipedia.org/wiki/Minimum\_mean\_square\_error}, Accessed 12/04/2025.
 
 \bibitem{whittle2}
 {Whittle P.}
 \newblock On stationary processes in the plane.
-\newblock {\em Applied Mathematics Laboratory, New Zealand Department of
-  Scientific and Industrial Research}, 1954.
+\newblock {\em Applied Mathematics Laboratory, New Zealand Department of Scientific and Industrial Research}, 1954.
 
 \bibitem{whittle}
 {Whittle P.}
 \newblock Stochastic-processes in several dimensions.
-\newblock {\em Bulletin of the International Statistical Institute}, pages
-  974--994, 1963.
+\newblock {\em Bulletin of the International Statistical Institute}, pages 974--994, 1963.
 
 \bibitem{wiener}
 {Wiener N.}
-\newblock {\em Extrapolation, interpolation, and smoothing of stationary time
-  series.}
-\newblock 1949.
+\newblock {\em Extrapolation, interpolation, and smoothing of stationary time series.}
+\newblock MIT Press, 1949.
 
 \bibitem{stochastic_wiki}
 Wikipedia.
 \newblock Stochastic process, 2025.
-\newblock \url{https://en.wikipedia.org/wiki/Stochastic\_process}, Accessed
-  22/03/2025.
+\newblock \url{https://en.wikipedia.org/wiki/Stochastic\_process}, Accessed 22/03/2025.
 
-\bibitem{yeo}
-{Yeo I., Johnson R.}
-\newblock A new family of power transformations to improve normality or
-  symmetry.
-\newblock {\em Biometrika}, 2000.
+\bibitem{yue}
+{Z. Yue, P. Sundaram, V. Solo}.
+\newblock Fast block-sparse estimation for vector networks.
+\newblock {\em School of Electrical Engineering and Telecommunications, UNSW, Sydney, AUSTRALIA, Martinos Center for Biomedical Imaging, Harvard Medical School, Charlestown, MA, USA}, 2020.
 
 \end{thebibliography}

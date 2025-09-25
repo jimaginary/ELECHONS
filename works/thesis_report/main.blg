@@ -3,46 +3,44 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
 The style file: plain.bst
 Database file #1: bibliography.bib
-Warning--empty publisher in wiener
-You've used 37 entries,
+You've used 38 entries,
             2118 wiz_defined-function locations,
-            667 strings with 7821 characters,
-and the built_in function-call counts, 8193 in all, are:
-= -- 787
-> -- 259
+            668 strings with 8129 characters,
+and the built_in function-call counts, 8363 in all, are:
+= -- 804
+> -- 266
 < -- 3
-+ -- 118
-- -- 74
-* -- 307
-:= -- 1447
-add.period$ -- 110
-call.type$ -- 37
-change.case$ -- 140
++ -- 121
+- -- 76
+* -- 320
+:= -- 1493
+add.period$ -- 114
+call.type$ -- 38
+change.case$ -- 145
 chr.to.int$ -- 0
 cite$ -- 38
-duplicate$ -- 403
-empty$ -- 744
-format.name$ -- 74
-if$ -- 1733
+duplicate$ -- 401
+empty$ -- 759
+format.name$ -- 76
+if$ -- 1759
 int.to.chr$ -- 0
-int.to.str$ -- 37
+int.to.str$ -- 38
 missing$ -- 38
-newline$ -- 187
-num.names$ -- 74
-pop$ -- 217
+newline$ -- 193
+num.names$ -- 76
+pop$ -- 215
 preamble$ -- 1
-purify$ -- 111
+purify$ -- 114
 quote$ -- 0
-skip$ -- 298
+skip$ -- 291
 stack$ -- 0
-substring$ -- 258
-swap$ -- 72
+substring$ -- 273
+swap$ -- 63
 text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 132
-warning$ -- 1
-while$ -- 79
-width$ -- 39
-write$ -- 372
-(There was 1 warning)
+type$ -- 138
+warning$ -- 0
+while$ -- 82
+width$ -- 40
+write$ -- 385
