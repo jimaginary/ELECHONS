@@ -1,0 +1,15 @@
+--- var 2 l=0.3 group lasso model
+rmse: 1.7856, rmse (%): 62.81
+BICa: 2179943.88, num params: 2004
+--- var 2 l=0.05 group lasso model
+rmse: 1.6811, rmse (%): 59.13
+BICa: 2024387.06, num params: 6728
+--- var 3 l=0.05 group lasso model
+rmse: 1.6720, rmse (%): 58.81
+BICa: 2071195.61, num params: 11364
+--- var 2 l=0.1 group lasso model
+rmse: 1.7061, rmse (%): 60.01
+BICa: 2040904.76, num params: 4080
+--- var 2 l=0.08 group lasso model
+rmse: 1.6967, rmse (%): 59.68
+BICa: 2030298.79, num params: 4754

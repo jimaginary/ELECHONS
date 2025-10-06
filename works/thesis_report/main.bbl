@@ -1,0 +1,193 @@
+\begin{thebibliography}{10}
+
+\bibitem{acemoglu}
+{Acemoglu D., et. al.}
+\newblock systemic risk and stability in financial networks.
+\newblock {\em National Bureau of Economic Research}, 2013.
+
+\bibitem{roger}
+{Barry R., Chorley R.}
+\newblock {\em Atmosphere, Weather, and Climate (9th ed.)}.
+\newblock Routledge, 2010.
+
+\bibitem{matern}
+{Bertil Matérn}.
+\newblock {\em Spatial Variation}.
+\newblock Reports of the Swedish Institute of Experimental Forestry, 1960.
+
+\bibitem{cooley}
+{Cooley J., Tukey J.}
+\newblock An algorithm for the machine calculation of complex fourier series.
+\newblock {\em American Mathematical Society}, 1965.
+
+\bibitem{cressie}
+{Cressie N., Moores M.}
+\newblock Spatial statistics.
+\newblock {\em National Institute for Applied Statistics Research Australia}, 2021.
+
+\bibitem{euler}
+{Euler L.}
+\newblock Solutio problematis ad geometriam situs pertinentis.
+\newblock {\em Commentarii Academiae Scientiarum Petropolitanae}, pages 128--140, 1741.
+
+\bibitem{stats}
+{Freedman, David A.}
+\newblock {\em Statistical Models: Theory and Practice}.
+\newblock Cambridge University Press, 2009.
+
+\bibitem{friedmanglasso}
+{Friedman, Jerome and Hastie, Trevor and Tibshirani, Robert}.
+\newblock Sparse inverse covariance estimation with the graphical lasso.
+\newblock {\em Biostatistics}, 2008.
+
+\bibitem{grady_shah}
+{Grady L., Alvino C.}
+\newblock Reformulating and optimizing the mumford-shah functional on a graph — a faster, lower energy solution.
+\newblock {\em Siemens Corporate Research}, 2008.
+
+\bibitem{grady}
+{Grady L., Polimeni J.}
+\newblock Discrete calculus.
+\newblock {\em Springer}, 2010.
+
+\bibitem{imrich}
+{Imrich W., Peterin I.}
+\newblock Recognizing cartesian products in linear time.
+\newblock {\em Elsevier}, 2005.
+
+\bibitem{krige}
+{Krige D.}
+\newblock A statistical approach to some basic mine valuation problems on the witwatersrand.
+\newblock {\em Journal of the Chemical Metallurgical \& Mining Society of South Africa}, 1951.
+
+\bibitem{loan}
+{Loan C.}
+\newblock The ubiquitous kronecker product.
+\newblock {\em Cornell University}, 1999.
+
+\bibitem{glasso}
+{Meinshausen N., Buhlmann P.}
+\newblock High-dimensional graphs and variable selection with the lasso.
+\newblock {\em arXiv:math/0608017v}, 2006.
+
+\bibitem{moura2}
+{Moura J., Sandryhaila A.}
+\newblock Discrete signal processing on graphs.
+\newblock {\em IEEE}, 2012.
+
+\bibitem{moura}
+{Moura J., Sandryhaila A.}
+\newblock Big data analysis with signal processing on graphs.
+\newblock {\em IEEE Signal Processing Magazine}, pages 80--90, 2014.
+
+\bibitem{noaa}
+{NOAA}.
+\newblock Global surface temperature data, 2025.
+\newblock \url{https://www.ncei.noaa.gov/pub/data/ghcn/daily/}.
+
+\bibitem{bom}
+Bureau of~Meteorology.
+\newblock Acorn sat data set, 2023.
+\newblock \url{http://www.bom.gov.au/climate/data/acorn-sat/}, Accessed 22/03/2025.
+
+\bibitem{page}
+{Page L.}
+\newblock The pagerank citation ranking: bringing order to the web.
+\newblock {\em Stanford Digital Library Project}, 1998.
+
+\bibitem{shwarz}
+{Schwarz, Gideon E.}
+\newblock {\em Estimating the dimension of a model}.
+\newblock Annals of Statistics, 1978.
+
+\bibitem{mand}
+{Stankovi\'{c} L., et. al.}
+\newblock Vertex-frequency graph signal processing: A comprehensive review.
+\newblock {\em Elsevier}, 2020.
+
+\bibitem{stankovic}
+{Stankovic L., et. al.}
+\newblock Vertex-frequency graph signal processing: A comprehensive review.
+\newblock {\em Elsevier}, 2020.
+
+\bibitem{linear}
+{Stigler, Stephen M.}
+\newblock {\em The History of Statistics: The Measurement of Uncertainty before 1900}.
+\newblock Cambridge: Harvard, 1986.
+
+\bibitem{sun}
+{Sun M., et. al.}
+\newblock Graph neural networks: A review of methods and applications.
+\newblock {\em AI Open}, 2020.
+
+\bibitem{park}
+{T. Park, G. Casella}.
+\newblock The bayesian lasso.
+\newblock {\em Journal of the American Statistical Association}, 2008.
+
+\bibitem{taubin}
+{Taubin G., et. al.}
+\newblock Optimal surface smoothing as filter design.
+\newblock {\em IBM T.J. Watson Research Center}, 1996.
+
+\bibitem{tibshirani}
+{Tibshirani, Robert}.
+\newblock {\em Regression Shrinkage and Selection via the lasso}.
+\newblock Journal of the Royal Statistical Society, 1996.
+
+\bibitem{hyperkrige}
+{Toal D., et. al.}
+\newblock Kriging hyperparameter tuning strategies.
+\newblock {\em University of Southampton}, 2020.
+
+\bibitem{l1_min}
+{Tony C., et. al.}
+\newblock A constrained l1 minimization approach to sparse precision matrix estimation.
+\newblock {\em arXiv:1102.2233v1}, 2011.
+
+\bibitem{dijkstra}
+{Various}.
+\newblock Dijkstra's algorithm, 2025.
+\newblock \url{https://en.wikipedia.org/wiki/Dijkstra's_algorithm, Accessed 20/04/2025}.
+
+\bibitem{floyd}
+{Various}.
+\newblock Floyd-warshall algorithm, 2025.
+\newblock \url{https://en.wikipedia.org/wiki/Floyd-Warshall_algorithm, Accessed 20/04/2025}.
+
+\bibitem{JPEG}
+{Various}.
+\newblock Jpeg, 2025.
+\newblock \url{https://en.wikipedia.org/wiki/JPEG}, Accessed 12/04/2025.
+
+\bibitem{mmse}
+{Various}.
+\newblock Minimum mean square error, 2025.
+\newblock \url{https://en.wikipedia.org/wiki/Minimum\_mean\_square\_error}, Accessed 12/04/2025.
+
+\bibitem{whittle2}
+{Whittle P.}
+\newblock On stationary processes in the plane.
+\newblock {\em Applied Mathematics Laboratory, New Zealand Department of Scientific and Industrial Research}, 1954.
+
+\bibitem{whittle}
+{Whittle P.}
+\newblock Stochastic-processes in several dimensions.
+\newblock {\em Bulletin of the International Statistical Institute}, pages 974--994, 1963.
+
+\bibitem{wiener}
+{Wiener N.}
+\newblock {\em Extrapolation, interpolation, and smoothing of stationary time series.}
+\newblock MIT Press, 1949.
+
+\bibitem{stochastic_wiki}
+Wikipedia.
+\newblock Stochastic process, 2025.
+\newblock \url{https://en.wikipedia.org/wiki/Stochastic\_process}, Accessed 22/03/2025.
+
+\bibitem{yue}
+{Z. Yue, P. Sundaram, V. Solo}.
+\newblock Fast block-sparse estimation for vector networks.
+\newblock {\em School of Electrical Engineering and Telecommunications, UNSW, Sydney, AUSTRALIA, Martinos Center for Biomedical Imaging, Harvard Medical School, Charlestown, MA, USA}, 2020.
+
+\end{thebibliography}
