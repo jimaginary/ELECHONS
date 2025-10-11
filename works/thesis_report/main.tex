@@ -1015,10 +1015,10 @@ This can be seem as a non-linear variant of the traditional $l_0$ regularised le
 \begin{align*}
     \text{loss}&=MSE+\lambda||\pmb{A}||_0
 \end{align*}
-Because of the non-convexity of the $l_0$ norm, both these problems are difficult to solve, and even iterative solvers can be prone to instability and getting trapped in local minima. A common approximation is to use coordinate descent algorithms to optimise MSE for each coordinate in the matrix $A$, and to consider if keeping the coordinate improves or worsens BIC. This can be done iteratively. Unfortunately, this method is very slow, as we need to reevaluate MSE for every matrix index a number of times. We will not discuss this method further.
+Because of the non-convexity of the $l_0$ norm, both these problems are difficult to solve, and even iterative solvers can be prone to instability and getting trapped in local minima. A common approximation is to use coordinate descent algorithms to optimise MSE for each coordinate in the matrix $A$, and to consider if keeping the coordinate improves or worsens the loss function. We will investigate an approximate method first, before returning to the coordinate descent algorithm.
 \subsubsection{Masking}
 \label{subsec:masking}
-Although $l_0$ optimisation is intractable, its goal is essentially to choose an optimal set of active matrix entries, and then to minimise the MSE with respect only to those entries. i.e. we apply a mask to the matrix and optimise within the mask. We will derive how to optimise this expression.
+The goal of $l_0$ optimisation is essentially to choose an optimal set of active matrix entries, and then to minimise the MSE with respect only to those entries. i.e. we apply a mask to the matrix and optimise within the mask. We will derive how to optimise this expression.
 
 We may consider the $VAR(p)$ model across all times as below.
 \begin{align*}
@@ -1079,6 +1079,25 @@ We test and compare a variety of methods for choosing masks. Because our data is
 \end{figure}
 \\ Based upon this analysis, reregression using the Lasso selector is the best performing model amongst those tested. In second is the distance-selected model, which uses the underlying geographic data to model weight importance. The distance-selected model uses many more active weights achieving the same MSE as the Lasso selection.
 
+\subsubsection[l0 Coordinate Descent]{$l_0$ Coordinate Descent}
+We will now derive the $l_0$ coordinate descent algorithm. Our goal is to simply express the component of the MSE which is contributed by a particular parameter, keeping all others fixed, and then to minimise the MSE with respect to that parameter. We can then see if keeping the parameter or discarding it is optimal for the $l_0$ loss function. We proceed as below.
+\begin{align*}
+    MSE&=\sum_t||\ve{x_t}-\pmb{A}\ve{z_t}||_2^2\\
+    &=\sum_t (\ve{x_t}-\pmb{A}\ve{z_t})^\top (\ve{x_t}-\pmb{A}\ve{z_t})\\
+    &=\sum_t ||\ve{x_t}||_2^2 - 2 \sum_t \ve{x_t}^\top \pmb{A}\ve{z_t} + \sum_t \ve{z_t}^\top\pmb{A}^\top\pmb{A}\ve{z_t}\\
+    &\text{Discarding components not dependent on }\pmb{A}:\\
+    &=-2\sum_{t,i,j}x_{ti}A_{ij}z_{tj} + \sum_{t,k,l,m}z_{tk}z_{tl}A_{mk}A_{ml}\\
+    &\text{Considering only components dependent on }A_{ij}:\\
+    MSE_{ij}&=-2\sum_t x_{ti}A_{ij}z_{tj} + \sum_tz_{tj}^2A_{ij}^2 + 2\sum_{t,l\neq j}z_{tj}z_{tl}A_{ij}A_{il}\\
+    &\text{Calling }\Gamma_{ij}=\sum_tx_{ti}z_{tj},\Sigma_ij=\sum_tz_{ti}z_{tj}\\
+    &=-2A_{ij}\Gamma_{ij}+A_{ij}^2\Sigma_{jj} + 2A_{ij}\sum_{l\neq j}\Sigma_{jl}A_{il}
+\end{align*}
+We can then optimise this expression with respect to $A_{ij}$ to get $A_{ij}^*$.
+\begin{align*}
+    \frac{\partial MSE_{ij}}{\partial A_{ij}}&=-2\Gamma_{ij}+2A_{ij}^*\Sigma_{jj} + 2\sum_{l\neq j}\Sigma_{jl}A_{il}=0\\
+    A_{ij}^*&=\frac{\Gamma_{ij}-\sum_{l\neq j}\Sigma_{jl}A_{il}}{\Sigma_{jj}}
+\end{align*}
+The $l_0$ loss due to this parameter is then either $MSE_{ij}(0)=0$ if the parameter is ignored, or $MSE_{ij}(A_{ij}^*)+\lambda$ if the optimal choice is made. We can thus compare each of these two options and take the lesser at each step to reduce the $l_0$ loss.
 \subsection{Dynamic Modelling with SGD}
 Online learning often dramatically reduces the number of effective parameters a model has. This is because parameters are learnt on-the-fly only on data seen so far, not on all data. Any parameters than are not fitted on the whole dataset, but only on data prior to that which is predicted with those parameters, are not counted in the BIC calculation. Additionally, online learning can account for changing system conditions in a simple model. The $VAR(p)$ model can be reframed into an online predictor via stochastic gradient descent (SGD). At each time step, we predict the true varying parameters of the $VAR(p)$ model using gradient descent. This gradient descent update is derived below.
 \begin{align*}
@@ -1086,7 +1105,7 @@ Online learning often dramatically reduces the number of effective parameters a 
     0&=\frac{\partial||\ve{\varepsilon_t}||_2^2}{\partial\hat{\pmb{A}_t}}\\
     &=2\ve{\varepsilon_t}\frac{\partial\ve{\varepsilon_t}}{\partial\hat{\pmb{A}_t}}\\
     &=2\ve{\varepsilon_t}\frac{\partial}{\partial\hat{\pmb{A}_t}}\ve{x_t}-\hat{\pmb{A}_t}\ve{z_t}\\
-    &=-\ve{\varepsilon_t}\ve{z_t}^\top\\
+    &=-2\ve{\varepsilon_t}\ve{z_t}^\top\\
     \hat{\pmb{A}}_{t+1}&=\hat{\pmb{A}_t}+2\eta\ve{\varepsilon_t}\ve{z_t}^\top\\
     \eta&:\text{ learning rate}
 \end{align*}
@@ -1150,7 +1169,15 @@ Which is not necessarily as easy to solve. We can proceed as below.
     \hat{\pmb{A}}_{t}+2\eta\ve{x_t}\ve{z_t}^\top&=\hat{\pmb{A}}_{t+1}+2\eta\hat{\pmb{A}}_{t+1}\ve{z_t}\ve{z_t}^\top\\
     \hat{\pmb{A}}_{t+1}&=(\hat{\pmb{A}}_{t}+2\eta\ve{x_t}\ve{z_t}^\top)(\pmb{I}+2\eta\ve{z_t}\ve{z_t}^\top)^{-1}
 \end{align*}
-These updates require either a large matrix inversion at each time step, or an approximation to this. As such this method is exceedingly slow, so we will not address it practically further.
+Normally the large matrix inversion here would be computationally expensive ($O(n^3)$), but because it is a rank-1 update of the identity matrix, i.e. the identity matrix plus an outer product, we can apply the Sherman-Morrison inversion formula, as below.
+\begin{align*}
+    \hat{\pmb{A}}_{t+1}&=(\hat{\pmb{A}}_{t}+2\eta\ve{x_t}\ve{z_t}^\top)(\pmb{I}-\frac{2\eta}{1+2\eta||\ve{z_t}||_2^2}\ve{z_t}\ve{z_t}^\top)
+\end{align*}
+For brevity we will omit the full working for the simplification, but the expression simplifies to that below.
+\begin{align*}
+    \hat{\pmb{A}}_{t+1}&=\hat{\pmb{A}}_{t}+\frac{2\eta}{1+2\eta||\ve{z_t}||_2^2}\ve{\varepsilon_t}\ve{z_t}^\top
+\end{align*}
+Which appears as a stabilised version of explicit SGD, scaling down updates with very large inputs. The results of applying this are very similar to that of explicit SGD and normalised SGD, so we will not discuss this method further.
 
 % \newpage
 % \section{Reflection}
