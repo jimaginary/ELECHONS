@@ -11,11 +11,11 @@ def print_info(pred):
 r.init('mean')
 
 # group l0
-for i in range(1,5):
-    init = lr.VAR(r.temps_mean_sin_adj, 2).param_history.T
-    B = np.empty_like(init)
-    B[:,0::2] = init[:,:init.shape[0]]
-    B[:,1::2] = init[:,init.shape[0]:]
-    pred = lr.VAR_group_l0(r.temps_mean_sin_adj, 2, B, alpha=(0.05*i), threshhold=100)
-    print(f'--- var 2 l={(0.05*i)} group lasso model\n')
+init = lr.VAR(r.temps_mean_sin_adj, 2).param_history.T
+B = np.empty_like(init)
+B[:,0::2] = init[:,:init.shape[0]]
+B[:,1::2] = init[:,init.shape[0]:]
+for i in range(1,6):
+    pred = lr.VAR_group_l0(r.temps_mean_sin_adj, 2, B, alpha=(0.0025*i), threshhold=100)
+    print(f'--- var 2 l={(0.0025*i)} group lasso model\n')
     print_info(pred)

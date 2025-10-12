@@ -1089,7 +1089,7 @@ We will now derive the $l_0$ coordinate descent algorithm. Our goal is to simply
     &=-2\sum_{t,i,j}x_{ti}A_{ij}z_{tj} + \sum_{t,k,l,m}z_{tk}z_{tl}A_{mk}A_{ml}\\
     &\text{Considering only components dependent on }A_{ij}:\\
     MSE_{ij}&=-2\sum_t x_{ti}A_{ij}z_{tj} + \sum_tz_{tj}^2A_{ij}^2 + 2\sum_{t,l\neq j}z_{tj}z_{tl}A_{ij}A_{il}\\
-    &\text{Calling }\Gamma_{ij}=\sum_tx_{ti}z_{tj},\Sigma_ij=\sum_tz_{ti}z_{tj}\\
+    &\text{With }\Gamma_{ij}=\sum_tx_{ti}z_{tj},\Sigma_{ij}=\sum_tz_{ti}z_{tj}\\
     &=-2A_{ij}\Gamma_{ij}+A_{ij}^2\Sigma_{jj} + 2A_{ij}\sum_{l\neq j}\Sigma_{jl}A_{il}
 \end{align*}
 We can then optimise this expression with respect to $A_{ij}$ to get $A_{ij}^*$.
@@ -1097,7 +1097,58 @@ We can then optimise this expression with respect to $A_{ij}$ to get $A_{ij}^*$.
     \frac{\partial MSE_{ij}}{\partial A_{ij}}&=-2\Gamma_{ij}+2A_{ij}^*\Sigma_{jj} + 2\sum_{l\neq j}\Sigma_{jl}A_{il}=0\\
     A_{ij}^*&=\frac{\Gamma_{ij}-\sum_{l\neq j}\Sigma_{jl}A_{il}}{\Sigma_{jj}}
 \end{align*}
-The $l_0$ loss due to this parameter is then either $MSE_{ij}(0)=0$ if the parameter is ignored, or $MSE_{ij}(A_{ij}^*)+\lambda$ if the optimal choice is made. We can thus compare each of these two options and take the lesser at each step to reduce the $l_0$ loss.
+The $l_0$ loss due to this parameter is then either $MSE_{ij}(0)=0$ if the parameter is ignored, or $MSE_{ij}(A_{ij}^*)+\lambda$ if the optimal choice is made. We can thus compare each of these two options and take the lesser at each step to reduce the $l_0$ loss. Because the $l_0$ regression problem is non-convex, this style of optimisation may result in finding a local rather than a global minima. With that noted, in our case testing with both trivial initialisations, such as ones on the diagonal, and more complex ones, like the lasso reregression model, yield very similar results. The most optimal achieved BICa is shown in Fig. \ref{fig:l0_table}.
+\begin{figure}[!ht]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        $\lambda$ & RMSE ($^\circ C$) & BICa ($\times10^6$) & no. params \\
+        \hline
+        0.005 & 1.66 & 1.946 & 3875 \\
+        \hline
+    \end{tabular}
+    \caption{$l_0$ coordinate descent optimal BICa result.}
+    \label{fig:l0_table}
+\end{figure}
+\subsubsection[Group l0]{Group $l_0$}
+In applications beyond temperature datasets, each vertex may be associated with a number of scalar values. E.g. temperature and pressure. In this case, we can come up with an algorithm for $l_0$ coordinate descent in the case of vector-values vertices. Where in scalar regression, the prediction at the next time step is given by multiplication of a matrix of scalars with a vector of scalar, in vector regression we can multiply a matrix of matrices with a vector of vectors. This summation is shown below.
+\begin{align*}
+    \ve{x_{ti}}&=\sum_j \pmb{A}_{ij}\ve{x_{tj}}
+\end{align*}
+A simple application of this is to consider the vector of values at each point as the values at the past $p$ timesteps. This can be seen as grouping together some of the parameters in the VAR matrix $\pmb{A}$, hence the name group $l_0$, where the parameters in a group are optimised together and may be zeroed out together. We will derive from the equivalent expression for $MSE_{ij}$ from the previous section the optimal selection of $\pmb{A}_{ij}$.
+\begin{align*}
+    MSE_{ij}&=-2\sum_t \ve{x_{ti}}^\top\pmb{A}_{ij}\ve{z_{tj}} + \sum_t\ve{z_{tj}}^\top \pmb{A}_{ij}^\top \pmb{A}_{ij}\ve{z_{tj}} + 2\sum_{t,l\neq j}\ve{z_{tj}}^\top \pmb{A}_{ij}^\top \pmb{A}_{il}\ve{z_{tl}}\\
+\end{align*}
+In order to seperate the components which are time-dependent from the components which are parameter-dependent we can use the trace identity below.
+\begin{align*}
+    \sum_t \ve{x_t}^T \pmb{M}\ve{y_t}&=\sum_t tr(\pmb{M} \ve{y_t} \ve{x_t}^\top)\\
+    &=tr(\pmb{M}\sum_t \ve{y_t} \ve{x_t}^\top)
+\end{align*}
+Using this identity with $\pmb{\Gamma}_{ij}=\sum_t\ve{x_{ti}}\ve{z_{tj}}^\top$ and $\pmb{\Sigma}_{ij}=\sum_t\ve{z_{ti}}\ve{z_{tj}}^\top$, we can simplify $MSE_{ij}$ as below.
+\begin{align*}
+    MSE_{ij}&=-2tr(\pmb{A}_{ij}\pmb{\Gamma}_{ij}^\top) + tr(\pmb{A}_{ij}^\top \pmb{A}_{ij} \pmb{\Sigma}_{jj}^\top) + 2\sum_{l\neq j}tr(\pmb{A}_{ij}^\top\pmb{A}_{il}\pmb{\Sigma}_{lj})\\
+\end{align*}
+In the simple case of a grouping of VAR parameters in time, we are not predicting the next vector of values in time, but using an input vector to predict a scalar. This simplifies the above expression to the one below for a vector of parameters $\ve{A_{ij}}$ rather than a block of such parameters $\pmb{A}_{ij}$. It also makes the covariance between the output scalar and input vector a vector $\ve{\Gamma_{ij}}$ rather than $\pmb{\Gamma}_{ij}$.
+\begin{align*}
+    MSE_{ij}&=-2\ve{\Gamma_{ij}}^\top\ve{A_{ij}} + \ve{A_{ij}}^\top \pmb{\Sigma}_{jj}\ve{A_{ij}} + 2\ve{A_{ij}}^\top\sum_{l\neq j}\pmb{\Sigma}_{lj}\ve{A_{il}}\\
+\end{align*}
+Taking derivatives and optimising we get the optimal choice of paramters $\ve{A_{ij}}^*$ as below.
+\begin{align*}
+    \ve{A_{ij}}^*&=\pmb{\Sigma}_{jj}^{-1}(\ve{\Gamma_{ij}}-\sum_{l\neq j}\pmb{\Sigma}_{lj}\ve{A_{il}})
+\end{align*}
+Running $l_0$ coordinate descent with time-domain grouping like this yields very similar results to regular $l_0$, in a comparable length of time, suggesting that the prediction fidelity gained from seperating these parameters is minimal. The optimal results of the group $l_0$ coordinate descent are shown in \ref{fig:group_l0_table}.
+\begin{figure}[!ht]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        $\lambda$ & RMSE ($^\circ C$) & BICa ($\times10^6$) & no. params \\
+        \hline
+        0.01 & 1.67 & 1.960 & 4090 \\
+        \hline
+    \end{tabular}
+    \caption{$l_0$ coordinate descent optimal BICa result.}
+    \label{fig:group_l0_table}
+\end{figure}
 \subsection{Dynamic Modelling with SGD}
 Online learning often dramatically reduces the number of effective parameters a model has. This is because parameters are learnt on-the-fly only on data seen so far, not on all data. Any parameters than are not fitted on the whole dataset, but only on data prior to that which is predicted with those parameters, are not counted in the BIC calculation. Additionally, online learning can account for changing system conditions in a simple model. The $VAR(p)$ model can be reframed into an online predictor via stochastic gradient descent (SGD). At each time step, we predict the true varying parameters of the $VAR(p)$ model using gradient descent. This gradient descent update is derived below.
 \begin{align*}
