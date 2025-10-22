@@ -79,7 +79,7 @@ Graphs were first introduced into the literature through Euler's solution to the
 
 The present literature has established techniques for compression \cite{moura}, prediction \cite{krige}, filtering \cite{taubin}, and computer vision \cite{grady_shah} on graphs. Such techniques have been relevant to highly influential areas, including advertising and ranking as in the Google PageRank algorithm \cite{page}, risk and stability analysis in econometrics \cite{acemoglu}, and the application of graph techniques to neural networks as has been used in drug discovery and development \cite{sun}. We will explore examples and replicate some of these techniques.
 
-In this report, we replicate techniques and empirically confirm results both with synthetic data sets and a real data set. Two real datasets are used: homogenised daily mean temperature data across Australia as reported by the Bureau of Meteorology (BOM) \cite{bom}, and daily mean temperature data over north America, extracted as a subset of the global surface temperature data provided by the National Oceanic and Atmospheric Administration of the United States (NOAA) \cite{noaa}. The BOM dataset is broadly used for developing and exhibiting methods covered, whilst the NOAA dataset is used to validate the broad utility of models created.
+In this report, we replicate techniques and empirically confirm results both with synthetic data sets and a real data set. Two real datasets are used: homogenised daily mean temperature data across Australia as reported by the Bureau of Meteorology (BOM) \cite{bom}, and daily mean temperature data over north America, extracted as a subset of the global surface temperature data provided by the National Oceanic and Atmospheric Administration of the United States (NOAA) \cite{noaa}. The BOM dataset is broadly used for developing and exhibiting methods covered, whilst the NOAA dataset is used to validate the broad utility of models created, as well as to investigate how model parameters change over different samples of the same type of data (temperature networks).
 
 \newpage
 \section{Background}\subsection{An Introduction to Graphs, Graph Signals, and Graph Spectra}
@@ -461,6 +461,26 @@ It is well known \cite{park} that the L1 regulariser places a Laplacian prior on
 A notable extension of this system is for graphs where each node is associated with a vector of scalars, rather than a single scalar, where the covariance becomes a rank-3 tensor, rather than a 2d matrix. Z. Yue et. al. \cite{yue} come up with a fast algorithm for approximate solving of the L0 regularised vector inverse covariance tensor approximation.
 
 Both these methods address methods for quantifying the graphical relationship at a single point in time between a set of variables for which many samples are available. The methods do not describe how to handle relationships in a graph with time series at each vertex, where relationships may include delayed effects. Examples of such real world networks would be climatic relationships, where it takes time for the climate in one region to effect another region, or a brain network, where neurons influence each other with a synaptic delay.
+
+\subsection{Conditional Mutual Information}
+\label{subsec:cmi_intro}
+A key goal of this thesis is to inform understanding of which pairwise relationships are important between different variables. In particular, throughout the thesis we look at multivariate time-varying data. For some pair of time series $x_i(t)$ and $x_j(t)$, we would like to know what amount of the information at $i$ is explicable using the information at $j$, presuming we have already accounted for (conditioned upon) the data at $j$. For this we assume that $x_i(t)$ is just one possible trajectory along the random variable $X_i$, which follows a distribution of such trajectories. Two such random variables $X_i$ and $X_j$ are independent given the remaining data $X_{\neq i,j}$ if the relationship below is satisfied.
+\begin{align*}
+    P(X_i,X_j|X_{\neq i,j})&=P(X_i|X_{\neq i,j})P(X_j|X_{\neq i,j})
+\end{align*}
+A popular and statistically robust way to measure how far apart these two distributions are; the joint distribution and the distribution assuming independence, is the Kullback-Leibler divergence, $D_{KL}$. The divergence of two distributions is measured as $\int_{\mathcal{X}}P(x)\log\frac{P(x)}{Q(x)}$ for distributions $P$ and $Q$ over domain $\mathcal{X}$. We also integrate with respect to $dX_{\neq i,j}$, to average out all the possible external information. This is precisely the conditional mutual information between the two time series, given the others. Unfortunately, this is essentially a useless tool as stated, as we have just one sample of each timeseries $X_i$ over a massive domain of size $|\mathbb{R}|^{|\mathbb{R}|}$. To make this tool useful, a few changes are needed.
+
+First, we simply discretise the data, reducing the domain to size $|\mathbb{R}|^n$. Then, we must assume a prior distribution on the $X$ variables. This way, our single sample allows for the acquisition of a posterior distribution on the trajectories, which allows for the integration across all possible trajectories in order to determine the mutual information between variables. This still provides a fairly poor estimate, as one sample gives no knowledge of the variance in the underlying distribution. An additional presumption we can make is rough stationarity of the data. This way, we can treat contiguous windows of datapoints as independent samples. The tradeoff here is between accounting for far-reaching effects across long time spans, and enough samples to appropriately predict the distribution of the data.
+
+In the thesis, a key formula will be the simplification of the CMI into an expression in terms of entropy. The expression for entropy of a distribution over domain $\mathcal{X}$ is as below.
+\begin{align*}
+    H(X)&=\int_{\mathcal{X}}P(x)\log(P(x))dx
+\end{align*}
+When the base of the logarithm is 2, the unit of this quantity is the Shannon, or sometimes abusively bits. When the logarithm uses the natural base $e$, the unit is nats. Unless otherwise specified, we will work in nats in this thesis. CMI can be broken down in terms of conditional entropy as below.
+\begin{align*}
+    CMI(X,Y|Z)&=H(X|Z)+H(Y|Z)-H(X,Y|Z)
+\end{align*}
+In a sense, this tells us that CMI measures how much excess information is contained within X and Y that is not explained either by the information in Z, or by their relationship (once accounting for information from Z).
 
 \newpage
 \section{Spatiotemporal Analysis of BOM Dataset}
@@ -1229,6 +1249,80 @@ For brevity we will omit the full working for the simplification, but the expres
     \hat{\pmb{A}}_{t+1}&=\hat{\pmb{A}}_{t}+\frac{2\eta}{1+2\eta||\ve{z_t}||_2^2}\ve{\varepsilon_t}\ve{z_t}^\top
 \end{align*}
 Which appears as a stabilised version of explicit SGD, scaling down updates with very large inputs. The results of applying this are very similar to that of explicit SGD and normalised SGD, so we will not discuss this method further.
+
+\section{Application of Conditional Mutual Information}
+As discussed in \ref{subsec:cmi_intro}, once we choose a prior distribution in parameter space, like the one induced by a VAR model, or a VAR model with $l_0$ regularisation, or by another prior, and we fit the model to the data, we can determine the conditional mutual information between each pair of timeseries. Once we fit our model with the maximum likelihood estimate, we can evaluate the conditional mutual information between each pair of timeseries, which gives a clearer picture than either correlation or precision can about how interrelated two variables are. Then, from the modelled distribution, we can analytically determine the conditional information between two timeseries modelled by the distribution.
+
+\subsection{Calculating CMI for VAR(p) Models}
+We recall the general VAR(p) model below.
+\begin{align*}
+    \ve{x_t}&=\sum_{\tau=1}^p \pmb{A}_\tau\ve{x_{t-\tau}}+\ve{\varepsilon_t}
+\end{align*}
+The two key features of this model are the autoregression matrices $\pmb{A}_\tau$ and the driving noise covariance $\pmb{\Sigma}_\varepsilon$. We recall the required formulae for conditional mutual information discussed in \ref{subsec:cmi_intro}, given below in terms of $\pmb{A}_\tau$ and $\pmb{\Sigma}_\varepsilon$.
+\begin{align*}
+    A(j\omega)&=I-\sum_\tau e^{-j\omega\tau}\pmb{A}_\tau\\
+    A(j\omega)&=\begin{pmatrix}
+        g_1(j\omega)&\vdots&g_2(j\omega)&\vdots&...&\vdots&g_N(j\omega)
+    \end{pmatrix}\\
+    \rho_{ij|\neq{ij}}&=\frac{-g_i^H\pmb{\Sigma}_\varepsilon g_j}{\sqrt{(g_i^H\pmb{\Sigma}_\varepsilon g_i)(g_j^H\pmb{\Sigma}_\varepsilon g_j)}}\\
+    R(\omega)&=\frac{-F^{-1}(\omega)}{\sqrt{diag(F^{-1}(\omega))diag(F^{-1}(\omega))^T}}\\
+    CMI_{ij}&=-\frac12\int_{\pi}^\pi\ln(1-|\rho_{ij\neq{ij}}|^2)\frac{d\omega}{2\pi}
+\end{align*}
+Where the square root and division are performed elementwise for $\rho_{ij|\neq{ij}}$.
+\begin{align*}
+    CMI_{ij}&=H(X_i|X_{\neq i,j})+H(X_j|X_{\neq i,j})-H(X_i,X_j|X_{\neq i,j})
+\end{align*}
+To this end, we need to describe the distributions $X_i,X_j|X_{\neq i,j}$ and $X_i|X_{\neq i,j}$ within the VAR model. These quanties follow typical marginalition rules and conditioning for a multivariate normal distribution following the error covariance. We derive the distributions below, for $\pmb{\Omega}$ the precision matrix of the error, and $\pmb{\Omega}_{a,b}$ the submatrix of precisions of set of variables $a$ with set $b$. We denote collections of timeseries as vectors, with the whole collection denoted $\ve{X}$.
+\begin{align*}
+    P(\ve{X})&=\prod_t P(\ve{\varepsilon^t})\\
+    P(\ve{\varepsilon^t})&\sim\mathcal{N}(\ve{0},\pmb{\Omega})\\
+    \ve{\mu}^*&=-\pmb{\Omega}_{ij,ij}^{-1}\pmb{\Omega}_{ij,\neq ij}\ve{\varepsilon_{\neq i,j}}\\
+    P(\varepsilon_i^t,\varepsilon_j^t|\ve{\varepsilon_{\neq i,j}^t})&\sim\mathcal{N}(\ve{\mu}^*,\pmb{\Omega}_{ij,ij})\\
+    P(X_i,X_j|X_{\neq i,j})&=\prod_t P(\varepsilon_i^t,\varepsilon_j^t|\ve{\varepsilon_{\neq i,j}^t})\\
+    P(\varepsilon_i^t|\ve{\varepsilon_{\neq i,j}^t})&=\mathcal{N}(\ve{\mu}^*, (\pmb{\Omega}_{ij,ij}^{-1})_{i,i}^{-1})\\
+    P(X_i|X_{\neq i,j})&=\prod_t P(\varepsilon_i^t|\ve{\varepsilon_{\neq i,j}^t})
+\end{align*}
+Note that one benefit of using the precision matrix rather than the covariance matrix is that the expressions for the precisions of the desired distributions are very simple and very low complexity to compute from an estimate of the precision matrix. Now, we derive the expression for the relevant entropies, with $\mathcal{X}$ denoting the domain of time series, i.e. functions from $[0..n]\to\mathbb{R}$.
+\begin{align*}
+    H(X_i|X_{\neq i,j})=\int_{\mathcal{X}}P(X_i|X_{\neq i,j})\log(P(X_i|X_{\neq i,j}))dX_i
+\end{align*}
+Because there is a one-to-one linear mapping between trajectories $X_i$ and error signals $\varepsilon_i$, we can make a change of variables from $X_i\to\varepsilon_i$, over the same domain. The proof of this is irrelevant to the point here, so is omitted. The errors are independent at each time step, and entropy is linear for independent variables, so the entropy is equivalent to $n$ times the entropy of a single distribution of the error, as below.
+\begin{align*}
+    H(X_i|X_{\neq i,j})&=n\int_{\mathbb{R}}P(\varepsilon_i^t|\ve{\varepsilon_{\neq i,j}^t})\log(P(\varepsilon_i^t|\ve{\varepsilon_{\neq i,j}^t}))d\varepsilon_i
+\end{align*}
+There is a known expression for the entropy of a multivariate Gaussian in $d$ variables. We use this below to find this entropy.
+\begin{align*}
+    H(\mathcal{N}(\ve{\mu},\pmb{\Omega}))&=\frac{1}{2}\log((2\pi e)^d |\pmb{\Omega}|^{-1})\\
+    H(X_i|X_{\neq i,j})&=\frac{n}{2}\log((2\pi e)^d (\pmb{\Omega}_{ij,ij}^{-1})_{i,i})\\
+    H(X_j|X_{\neq i,j})&=\frac{n}{2}\log((2\pi e)^d (\pmb{\Omega}_{ij,ij}^{-1})_{j,j})\\
+\end{align*}
+The expression for the remaining entropy is similar.
+\begin{align*}
+    H(X_i,H_j|X_{\neq i,j})&=\frac{n}{2}\log((2\pi e)^d |\pmb{\Omega}_{ij,ij}|^{-1})
+\end{align*}
+Then, the CMI is given as below.
+\begin{align*}
+    CMI_{ij}&=H(X_i|X_{\neq i,j})+H(X_j|X_{\neq i,j})-H(X_i,X_j|X_{\neq i,j})\\
+    &=\frac{n}{2}\log((2\pi e) (\pmb{\Omega}_{ij,ij}^{-1})_{i,i})+\frac{n}{2}\log((2\pi e) (\pmb{\Omega}_{ij,ij}^{-1})_{j,j})-\frac{n}{2}\log((2\pi e)^2 |\pmb{\Omega}_{ij,ij}|^{-1})\\
+    &=\frac{n}{2}\log((\pmb{\Omega}_{ij,ij}^{-1})_{i,i} (\pmb{\Omega}_{ij,ij}^{-1})_{j,j}|\pmb{\Omega}_{ij,ij}|)
+\end{align*}
+There is a well-known formula relating the inverse of a 2x2 matrix in terms of its determinant and other elements of the matrix, through the cofactors of the matrix. This is shown below.
+\begin{align*}
+    \pmb{A}&=\begin{pmatrix}
+        a&b\\
+        c&d
+    \end{pmatrix}\\
+    \pmb{A}^{-1}&=\frac{1}{|\pmb{A}|}\begin{pmatrix}
+        d&-b\\
+        -c&a
+    \end{pmatrix}
+\end{align*}
+This allows us to simplify the CMI equation as below.
+\begin{align*}
+    CMI_{ij}&=\frac{n}{2}\log(\pmb{\Omega}_{j,j} \pmb{\Omega}_{i,i}\frac{|\pmb{\Omega}_{ij,ij}|}{|\pmb{\Omega}_{ij,ij}|^2})\\
+    &=\frac{n}{2}\log(\frac{\pmb{\Omega}_{j,j} \pmb{\Omega}_{i,i}}{|\pmb{\Omega}_{ij,ij}|})\\
+    &=\frac{n}{2}\log(\frac{\pmb{\Omega}_{jj} \pmb{\Omega}_{ii}}{\pmb{\Omega}_{jj} \pmb{\Omega}_{ii}-\pmb{\Omega}_{ij}^2})
+\end{align*}
 
 % \newpage
 % \section{Reflection}

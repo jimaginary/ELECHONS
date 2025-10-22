@@ -7,17 +7,14 @@ import networkx as nx
 r.init('mean')
 # s1 = np.random.randint(len(r.long))
 # s2 = np.random.randint(len(r.long))
-s1 = np.argmin(r.lat)
-s2 = np.argmax(r.lat)
+s1 = np.argmin(r.long)
+s2 = np.argmax(r.long)
 print(s1, s2)
 
 p = 1
 L = lr.VAR(r.temps_mean_sin_adj, p)
 init = L.param_history.T
-cap = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.008).param_history
-cap = np.pow(cap, 2)
-cap += cap.T
-np.fill_diagonal(cap, 0)
+cap = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005).CMI()
 
 G = nx.DiGraph()
 n = cap.shape[0]

@@ -28,6 +28,18 @@ class Prediction:
     
     def BIC(self):
         return np.prod(self.data.shape) * 2 * np.log(self.rmse()) + self.num_params * np.log(np.prod(self.data.shape))
+    
+    def CMI(self):
+        E = self.residuals()
+        N = E.shape[0]
+        Ecov = np.cov(E)
+        Epr = np.linalg.inv(Ecov)
+        CMI = np.empty((N,N))
+        for i in range(N):
+            for j in range(N):
+                CMI[i,j] = np.log(Epr[i,i]*Epr[j,j]/(Epr[i,i]*Epr[j,j]-np.pow(Epr[i,j],2)))
+        # np.fill_diagonal(CMI, 0)
+        return CMI
 
 def VAR(data, p, percentile=0):
     Y = data[:, p:]

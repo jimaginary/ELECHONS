@@ -13,34 +13,37 @@
 \contentsline {subsubsection}{\numberline {3.5.1}Linear Regression}{17}{subsubsection.3.5.1}%
 \contentsline {subsubsection}{\numberline {3.5.2}The Wiener Filter}{18}{subsubsection.3.5.2}%
 \contentsline {subsection}{\numberline {3.6}Regularisation as Graph Selection}{18}{subsection.3.6}%
-\contentsline {section}{\numberline {4}Spatiotemporal Analysis of BOM Dataset}{21}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Bureau of Meteorology ACORN SAT dataset}{21}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Efficient Lossy Compression Implementation}{21}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Temporal Predictive Filters}{22}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}Explicit Seasonality Modelling}{23}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Differencing}{24}{subsubsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.3}Geographical Analysis}{24}{subsubsection.4.3.3}%
-\contentsline {subsubsection}{\numberline {4.3.4}Autoregression}{25}{subsubsection.4.3.4}%
-\contentsline {subsection}{\numberline {4.4}Spatial Autoregressive Processes}{26}{subsection.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.1}Modelling}{29}{subsubsection.4.4.1}%
-\contentsline {subsubsection}{\numberline {4.4.2}Connection to the Mat\'{e}rn Kernel}{29}{subsubsection.4.4.2}%
-\contentsline {subsubsection}{\numberline {4.4.3}The 1D Correlation Function}{29}{subsubsection.4.4.3}%
-\contentsline {subsubsection}{\numberline {4.4.4}Numerical Confirmation}{30}{subsubsection.4.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.5}Kriging}{31}{subsubsection.4.4.5}%
-\contentsline {subsubsection}{\numberline {4.4.6}Limitations of the Mat\'{e}rn Kernel}{32}{subsubsection.4.4.6}%
-\contentsline {subsection}{\numberline {4.5}Deterministic Graph Filters}{33}{subsection.4.5}%
-\contentsline {subsubsection}{\numberline {4.5.1}Introduction}{33}{subsubsection.4.5.1}%
-\contentsline {subsubsection}{\numberline {4.5.2}Well-Chosen Graph Fourier Transforms}{34}{subsubsection.4.5.2}%
-\contentsline {subsubsection}{\numberline {4.5.3}Empirical Results Across GFTs}{36}{subsubsection.4.5.3}%
-\contentsline {section}{\numberline {5}Regularisation as Space-Time Graph Selection}{39}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Model Selection with BIC}{39}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}The VAR(p) model}{40}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Regularisation as Graph Selection}{41}{subsection.5.3}%
-\contentsline {subsubsection}{\numberline {5.3.1}Lasso Regression}{42}{subsubsection.5.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.2}l0 Regularisation}{42}{subsubsection.5.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.3}Masking}{43}{subsubsection.5.3.3}%
-\contentsline {subsubsection}{\numberline {5.3.4}l0 Coordinate Descent}{44}{subsubsection.5.3.4}%
-\contentsline {subsubsection}{\numberline {5.3.5}Group l0}{46}{subsubsection.5.3.5}%
-\contentsline {subsection}{\numberline {5.4}Dynamic Modelling with SGD}{47}{subsection.5.4}%
-\contentsline {subsubsection}{\numberline {5.4.1}Implicit Updates}{49}{subsubsection.5.4.1}%
-\contentsline {section}{Bibliography}{51}{section*.6}%
+\contentsline {subsection}{\numberline {3.7}Conditional Mutual Information}{20}{subsection.3.7}%
+\contentsline {section}{\numberline {4}Spatiotemporal Analysis of BOM Dataset}{22}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Bureau of Meteorology ACORN SAT dataset}{22}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Efficient Lossy Compression Implementation}{22}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Temporal Predictive Filters}{23}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Explicit Seasonality Modelling}{24}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Differencing}{25}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}Geographical Analysis}{25}{subsubsection.4.3.3}%
+\contentsline {subsubsection}{\numberline {4.3.4}Autoregression}{26}{subsubsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.4}Spatial Autoregressive Processes}{27}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Modelling}{30}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Connection to the Mat\'{e}rn Kernel}{30}{subsubsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.3}The 1D Correlation Function}{30}{subsubsection.4.4.3}%
+\contentsline {subsubsection}{\numberline {4.4.4}Numerical Confirmation}{31}{subsubsection.4.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.5}Kriging}{32}{subsubsection.4.4.5}%
+\contentsline {subsubsection}{\numberline {4.4.6}Limitations of the Mat\'{e}rn Kernel}{33}{subsubsection.4.4.6}%
+\contentsline {subsection}{\numberline {4.5}Deterministic Graph Filters}{34}{subsection.4.5}%
+\contentsline {subsubsection}{\numberline {4.5.1}Introduction}{34}{subsubsection.4.5.1}%
+\contentsline {subsubsection}{\numberline {4.5.2}Well-Chosen Graph Fourier Transforms}{35}{subsubsection.4.5.2}%
+\contentsline {subsubsection}{\numberline {4.5.3}Empirical Results Across GFTs}{37}{subsubsection.4.5.3}%
+\contentsline {section}{\numberline {5}Regularisation as Space-Time Graph Selection}{40}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Model Selection with BIC}{40}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}The VAR(p) model}{41}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Regularisation as Graph Selection}{42}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Lasso Regression}{43}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}l0 Regularisation}{43}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Masking}{44}{subsubsection.5.3.3}%
+\contentsline {subsubsection}{\numberline {5.3.4}l0 Coordinate Descent}{45}{subsubsection.5.3.4}%
+\contentsline {subsubsection}{\numberline {5.3.5}Group l0}{47}{subsubsection.5.3.5}%
+\contentsline {subsection}{\numberline {5.4}Dynamic Modelling with SGD}{48}{subsection.5.4}%
+\contentsline {subsubsection}{\numberline {5.4.1}Implicit Updates}{50}{subsubsection.5.4.1}%
+\contentsline {section}{\numberline {6}Application of Conditional Mutual Information}{51}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Calculating CMI for VAR(p) Models}{51}{subsection.6.1}%
+\contentsline {section}{Bibliography}{54}{section*.6}%
