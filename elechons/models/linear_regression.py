@@ -29,16 +29,27 @@ class Prediction:
     def BIC(self):
         return np.prod(self.data.shape) * 2 * np.log(self.rmse()) + self.num_params * np.log(np.prod(self.data.shape))
     
-    def CMI(self):
+    # this function only works when param_history is a VAR autoregression matrix
+    def CMI(self, l0=False):
         E = self.residuals()
         N = E.shape[0]
+        p = self.param_history.shape[1] // self.param_history.shape[0]
         Ecov = np.cov(E)
-        Epr = np.linalg.inv(Ecov)
-        CMI = np.empty((N,N))
-        for i in range(N):
-            for j in range(N):
-                CMI[i,j] = np.log(Epr[i,i]*Epr[j,j]/(Epr[i,i]*Epr[j,j]-np.pow(Epr[i,j],2)))
-        # np.fill_diagonal(CMI, 0)
+        prE = np.linalg.inv(Ecov)
+        if (l0):
+            prE = FastGL0(Ecov, p)
+        Atau = np.split(self.param_history, p, axis=1)
+        def R(omega):
+            Aomega = np.eye(N) - sum(Atau[i]*np.exp(-1j*omega*i) for i in range(p))
+            Finvomega = Aomega.conj().T @ prE @ Aomega
+            return - Finvomega / np.sqrt(np.outer(Finvomega.diagonal(), Finvomega.diagonal()))
+        
+        CMI = np.zeros((N,N))
+        D = self.data.shape[1]
+        dw = 2 * np.pi / D
+        for omega in np.linspace(-np.pi,np.pi,D):
+            CMI += - 0.5 * (1/(2*np.pi)) * np.log(1 - np.pow(np.abs(R(omega)),2)) * dw
+        
         return CMI
 
 def VAR(data, p, percentile=0):
@@ -52,24 +63,83 @@ def VAR(data, p, percentile=0):
     def predictor(data):
         Z = np.vstack([data[:,p-i-1:-i] if i != 0 else data[:,p-1:] for i in range(p)])
 
-        return ((Z.T @ A).T, A)
+        return ((Z.T @ A).T, A.T)
     return Prediction(data, predictor, np.sum(A != 0), delay=p)
 
+def FastGL0(S_, n):
+    l = np.log(n)/(2*n)
+    O_ = np.diag(1 / np.diag(S_))
+    G_ = np.diag(np.diag(S_))
+    N = S_.shape[0]
+
+    def p_(A,i):
+        A[[-1,i],:]=A[[i,-1],:]
+        A[:,[-1,i]]=A[:,[i,-1]]
+
+    def it(S,O,G):
+        for i in range(N):
+            # permute the matrices
+            p_(S,i)
+            p_(O,i)
+            p_(G,i)
+
+            O_not_i_inv = G[:-1,:-1] - np.outer(G[:-1,-1],G[:-1,-1])/G[-1,-1]
+            for j in range(N-1):
+                dot_ = np.dot(O_not_i_inv[:,j],O[:-1,-1])-O_not_i_inv[j,j]*O[j,-1]
+                Bij_nz_opt = -(S[-1,j]+S[-1,-1]*dot_)/(S[-1,-1]*O_not_i_inv[j,j])
+                F_nz_opt = 2*S[-1,j]+2*S[-1,-1]*Bij_nz_opt*dot_+S[-1,-1]*np.pow(Bij_nz_opt,2)*O_not_i_inv[j,j]
+                if F_nz_opt > l:
+                    O[-1,j] = Bij_nz_opt
+                    O[j,-1] = Bij_nz_opt
+                else:
+                    O[-1,j] = 0
+                    O[j,-1] = 0
+            O[-1,-1] = O[-1,:-1] @ O_not_i_inv @ O[:-1,-1] + (1/S[-1,-1])
+
+            prod_ = O_not_i_inv @ O[:-1,-1]
+            s_ = O[-1,-1] - O[-1,:-1] @ O_not_i_inv @ O[:-1,-1]
+            G[:-1,:-1] = O_not_i_inv + np.outer(prod_,prod_)/s_
+            G[:-1,-1] = - prod_ / s_
+            G[-1,:-1] = - prod_.T / s_
+            G[-1,-1] = 1/s_
+
+            # permute back
+            p_(S,i)
+            p_(O,i)
+            p_(G,i)
+        return O, G
+    
+    for i in range(200):
+        O_, G_ = it(S_, O_, G_)
+    return O_
+
 def CMI(data, p):
-    # Compute CMI matrix with entries CMI[i,j] = I(x_i; z_j | z_-j)
-    # using the formula:
-    #     0.5 * log(1 + (A[i,j]**2 / Sigma_e[i,i]) * ((Sigma_z^{-1})[j,j])**(-1))
+    # Compute CMI matrix with entries CMI[i,j] = I(x_i; z_j | z_-ij)
     Y = data[:, p:]
     Z = np.vstack([data[:,p-i-1:-i-1] for i in range(p)])
 
     A = (np.linalg.inv(Z @ Z.T) @ Z @ Y.T).T
+    N = A.shape[0]
+    Atau = np.split(A, p, axis=1)
 
     sZ = np.cov(Z)
     E = Y - A @ Z
-    sEii = np.diag(np.cov(E))
-    sZjj = np.reciprocal(np.diag(np.linalg.inv(sZ)))
+    sE = np.cov(E)
+    prE = np.linalg.inv(sE)
+    def R(omega):
+        Aomega = np.eye(N) - sum(Atau[i]*np.exp(-1j*omega*i) for i in range(p))
+        Finvomega = Aomega.conj().T @ prE @ Aomega
+        return - Finvomega / np.sqrt(np.outer(Finvomega.diagonal(), Finvomega.diagonal()))
+    
+    CMI = np.zeros((N,N))
+    D = 300
+    dw = 2 * np.pi / D
+    for omega in np.linspace(-np.pi,np.pi,D):
+        CMI += - 0.5 * (1/(2*np.pi)) * np.log(1 - np.pow(np.abs(R(omega)),2)) * dw
+    
+    return CMI
 
-    return 0.5 * np.log(1 + np.pow(A,2) * sZjj[None, :] / sEii[:, None])
+    
 
 def VAR_lasso(data, p, alpha):
     Y = data[:, p:]

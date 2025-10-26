@@ -24,23 +24,31 @@ print(f'--- var {p} l0 model')
 print(f'alpha={0.005:.4f}')
 print_info(pred)
 CMI = pred.CMI()
+# CMI = lr.CMI(r.temps_mean_sin_adj, p)
+print(f'min: {CMI.min()}, max: {np.triu(CMI,k=1).max()}')
 
-Ecov = np.cov(pred.residuals())
-Ecov_scaled = Ecov / np.sum(Ecov, axis=1, keepdims=True)
-plt.scatter(ec.closeness_matrix(sh.STATIONS,1000,8).flatten(), CMI.flatten())
-plt.colorbar()
-plt.show()
+# Ecov = np.cov(pred.residuals())
+# Ecov_scaled = Ecov / np.sum(Ecov, axis=1, keepdims=True)
+# plt.scatter(ec.closeness_matrix(sh.STATIONS,1000,8).flatten(), CMI.flatten())
+# plt.colorbar()
+# plt.show()
 
-plt.imshow(CMI)
-plt.colorbar()
-plt.show()
+# plt.imshow(CMI)
+# plt.colorbar()
+# plt.show()
 
-# drank = dist.argsort(axis=1).argsort(axis=1)
-# ranksym = (drank + drank.T)/2
-plt.scatter(dist.flatten(), CMI.flatten())
+drank = dist.argsort(axis=1).argsort(axis=1)
+ranksym = (drank + drank.T)/2
+plt.scatter(dist.flatten(), CMI.flatten(), c=ranksym, vmin=0.0, vmax=10, s=10)
 plt.colorbar()
 # plt.show()
 plt.savefig('plts/CMI_v_dist.png', dpi=300, bbox_inches='tight')
+
+plt.clf()
+plt.scatter(ranksym, CMI.flatten(), c=dist.flatten(), vmin=0, vmax=1000, s=10)
+plt.colorbar()
+# plt.show()
+plt.savefig('plts/CMI_v_rankdist.png', dpi=300, bbox_inches='tight')
 
 segments = [((long[i],lat[i]),(long[j],lat[j])) for i in range(N) for j in range(N)]
 
@@ -53,7 +61,7 @@ lc = LineCollection(
     segments,
     cmap=transparent_cmap,
     linewidths=2,
-    norm=plt.Normalize(0, 0.4)
+    norm=plt.Normalize(0, 0.25)
 )
 
 lc.set_array(CMI.flatten())

@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex main"] 1760648767.31936 "main.aux" "main.bbl" "main" 1761129131.54901 0
-  "./bibliography.bib" 1759736463.97065 8330 ecc9024426f02c3d7fcdcbb94c3b9cca ""
+["bibtex main"] 1761459912.71182 "main.aux" "main.bbl" "main" 1761511884.72115 0
+  "./bibliography.bib" 1761448108.00394 8806 e6f897bf0122af64e6195505474f146a ""
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/plain.bst" 1737590400 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1761129130.73487 21926 403b20bf05835f7ec2242ab81640b6db "pdflatex"
+  "main.aux" 1761511884.26842 23457 72a79407ba0200289baf89c61cde96c8 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1761129120.9332 "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" "main.pdf" "main" 1761129131.54978 0
-  "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" 1761129120.18633 127037 22a0ae3940efab025e5992a99bf27a1d ""
+["pdflatex"] 1761511878.00284 "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" "main.pdf" "main" 1761511884.7215 0
+  "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" 1761511877.45379 133771 65ebbfc089ea314b0356fc1b99eb2500 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1737590400 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
@@ -16,6 +16,7 @@
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmb7t.tfm" 1136768653 2172 fd0c924230362ff848a33632ed45dc23 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmb8r.tfm" 1136768653 4524 6bce29db5bc272ba5f332261583fee9c ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmr7t.tfm" 1136768653 2124 2601a75482e9426d33db523edf23570a ""
+  "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmr8c.tfm" 1136768653 1352 fa28a7e6d323c65ce7d13d5342ff6be2 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmr8r.tfm" 1136768653 4408 25b74d011a4c66b7f212c0cc3c90061b ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmri7t.tfm" 1136768653 2288 f478fc8fed18759effb59f3dad7f3084 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmri8r.tfm" 1136768653 4640 532ca3305aad10cc01d769f3f91f1029 ""
@@ -46,6 +47,7 @@
   "/usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb" 1136849748 45458 a3faba884469519614ca56ba5f6b1de1 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmb7t.vf" 1136768653 1372 788387fea833ef5963f4c5bffe33eb89 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmr7t.vf" 1136768653 1380 0ea3a3370054be6da6acd929ec569f06 ""
+  "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmr8c.vf" 1136768653 3556 8a9a6dcbcd146ef985683f677f4758a6 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmri7t.vf" 1136768653 1384 a9d8adaf491ce34e5fba99dc7bbe5f39 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/zptmcm7m.vf" 1136768653 1132 27520247d3fe18d4266a226b461885c2 ""
   "/usr/share/texlive/texmf-dist/fonts/vf/adobe/times/zptmcm7t.vf" 1136768653 1108 d271d6f9de4122c3f8d3b65666167fac ""
@@ -175,6 +177,7 @@
   "/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd" 1137110629 329 c8cddcc90b6f567b28408eb374773c9c ""
   "/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd" 1137110629 961 15056f4a61917ceed3a44e4ac11fcc52 ""
   "/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd" 1137110629 329 aee7226812ba4138ac67a018466b488d ""
+  "/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd" 1137110629 619 96f56dc5d1ef1fe1121f1cfeec70ee0c ""
   "/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty" 1576624809 9878 9e94e8fa600d95f9c7731bb21dfb67a4 ""
   "/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty" 1657483315 9714 ba3194bd52c8499b3f1e3eb91d409670 ""
   "/usr/share/texlive/texmf-dist/tex/latex/setspace/setspace.sty" 1670275497 22490 8cac309b79a4c53a4ffce4b1b07aead0 ""
@@ -185,11 +188,13 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1758437073.17899 4602002 62dba5fc29055c16380d7393a2adb07a ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1758436586 7753794 0b6227a8726be7d4e63f1129d7541864 ""
   "7045_monthly.png" 1759736463.9695 55266 d8932525308c7ffd5f37d69734fafb5d ""
-  "main.aux" 1761129130.73487 21926 403b20bf05835f7ec2242ab81640b6db "pdflatex"
-  "main.bbl" 1760648767.45995 6091 90cd95d1c720734e997bbb0fef736d88 "bibtex main"
-  "main.out" 1761129130.73887 9574 fcb0e98c341ac6e30e4e607786b2145e "pdflatex"
-  "main.tex" 1761129120.18633 127037 22a0ae3940efab025e5992a99bf27a1d ""
-  "main.toc" 1761129130.74095 4696 4b570efbab78f1deb2c8fc029274d8d2 "pdflatex"
+  "CMI_edges_options.png" 1761459468.19694 621789 00f25f7d21a244dee1d93d1f453f18e8 ""
+  "VAR_Gl0_err_pr.png" 1761453123.94448 147197 3de9691400f7771ca0e75241fc3b3458 ""
+  "main.aux" 1761511884.26842 23457 72a79407ba0200289baf89c61cde96c8 "pdflatex"
+  "main.bbl" 1761459912.86772 6493 026bb9a5e09f6cdd397da7df44787efb "bibtex main"
+  "main.out" 1761511884.27042 10210 70897e494cd81a0239c8254e6378eca3 "pdflatex"
+  "main.tex" 1761511877.45379 133771 65ebbfc089ea314b0356fc1b99eb2500 ""
+  "main.toc" 1761511884.27142 4992 28937ccca55ebc29fb2167887f13837f "pdflatex"
   "mean_dist_7045.png" 1759736463.9985 68209 a9aa52247ef70f8badeaf7010a33d107 ""
   "mean_dist_7045_dif.png" 1759736463.9985 64791 e18c58297a34dfd97c9c59bd84b7cc56 ""
   "mean_dists_by_loc.png" 1759736463.9995 124616 b017d23eee40ebd04311a0aa0dd20f24 ""

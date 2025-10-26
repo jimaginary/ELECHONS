@@ -50,6 +50,11 @@
 \newblock Discrete calculus.
 \newblock {\em Springer}, 2010.
 
+\bibitem{gelfand}
+{I. Gel'fand and A. Yaglom,}.
+\newblock Calculation of the amount of information about a random function contained in another such function.
+\newblock {\em American Mathematical Society Translations vol. 2, no. 12}, pages 199--247, 1959.
+
 \bibitem{imrich}
 {Imrich W., Peterin I.}
 \newblock Recognizing cartesian products in linear time.
@@ -99,6 +104,11 @@ Bureau of~Meteorology.
 {Schwarz, Gideon E.}
 \newblock {\em Estimating the dimension of a model}.
 \newblock Annals of Statistics, 1978.
+
+\bibitem{shannon_comms}
+{Shannon, C. E.}
+\newblock A mathematical theory of communication.
+\newblock {\em Bell System Technical Journal}, 1948.
 
 \bibitem{mand}
 {Stankovi\'{c} L., et. al.}

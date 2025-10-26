@@ -440,16 +440,17 @@ For 0-mean normal noise $\ve{\varepsilon}(t)$. The assumption of noise normality
 For the covariances of $\ve{x}(t)$ and $\ve{\varepsilon}(t)$, $\pmb{\Sigma}_{\ve{x}}$ and $\pmb{\Sigma}_{\ve{\varepsilon}}$ respectively. This filter is said to be adaptive, as its structure depends on the data, which is to say its covariance.
 
 \subsection{Regularisation as Graph Selection}
+\label{subsec:intro_reg_as_graph_sel}
 In many applications we can consider all pairwise relationships between a set of variables. This corresponds, rather simply to the complete graph of pairwise relationships. In reality, we expect many pairwise relationships to be irrelevant or not useful. In this case, we may wish to prune down the complete graph to a much sparser graph to represent only the useful pairwise relationships. In applications where there is an underlying graph present, this can be useful for identifying missing links, and in other applications it can simplify model structure and reduce size. In particular, for a Gaussian random field, strength of pairwise relationships are identified as the elements of the precision matrix, $\pmb{\Sigma}^{-1}$. Friedman, J. et. al. \cite{friedmanglasso} were the first to do this, applying L1 regularisation to the likelihood function of the inverse covariance matrix. We can derive this likelihood as below for k-dimensional vectors.
 \begin{align*}
     \mathcal{N}(\ve{\mu},\pmb{\Sigma})&\sim(2\pi)^{-k/2}\det(\pmb{\Sigma})^{-1/2}\exp(-\frac12 (\ve{x}-\ve{\mu})^\top\pmb{\Sigma}^{-1}(\ve{x}-\ve{\mu}))\\
     P(\ve{x_0},\ve{x_1},\dots,{\ve{x_n}})&=\prod_{i=0}^n(2\pi)^{-k/2}\det(\pmb{\Sigma})^{-1/2}\exp(-\frac12 (\ve{x_i}-\ve{\mu})^\top\pmb{\Sigma}^{-1}(\ve{x_i}-\ve{\mu}))\\
     \ln(P(\ve{x_0},\ve{x_1},\dots,{\ve{x_n}}))&=\sum_{i=0}^n -\frac{k}{2}\ln(2\pi)+\frac12\ln\det(\pmb{\Sigma}^{-1})-\frac12(\ve{x_i}-\ve{\mu})^\top\pmb{\Sigma}^{-1}(\ve{x_i}-\ve{\mu}))\\
     &=const.+\frac{n}{2}(\ln\det(\pmb{\Sigma}^{-1})-\frac{1}{n}\sum_{i=0}^n(\ve{x_i}-\ve{\mu})^\top\pmb{\Sigma}^{-1}(\ve{x_i}-\ve{\mu}))\\
-    &\text{up to a constant and proportionality:}\\
-    &=\ln\det(\pmb{\Sigma}^{-1})-\frac{1}{n}\sum_{i=0}^n(\ve{x_i}-\ve{\mu})^\top\pmb{\Sigma}^{-1}(\ve{x_i}-\ve{\mu})\\
-    &=\ln\det(\pmb{\Sigma}^{-1})-\text{tr}(\pmb{\Sigma}^{-1}\frac{1}{n}\sum_{i=0}^n(\ve{x_i}-\ve{\mu})^\top(\ve{x_i}-\ve{\mu}))\\
-    &=\ln\det(\pmb{\Sigma}^{-1})-\text{tr}(\pmb{\Sigma}^{-1}S)\\
+    &\text{up to a constant:}\\
+    &=\frac{n}{2}(\ln\det(\pmb{\Sigma}^{-1})-\frac{1}{n}\sum_{i=0}^n(\ve{x_i}-\ve{\mu})^\top\pmb{\Sigma}^{-1}(\ve{x_i}-\ve{\mu}))\\
+    &=\frac{n}{2}(\ln\det(\pmb{\Sigma}^{-1})-\text{tr}(\pmb{\Sigma}^{-1}\frac{1}{n}\sum_{i=0}^n(\ve{x_i}-\ve{\mu})^\top(\ve{x_i}-\ve{\mu})))\\
+    &=\frac{n}{2}(\ln\det(\pmb{\Sigma}^{-1})-\text{tr}(\pmb{\Sigma}^{-1}S))\\
     &\text{for }S\text{ the sample covariance.}
 \end{align*}
 Regularisers on the log-likelihood are computationally easier to deal with that those in pure likelihood space, and they have the added advantage of often being connected to a particular prior on the parameters. For example, consider the L1 regularised precision matrix likelihood equation below.
@@ -458,9 +459,117 @@ Regularisers on the log-likelihood are computationally easier to deal with that 
 \end{align*}
 It is well known \cite{park} that the L1 regulariser places a Laplacian prior on each parameter independently, that is a priori we consider $P(\pmb{\Sigma}^{-1}_{i,j}=\theta)\propto e^{-\lambda|\theta|}$. With an appropriate prior, such as L1 or L0 regularisation, this leads to zeroing out of some parameters at the maximum likelihood estimator. With a sufficiently stringent prior, this essentially leads to graph selection, as a limited number of pairwise relationships are considered valid, pruning the complete graph of relationships down to a sparser, more managable one.
 
-A notable extension of this system is for graphs where each node is associated with a vector of scalars, rather than a single scalar, where the covariance becomes a rank-3 tensor, rather than a 2d matrix. Z. Yue et. al. \cite{yue} come up with a fast algorithm for approximate solving of the L0 regularised vector inverse covariance tensor approximation.
+This method quantifies the graphical relationship between scalar random variables for which many samples are available. The methods do not describe how to handle relationships in a graph with time series or vectors at each vertex, where relationships may include delayed or multivariate effects. Examples of such real world time-series networks would be climatic relationships, where it takes time for the climate in one region to effect another region, or a brain network, where neurons influence each other with a synaptic delay.
 
-Both these methods address methods for quantifying the graphical relationship at a single point in time between a set of variables for which many samples are available. The methods do not describe how to handle relationships in a graph with time series at each vertex, where relationships may include delayed effects. Examples of such real world networks would be climatic relationships, where it takes time for the climate in one region to effect another region, or a brain network, where neurons influence each other with a synaptic delay.
+A notable extension of this system is for graphs where each node is associated with a vector of scalars, rather than a single scalar, where the covariance becomes a rank-3 tensor, rather than a 2d matrix. Z. Yue et. al. \cite{yue} come up with a fast algorithm for approximate solving of the L0 regularised vector inverse covariance tensor approximation. As it is relevant to this work, we will derive and implement a simpler version of this algorithm, namely the fast algorithm in the case of a regular matrix with scalar entries.
+\subsubsection{Fast L0 Spare Inverse Covariance}
+First, we recall the log-likelihood function for the error precision matrix $\pmb{\Omega}_\varepsilon$ in terms of the sample error covariance $\pmb{S}$ and number of samples $n$.
+\begin{align*}
+    \mathcal{LL}&=n\log{\det{\pmb{\Omega}}}-n\text{tr}(\pmb{S}\pmb{\Omega})
+\end{align*}
+Then, we wish to minimise the BIC of the log-likelihood for the number of parameters $k$, as below.
+\begin{align*}
+    BIC&=-2\mathcal{LL}+\ln(n)k
+\end{align*}
+This can be expressed as an $l_0$ regression. To simplify things for the algorithm, we presume that the diagonal elements of $\pmb{\Omega}$ are all non-zero. We can then express the function $F(\pmb{\Omega})$ that we wish to minimise as below.
+\begin{align*}
+    F(\pmb{\Omega})&\propto -\log{\det{\pmb{\Omega}}}+\text{tr}(\pmb{S}\pmb{\Omega})+\frac{\ln{n}}{2n}\sum_{i\neq j}I(\pmb{\Omega}_{ij}\neq0)
+\end{align*}
+For simplicity, we call $\frac{\ln{n}}{2n}=\lambda$, as in a typical $l_0$ regression. Note that this comes with a number of parameters equal to $\frac12\sum{i\neq j}I(\pmb{\Omega}_{ij}\neq0)$, because the precision matrix is symettric.
+
+One of the key insights of the coordinate descent optimisation algorithm employed here, is to consider optimising row $i$ and column $i$ together, keeping everything else constant. This contrasts with other algorithms that may optimise either rows individually, columns individually, or entries $ij$ in the matrix individually. Because each set of row and column $i$ represents the relationships with variable $i$, we can swap this row and column with the last row and column in the matrix to simplify the expressions for the matrix structure. After optimisation, the rows and columns can be moved back to where they belong. We hence partition the matrix $\pmb{\Omega}$ to be optimised and the sample covariance $\pmb{S}$ as below.
+\begin{align*}
+    \pmb{\Omega}&=\begin{pmatrix}
+        \pmb{\Omega}_{-i}&\ve{\Omega_{-i,i}}\\
+        \ve{\Omega_{-i,i}}^\top&\omega_{i,i}
+    \end{pmatrix}\\
+    \pmb{S}&=\begin{pmatrix}
+        \pmb{S}_{-i}&\ve{S_{-i,i}}\\
+        \ve{S_{-i,i}}^\top&s_{i,i}
+    \end{pmatrix}
+\end{align*}
+We also introduce a similar partitioning on the estimate covariance, $\pmb{\Sigma}=\pmb{\Omega}^{-1}$.
+\begin{align*}
+    \pmb{\Sigma}&=\begin{pmatrix}
+        \pmb{\Sigma}_{-i}&\ve{\Sigma_{-i,i}}\\
+        \ve{\Sigma_{-i,i}}^\top&\sigma_{i,i}
+    \end{pmatrix}
+\end{align*}
+We can then rewrite the objective function as below.
+\begin{align*}
+    F(\pmb{\Omega})&=-\log\det(\pmb{\Omega}_{-i})-\log(\omega_{i,i}-\ve{\Omega_{-i,i}}^\top\pmb{\Omega}_{-i}^{-1}\ve{\Omega_{-i,i}})\\
+    &+\text{tr}(\pmb{S}_{-i}\pmb{\Omega}_{-i})+2\ve{S_{-i,i}}\cdot\ve{\Omega_{-i,i}}+\omega_{i,i}s_{i,i}\\
+    &+\lambda\sum_{k\neq l} I(\pmb{\Omega}_{-i,kl}\neq0)+2\lambda\sum_{k}I(\ve{\Omega_{-i,i,k}}\neq0)\\
+    &\text{Removing terms independent of variable }i:\\
+    F_i(\omega_{i,i},\ve{\Omega_{-i,i}})&=-\log(\omega_{i,i}-\ve{\Omega_{-i,i}}^\top\pmb{\Omega}_{-i}^{-1}\ve{\Omega_{-i,i}})\\
+    &+2\ve{S_{-i,i}}\cdot\ve{\Omega_{-i,i}}+\omega_{i,i}s_{i,i}+2\lambda\sum_{k}I(\ve{\Omega_{-i,i,k}}\neq0)
+\end{align*}
+We then minimise with respect first to $\omega_{i,i}$.
+\begin{align*}
+    \frac{\partial F_i}{\partial \omega_{i,i}}&=-(\omega_{i,i}-\ve{\Omega_{-i,i}}^\top\pmb{\Omega}_{-i}^{-1}\ve{\Omega_{-i,i}})^{-1}+s_{i,i}\\
+    \omega_{i,i}^*&=\ve{\Omega_{-i,i}}^\top\pmb{\Omega}_{-i}^{-1}\ve{\Omega_{-i,i}}+s_{i,i}^{-1}
+\end{align*}
+We then substitute this minimisation into $F_i$ such that we may minimise with respect to $\ve{\Omega_{-i,i}}$.
+\begin{align*}
+    F_i(\omega_{i,i},\ve{\Omega_{-i,i}})&=-\log(s_{i,i}^{-1})+2\ve{S_{-i,i}}\cdot\ve{\Omega_{-i,i}}\\
+    &+(\ve{\Omega_{-i,i}}^\top\pmb{\Omega}_{-i}^{-1}\ve{\Omega_{-i,i}}+s_{i,i}^{-1})s_{i,i}+2\lambda\sum_{k}I(\ve{\Omega_{-i,i,k}}\neq0)\\
+    &\text{Removing constant terms:}\\
+    F_i(\omega_{i,i},\ve{\Omega_{-i,i}})&=2\ve{S_{-i,i}}\cdot\ve{\Omega_{-i,i}}+\ve{\Omega_{-i,i}}^\top\pmb{\Omega}_{-i}^{-1}\ve{\Omega_{-i,i}}s_{i,i}\\
+    &+2\lambda\sum_{k}I(\ve{\Omega_{-i,i,k}}\neq0)
+\end{align*}
+And then we minimise this expression with respect to the $j^{th}$ entry of $\ve{\Omega_{-i,i}}$. To avoid indicies getting confusing, we rename this vector $\ve{B^i}$. For each entry of $\ve{B^i}$, $B^i_j$, we can optimise its contribution to $F_i$, $F_{ij}$.
+\begin{align*}
+    F_{ij}(B^i_j)&=\begin{cases}
+        2s_{i,j}B^i_j+2s_{i,i}B^i_j({\Omega}_{-i}^{-1})_{j,-j}\cdot \ve{B^i_{-j}}+s_{i,i}(B^i_j)^2({\Omega}_{-i}^{-1})_{j,j}&B^i_j\neq0\\
+        2\lambda&B^i_j=0
+    \end{cases}\\
+    &\text{if }B^i_j\neq0:\\
+    \frac{\partial F_{ij}}{\partial B^i_j}&=2s_{i,j}+2(\Omega_{-i}^{-1})_{j,-j}\cdot{\ve{B^i_{-j}}}s_{i,i}+2s_{i,i}B^i_j({\Omega}_{-i}^{-1})_{j,j}\\
+    (B^i_j)^*&=-s_{i,i}^{-1}({\Omega}_{-i}^{-1})_{j,j}^{-1}(s_{i,j}+(\Omega_{-i}^{-1})_{j,-j}\cdot{\ve{B^i_{-j}}}s_{i,i})\\
+    F_{ij}^*&=\min(F_{ij}((B^i_j)^*),2\lambda)
+\end{align*}
+We can then choose each $B^i_j$ accordingly.
+
+The key speed up realised in the paper involves the difficulty of recalculating $\pmb{\Omega}_{-i}^{-1}$ for the relevant value of $i$ after some entries have changed from a previous minimisation step. A general formula is leveraged for the relevant part of the inverse of a matrix in terms of a matrix smaller by one row and column.
+\begin{align*}
+    A&=\begin{pmatrix}
+        A_0&\ve{v}\\
+        \ve{v}^\top&u
+    \end{pmatrix}\\
+    A^{-1}&=\begin{pmatrix}
+        A_0^{-1}+A_0^{-1}\ve{v}s^{-1}\ve{v}^\top A_0^{-1}&-A_0^{-1}\ve{v}s^{-1}\\
+        -s^{-1}\ve{v}^\top A_0^{-1}&s^{-1}
+    \end{pmatrix}\\
+    &\text{with }s=u-\ve{v}^\top A_0^{-1}\ve{v}
+\end{align*}
+The partitions of the inverse can be related as below.
+\begin{align*}
+    B=A^{-1}&=\begin{pmatrix}
+        B_0&\ve{w}\\
+        \ve{w}^\top&x
+    \end{pmatrix}\\
+    B_0&=A_0^{-1}+\ve{w}x^{-1}\ve{w}^\top\\
+    A_0^{-1}&=B_0-\ve{w}x^{-1}\ve{w}^\top\\
+\end{align*}
+This formula tells us exactly how to update $A_0^{-1}$ cheaply if we can compute the entire inverse $A^{-1}$. 
+Also, if we update $B$, these formulas tell us how to cheaply update $A_0^{-1}$ and the whole $A$.
+
+The overall coordinate descent algorithm thus works as follows.
+\begin{itemize}
+    \item Input: $S$, the sample covariance
+    \item Initialise $\pmb{\Omega}$, e.g. to the inverse of the diagonal entries of $S$, and compute (trivially) $\pmb{\Sigma}=\pmb{\Omega}^{-1}$
+    \item Choose a variable $i$.
+    \item Compute $\pmb{\Omega}_{-i}^{-1}$ cheaply using the formula in terms of components of $\pmb{\Sigma}$.
+    \item Optimise the choice of the row/column $B^i$ of the precision matrix.
+    \item Optimise the choice of $\omega_{i,i}$ in the precision matrix.
+    \item Update $\pmb{\Sigma}$ cheaply.
+    \item Repeat across all variables.
+    \item Repeat until convergence.
+\end{itemize}
+The optimisation of each entry of the precision matrix with this method is $O(n)$, for $n$ the matrix size.
+
+This algorithm is implemented and used in \ref{subsec:est_err_pr}.
+
 
 \subsection{Conditional Mutual Information}
 \label{subsec:cmi_intro}
@@ -468,19 +577,18 @@ A key goal of this thesis is to inform understanding of which pairwise relations
 \begin{align*}
     P(X_i,X_j|X_{\neq i,j})&=P(X_i|X_{\neq i,j})P(X_j|X_{\neq i,j})
 \end{align*}
-A popular and statistically robust way to measure how far apart these two distributions are; the joint distribution and the distribution assuming independence, is the Kullback-Leibler divergence, $D_{KL}$. The divergence of two distributions is measured as $\int_{\mathcal{X}}P(x)\log\frac{P(x)}{Q(x)}$ for distributions $P$ and $Q$ over domain $\mathcal{X}$. We also integrate with respect to $dX_{\neq i,j}$, to average out all the possible external information. This is precisely the conditional mutual information between the two time series, given the others. Unfortunately, this is essentially a useless tool as stated, as we have just one sample of each timeseries $X_i$ over a massive domain of size $|\mathbb{R}|^{|\mathbb{R}|}$. To make this tool useful, a few changes are needed.
+A popular and statistically robust way to measure how far apart these two distributions are; the joint distribution and the distribution assuming independence, is the Kullback-Leibler divergence, $D_{KL}$. The divergence of two distributions is measured as $\int_{\mathcal{X}}P(x)\log\frac{P(x)}{Q(x)}$ for distributions $P$ and $Q$ over domain $\mathcal{X}$. We also integrate with respect to $dX_{\neq i,j}$, to average out all the possible external information. This is precisely the conditional mutual information between the two time series, given the others.
 
-First, we simply discretise the data, reducing the domain to size $|\mathbb{R}|^n$. Then, we must assume a prior distribution on the $X$ variables. This way, our single sample allows for the acquisition of a posterior distribution on the trajectories, which allows for the integration across all possible trajectories in order to determine the mutual information between variables. This still provides a fairly poor estimate, as one sample gives no knowledge of the variance in the underlying distribution. An additional presumption we can make is rough stationarity of the data. This way, we can treat contiguous windows of datapoints as independent samples. The tradeoff here is between accounting for far-reaching effects across long time spans, and enough samples to appropriately predict the distribution of the data.
-
-In the thesis, a key formula will be the simplification of the CMI into an expression in terms of entropy. The expression for entropy of a distribution over domain $\mathcal{X}$ is as below.
+The concept of mutual information was first discussed by Claude Shannon \cite{shannon_comms}, although the modern terminology came later. A phenomenal result for the calculation of CMI for stationary timeseries, even with a single sample, comes from I. Gel'fand and A. Yaglom \cite{gelfand}, expressed below.
 \begin{align*}
-    H(X)&=\int_{\mathcal{X}}P(x)\log(P(x))dx
+    CMI(x_i(t),x_j(t)|x_{\neq i,j}(t))&=-\frac{T}{2}\int_{-\pi}^{\pi}\ln(1-|\rho_{i,j|\neq ij}(\omega)|^2)
+    \frac{d\omega}{2\pi}
 \end{align*}
-When the base of the logarithm is 2, the unit of this quantity is the Shannon, or sometimes abusively bits. When the logarithm uses the natural base $e$, the unit is nats. Unless otherwise specified, we will work in nats in this thesis. CMI can be broken down in terms of conditional entropy as below.
+With $\rho_{i,j|\neq ij}(\omega)$ the correlation between the $\omega$ frequency components of $i$ and $j$ after regression on the other components. This quantity can be expressed as below.
 \begin{align*}
-    CMI(X,Y|Z)&=H(X|Z)+H(Y|Z)-H(X,Y|Z)
+    \rho_{i,j|\neq ij}(\omega)&=\frac{F_{ij|\neq ij}(\omega)}{\sqrt{F_{ii|\neq ij}F_{jj|\neq ij}}}
 \end{align*}
-In a sense, this tells us that CMI measures how much excess information is contained within X and Y that is not explained either by the information in Z, or by their relationship (once accounting for information from Z).
+For $F_{ij|\neq ij}$ the cross frequency spectrum between $i$ and $j$ after regression of other signals, and $F_{ii|\neq ij}$ and $F_{jj|\neq ij}$ the power spectrums after regression of other signals. This produces a viable method for finding the information between two stationary signals.
 
 \newpage
 \section{Spatiotemporal Analysis of BOM Dataset}
@@ -954,6 +1062,7 @@ Because we judge models based on smallest BIC w.r.t. MSE and the number of param
 \end{align*}
 
 \subsection[The VAR(p) model]{The $VAR(p)$ model}
+\label{subsec:varp}
 In trimester one, univariate time domain predictive filters were developed in the form of $AR(p)$ models. These are models of the form below.
 \begin{align*}
     x_t=\sum_{i=1}^pa_ix_{t-i}+\varepsilon_t
@@ -997,6 +1106,7 @@ For the seasonality adjusted mean temperature dataset, we improve on RMSE's from
 \end{figure}
 \\Based on BICa, the $VAR(2)$ model is best.
 \subsection{Regularisation as Graph Selection}
+\label{subsec:reg_as_graph_sel}
 The full multivariate $VAR(p)$ model considers all relationships between all weather stations. By selecting a graph that imposes a set of relationships on the data, we reduce the number of parameters in the $VAR(p)$ model that need to be specified. Parameter reduction may viably improve BICa score, and provide a more robust predictor. Methods for reducing parameters to avoid over-fitting, which is the purpose of minimising the BICa score are in some cases referred to as regularisation. We will investigate some techniques for regularisation, and how they link to graph selection.
 \subsubsection{Lasso Regression}
 A commonly applied regulariser is the Lasso, popularised by Tibshirani\cite{tibshirani}. It is popular in part due to its good performance in promoting sparsity, that is in removing parameters by shrinking them to zero. Lasso regression minimises the error plus a penalty term, as shown below.
@@ -1258,71 +1368,52 @@ We recall the general VAR(p) model below.
 \begin{align*}
     \ve{x_t}&=\sum_{\tau=1}^p \pmb{A}_\tau\ve{x_{t-\tau}}+\ve{\varepsilon_t}
 \end{align*}
-The two key features of this model are the autoregression matrices $\pmb{A}_\tau$ and the driving noise covariance $\pmb{\Sigma}_\varepsilon$. We recall the required formulae for conditional mutual information discussed in \ref{subsec:cmi_intro}, given below in terms of $\pmb{A}_\tau$ and $\pmb{\Sigma}_\varepsilon$.
+The two key features of this model are the autoregression matrices $\pmb{A}_\tau$ and the driving noise covariance $\pmb{\Sigma}_\varepsilon$. We recall the required formulae for conditional mutual information discussed in \ref{subsec:cmi_intro}, given below in terms of $\pmb{A}_\tau$ and $\pmb{\Sigma}_\varepsilon$. We also provide a computationally efficient computation for all pairwise $\rho_{ij|\neq{ij}(\omega)}$ values in terms of the partial coherence matrix.
 \begin{align*}
     A(j\omega)&=I-\sum_\tau e^{-j\omega\tau}\pmb{A}_\tau\\
     A(j\omega)&=\begin{pmatrix}
         g_1(j\omega)&\vdots&g_2(j\omega)&\vdots&...&\vdots&g_N(j\omega)
     \end{pmatrix}\\
-    \rho_{ij|\neq{ij}}&=\frac{-g_i^H\pmb{\Sigma}_\varepsilon g_j}{\sqrt{(g_i^H\pmb{\Sigma}_\varepsilon g_i)(g_j^H\pmb{\Sigma}_\varepsilon g_j)}}\\
+    \rho_{ij|\neq{ij}}(\omega)&=\frac{-g_i^H\pmb{\Sigma}_\varepsilon g_j}{\sqrt{(g_i^H\pmb{\Sigma}_\varepsilon g_i)(g_j^H\pmb{\Sigma}_\varepsilon g_j)}}\\
+    F^{-1}(\omega)&=A(j\omega)^H\pmb{\Sigma}_\varepsilon^{-1}A(j\omega)\\
     R(\omega)&=\frac{-F^{-1}(\omega)}{\sqrt{diag(F^{-1}(\omega))diag(F^{-1}(\omega))^T}}\\
-    CMI_{ij}&=-\frac12\int_{\pi}^\pi\ln(1-|\rho_{ij\neq{ij}}|^2)\frac{d\omega}{2\pi}
+    CMI_{ij}&=-\frac12\int_{-\pi}^\pi\ln(1-|\rho_{ij|\neq{ij}}(\omega)|^2)\frac{d\omega}{2\pi}
 \end{align*}
-Where the square root and division are performed elementwise for $\rho_{ij|\neq{ij}}$.
-\begin{align*}
-    CMI_{ij}&=H(X_i|X_{\neq i,j})+H(X_j|X_{\neq i,j})-H(X_i,X_j|X_{\neq i,j})
-\end{align*}
-To this end, we need to describe the distributions $X_i,X_j|X_{\neq i,j}$ and $X_i|X_{\neq i,j}$ within the VAR model. These quanties follow typical marginalition rules and conditioning for a multivariate normal distribution following the error covariance. We derive the distributions below, for $\pmb{\Omega}$ the precision matrix of the error, and $\pmb{\Omega}_{a,b}$ the submatrix of precisions of set of variables $a$ with set $b$. We denote collections of timeseries as vectors, with the whole collection denoted $\ve{X}$.
-\begin{align*}
-    P(\ve{X})&=\prod_t P(\ve{\varepsilon^t})\\
-    P(\ve{\varepsilon^t})&\sim\mathcal{N}(\ve{0},\pmb{\Omega})\\
-    \ve{\mu}^*&=-\pmb{\Omega}_{ij,ij}^{-1}\pmb{\Omega}_{ij,\neq ij}\ve{\varepsilon_{\neq i,j}}\\
-    P(\varepsilon_i^t,\varepsilon_j^t|\ve{\varepsilon_{\neq i,j}^t})&\sim\mathcal{N}(\ve{\mu}^*,\pmb{\Omega}_{ij,ij})\\
-    P(X_i,X_j|X_{\neq i,j})&=\prod_t P(\varepsilon_i^t,\varepsilon_j^t|\ve{\varepsilon_{\neq i,j}^t})\\
-    P(\varepsilon_i^t|\ve{\varepsilon_{\neq i,j}^t})&=\mathcal{N}(\ve{\mu}^*, (\pmb{\Omega}_{ij,ij}^{-1})_{i,i}^{-1})\\
-    P(X_i|X_{\neq i,j})&=\prod_t P(\varepsilon_i^t|\ve{\varepsilon_{\neq i,j}^t})
-\end{align*}
-Note that one benefit of using the precision matrix rather than the covariance matrix is that the expressions for the precisions of the desired distributions are very simple and very low complexity to compute from an estimate of the precision matrix. Now, we derive the expression for the relevant entropies, with $\mathcal{X}$ denoting the domain of time series, i.e. functions from $[0..n]\to\mathbb{R}$.
-\begin{align*}
-    H(X_i|X_{\neq i,j})=\int_{\mathcal{X}}P(X_i|X_{\neq i,j})\log(P(X_i|X_{\neq i,j}))dX_i
-\end{align*}
-Because there is a one-to-one linear mapping between trajectories $X_i$ and error signals $\varepsilon_i$, we can make a change of variables from $X_i\to\varepsilon_i$, over the same domain. The proof of this is irrelevant to the point here, so is omitted. The errors are independent at each time step, and entropy is linear for independent variables, so the entropy is equivalent to $n$ times the entropy of a single distribution of the error, as below.
-\begin{align*}
-    H(X_i|X_{\neq i,j})&=n\int_{\mathbb{R}}P(\varepsilon_i^t|\ve{\varepsilon_{\neq i,j}^t})\log(P(\varepsilon_i^t|\ve{\varepsilon_{\neq i,j}^t}))d\varepsilon_i
-\end{align*}
-There is a known expression for the entropy of a multivariate Gaussian in $d$ variables. We use this below to find this entropy.
-\begin{align*}
-    H(\mathcal{N}(\ve{\mu},\pmb{\Omega}))&=\frac{1}{2}\log((2\pi e)^d |\pmb{\Omega}|^{-1})\\
-    H(X_i|X_{\neq i,j})&=\frac{n}{2}\log((2\pi e)^d (\pmb{\Omega}_{ij,ij}^{-1})_{i,i})\\
-    H(X_j|X_{\neq i,j})&=\frac{n}{2}\log((2\pi e)^d (\pmb{\Omega}_{ij,ij}^{-1})_{j,j})\\
-\end{align*}
-The expression for the remaining entropy is similar.
-\begin{align*}
-    H(X_i,H_j|X_{\neq i,j})&=\frac{n}{2}\log((2\pi e)^d |\pmb{\Omega}_{ij,ij}|^{-1})
-\end{align*}
-Then, the CMI is given as below.
-\begin{align*}
-    CMI_{ij}&=H(X_i|X_{\neq i,j})+H(X_j|X_{\neq i,j})-H(X_i,X_j|X_{\neq i,j})\\
-    &=\frac{n}{2}\log((2\pi e) (\pmb{\Omega}_{ij,ij}^{-1})_{i,i})+\frac{n}{2}\log((2\pi e) (\pmb{\Omega}_{ij,ij}^{-1})_{j,j})-\frac{n}{2}\log((2\pi e)^2 |\pmb{\Omega}_{ij,ij}|^{-1})\\
-    &=\frac{n}{2}\log((\pmb{\Omega}_{ij,ij}^{-1})_{i,i} (\pmb{\Omega}_{ij,ij}^{-1})_{j,j}|\pmb{\Omega}_{ij,ij}|)
-\end{align*}
-There is a well-known formula relating the inverse of a 2x2 matrix in terms of its determinant and other elements of the matrix, through the cofactors of the matrix. This is shown below.
-\begin{align*}
-    \pmb{A}&=\begin{pmatrix}
-        a&b\\
-        c&d
-    \end{pmatrix}\\
-    \pmb{A}^{-1}&=\frac{1}{|\pmb{A}|}\begin{pmatrix}
-        d&-b\\
-        -c&a
-    \end{pmatrix}
-\end{align*}
-This allows us to simplify the CMI equation as below.
-\begin{align*}
-    CMI_{ij}&=\frac{n}{2}\log(\pmb{\Omega}_{j,j} \pmb{\Omega}_{i,i}\frac{|\pmb{\Omega}_{ij,ij}|}{|\pmb{\Omega}_{ij,ij}|^2})\\
-    &=\frac{n}{2}\log(\frac{\pmb{\Omega}_{j,j} \pmb{\Omega}_{i,i}}{|\pmb{\Omega}_{ij,ij}|})\\
-    &=\frac{n}{2}\log(\frac{\pmb{\Omega}_{jj} \pmb{\Omega}_{ii}}{\pmb{\Omega}_{jj} \pmb{\Omega}_{ii}-\pmb{\Omega}_{ij}^2})
-\end{align*}
+Where the square root and division are performed elementwise for $\rho_{ij|\neq{ij}}$. Note that the per-omega evaluation of $F^{-1}(\omega)$ does not require a recomputation of any matrix inversions, only the computation of $A(j\omega)$ along with 2 matrix multiplications.
+
+\subsection{Estimating the Error Precision}
+\label{subsec:est_err_pr}
+As we have seen in the previous section, the CMI calculation relies heavily upon finding a fit of $\pmb{A}_\tau$, as well as $\pmb{\Omega}_\varepsilon$. We have discussed many choices of $\pmb{A}_\tau$ in \ref{subsec:reg_as_graph_sel}. We now turn our attention to choosing $\pmb{\Omega}_\varepsilon$. In \ref{subsec:intro_reg_as_graph_sel} we discussed a fast algorithm for finding a BIC optimal estimation of $\pmb{\Omega}_\varepsilon$. This estimation is shown in \ref{fig:err_pr_l0} compared with the inverse of the sample covariance of the error under a basic $VAR(2)$ model fit.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.8\linewidth]{VAR_Gl0_err_pr.png}
+    \caption{The sample precision (left) against the BIC-optimal $l_0$ estimate precision (right).}
+    \label{fig:err_pr_l0}
+\end{figure}
+
+The $l_0$ estimate of $\pmb{\Omega}$ retains only 60.34\% of the matrix entries that are in the sample precision matrix, providing a simpler model of the error structure. The max and min on the colourbars are tighter than the whole range of values in the plot to accentuate how the $l_0$ fit is more robust to noise than the regular fit.
+
+\subsection{CMI Evaluation Variants}
+We now have two selections to make before computing the CMI. First, how to compute the VAR regression matrices. The two major choices we have here are the simple choice of direct VAR regression, and the more computationally expensive choice of the BIC-optimal $l_0$ regression. Second, how to compute the error precision matrix. Again, we can either take the sample precision, or the BIC-optimal $l_0$ estimate of the error precision. This gives us four choices of how to calculate the CMI. Another key point is that the integral that gives the CMI does not have a closed form solution, so we must integrate numerically. Fortunately, the computations are fast, so even a very fine numerical integration is fairly fast. All the information of Fourier transform of a length $n$ digital signal is contained within $n$ evenly spaced samples of its frequency spectrum. Hence, in order to retain all the fidelity of an exact computation of the CMI, our numerical integration needs to have $n$ samples. We can observe some important geographic patterns in these estimations of the CMI in \ref{fig:cmi_options}.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.8\linewidth]{CMI_edges_options.png}
+    \caption{The various estimations of CMI plotted as edge relationships between stations.}
+    \label{fig:cmi_options}
+\end{figure}
+There are a number of interesting observations to note here. The first and clearest is that strong connections between timeseries tend aswell to be short in geographical distance. Secondarily, that the bottom two plots which utilise an $l_0$ $VAR(2)$ regression rather than a plain $VAR(2)$ regression assign a much more significant CMI to far-reaching coastal connections across the great Australian bite, as well as between the two northern tips of the country. This seems somewhat contrary to a simple expectation - that temperature relationships should be mostly connections between nearby stations, as these are most related in their distributions, and additionally, and that $l_0$ regressions should reduce spurious connections that arise from noise. In response, we can interpret this phenomenon either as suggesting that $l_0$ regression, especially $l_0$ VAR regression, as in the bottom two plots, is innappropriate here for some reason, as it attaches high CMI to spurious connections, or that these long-range connections are an integral part of this model of temperature evolution over time.
+
+These many significant long-range connections are especially odd given that 
+
+The distance between perth and tasmania is about 3000km.
+
+% TODO:
+% - Sims justifying issues with low-resolution sampling of Matern-corr type data & CMI
+% - Conceptual problems with identifying the system with a graph
+% - American data, differences, verification of results on American data
+% - Where to from here?
+% - cleaning and appendixing code.
 
 % \newpage
 % \section{Reflection}
