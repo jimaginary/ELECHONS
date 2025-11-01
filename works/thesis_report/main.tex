@@ -46,7 +46,7 @@
 \begin{center}
     \subsection*{Abstract}
 \end{center}
-Graph signal processing is a dense field of research that covers a wide array of problems. Much of its development is built upon the application of traditional signal processing techniques to the graphical domain, but much development is unique entirely to graphical data. Many such techniques have been developed across disciplines; statistics, geography, computer science, discrete mathematics, and signal processing. They apply to a number of problems; compression, prediction, filtering, and computer vision. This report is a preliminary review of a variety of work in these fields and problems over the past century. It works to critique, expand on, link, and reproduce the results of a variety of these works. More broadly, this thesis will aim to produce tangible evidence of the applicability of graph signal processing to a variety of real-world problems, as well as provide novel explanations for their applicability. It will further develop generic techniques for solving problems using graph signal processing problems.
+Graph signal processing is a dense field of research that covers a wide array of problems. Much of its development is built upon the application of traditional signal processing techniques to the graphical domain, but much development is unique entirely to graphical data. Many such techniques have been developed across disciplines; statistics, geography, computer science, discrete mathematics, and signal processing. They apply to a number of problems; compression, prediction, filtering, and computer vision. This report is a review of a variety of works in these fields and problems over the past century. It works to critique, expand on, link, and reproduce the results of a variety of these works. More broadly, this thesis will aim to produce tangible evidence of the applicability of graph signal processing to a variety of real-world problems, as well as provide novel explanations for their applicability. It will further develop generic techniques for solving problems using graph signal processing problems.
 
 \newpage
 \pagenumbering{arabic}
@@ -285,7 +285,7 @@ Moura applies the fast GFT to compress spatiotemporal daily temperature data acr
     \caption{US Data Daily Temperature (2002) Compression Results}
     \label{fig:moura-results}
 \end{figure}
-Moura does not discuss how much of this compression can be attributed simply to time-domain compression, and how much is due to graph-domain compression. Methods for evaluating this are discussed in the preliminary work in \ref{subsec:efficient_GFT}.
+Moura does not discuss how much of this compression can be attributed simply to time-domain compression, and how much is due to graph-domain compression. Methods for evaluating this are discussed in \ref{subsec:efficient_GFT}.
 
 Storing sparse coefficients like this however requires knowledge of the eigenvectors corresponding to each coefficient, as they are not so structures as the eigenvectors of the DFT. This requires storage costs of $n^2$ floats for $n$ weather stations, which in Moura's case represents $150^2/(150\cdot365)\approx41\%$ of the original storage cost. Alternatively, the decompression process can involve finding the GFT matrix through storing the associated graph metadata. I.e. the edges, their weights (or how these were found from for example, location data). The paper assigns edges via a nearest-neighbour scheme, and weights through equation (29) in their preceding paper \cite{moura2}, modified for clarity below. Note $d$ denotes the distances between measurement points, and $\sigma$ denotes a scaling factor.
 \begin{align*}
@@ -355,11 +355,11 @@ Whittle (1954) finds a case where the Mat\'{e}rn kernel naturally arises \cite{w
 \begin{align*}
     (\nabla^2-\lambda^2)X_{\ve{x}}&=\varepsilon_{\ve{x}}
 \end{align*}
-For $\varepsilon_{\ve{x}}$ uncorrelated white noise. We revisit this model in the preliminary work in \ref{subsec:spatial_model}. In two dimensions ($\nabla^2=\frac{\partial^2}{\partial x^2}+\frac{\partial^2}{\partial y^2}$) he found the correlation function to be a Mat\"{e}rn kernel with $\nu=1$, as below.
+For $\varepsilon_{\ve{x}}$ uncorrelated white noise. We revisit this model in \ref{subsec:spatial_model}. In two dimensions ($\nabla^2=\frac{\partial^2}{\partial x^2}+\frac{\partial^2}{\partial y^2}$) he found the correlation function to be a Mat\"{e}rn kernel with $\nu=1$, as below.
 \begin{align*}
     \rho(\ve{x},\ve{y})&=\lambda||\ve{x}-\ve{y}||_2 K_1(\lambda||\ve{x}-\ve{y}||_2)
 \end{align*}
-In his later work, he found the correlation function in all dimensions, except $n=1$, which is addressed in the preliminary work in \ref{subsec:1d_correlation} \cite{whittle}. For $r=||\ve{x}-\ve{y}||_2$, the correlation function $\rho$ is as below.
+In his later work, he found the correlation function in all dimensions, except $n=1$, which is addressed in \ref{subsec:1d_correlation} \cite{whittle}. For $r=||\ve{x}-\ve{y}||_2$, the correlation function $\rho$ is as below.
 \begin{align*}
     \rho(r)&=\frac{2^{n/2-1}}{\Gamma(2-n/2)}(\lambda r)^{2-n/2}K_{2-n/2}(\lambda r)
 \end{align*}
@@ -392,7 +392,7 @@ So that the process is biased. Finding the least-squares unbiased estimator lead
     \end{pmatrix}\\
     \hat{X_{\ve{y}}}&=X_{\ve{x}}^\top \hat{\ve{w}}
 \end{align*}
-This is the estimate implemented in the preliminary work in \ref{subsec:kriging_implementation}.
+This is the estimate implemented in \ref{subsec:kriging_implementation}.
 
 The Kriging error is the expected RMSE of the interpolation at each point. In the Ordinary Kriging case it can be computed using the formula below.
 \begin{align*}
@@ -778,6 +778,7 @@ The correlation is simply the covariance normalised to $1$ when $r=0$, as below.
     \rho(r)&=(1+\lambda r)e^{-\lambda r}
 \end{align*}
 \subsubsection{Numerical Confirmation}
+\label{subsec:matern_sims}
 We confirm the 1D and 2D results numerically. The 1D and 2D domains $\mathbb{R}$ and $\mathbb{R}^2$ can be approximated by the toroids $\mathbb{T}$ and $\mathbb{T}^2$. This is the same approximation the DFT uses. It is significant, because these domains, like the originals, have no boundary, and thus no need to specify boundary conditions. Just as with the DFT however, aliasing can occur when a function in the original domain is of wide enough extent that it overlaps with itself in the approximate domain. We put a lattice graph on the approximate domains, and discretise the differential equation from before.
 \begin{align*}
     -\gamma n(\ve{x})&=(-\mathbf{L}-\lambda^2\mathbf{I})\mathbf{v}
@@ -1083,7 +1084,7 @@ Just like $AR(p)$ models, $VAR(p)$ models can be solved with linear regression. 
     \ve{x_t}&=\pmb{A}\ve{z_t}+\ve{\varepsilon_t}
 \end{align*}
 This can be solved with standard linear regression methods. Note that $VAR(p)$ models for estimating an $n$ dimensional vector at each point in time have $pn^2$ parameters.\\
-For the seasonality adjusted mean temperature dataset, we improve on RMSE's from trimester one in \ref{subsec:temporal_processes} ($2.09^\circ C$ and $2.06^\circ C$ for first and second order $AR$ models respectively) by using $VAR(p)$ models. Models for varying $p$ are compared both by RMSE and BICa in \ref{fig:VARp}.
+For the seasonality adjusted mean temperature dataset, we improve on RMSE's from trimester one in \ref{subsec:temporal_processes} ($2.09^\circ C$ and $2.06^\circ C$ for first and second order $AR$ models respectively) by using $VAR(p)$ models. Models for varying $p$ are compared both by RMSE and BICa in Fig. \ref{fig:VARp}.
 \begin{figure}[!ht]
     \centering
     \begin{tabular}{|c|c|c|}
@@ -1266,7 +1267,7 @@ Taking derivatives and optimising we get the optimal choice of paramters $\ve{A_
 \begin{align*}
     \ve{A_{ij}}^*&=\pmb{\Sigma}_{jj}^{-1}(\ve{\Gamma_{ij}}-\sum_{l\neq j}\pmb{\Sigma}_{lj}\ve{A_{il}})
 \end{align*}
-Running $l_0$ coordinate descent with time-domain grouping like this yields very similar results to regular $l_0$, in a comparable length of time, suggesting that the prediction fidelity gained from seperating these parameters is minimal. The optimal results of the group $l_0$ coordinate descent are shown in \ref{fig:group_l0_table}.
+Running $l_0$ coordinate descent with time-domain grouping like this yields very similar results to regular $l_0$, in a comparable length of time, suggesting that the prediction fidelity gained from seperating these parameters is minimal. The optimal results of the group $l_0$ coordinate descent are shown in Fig. \ref{fig:group_l0_table}.
 \begin{figure}[!ht]
     \centering
     \begin{tabular}{|c|c|c|c|}
@@ -1383,7 +1384,7 @@ Where the square root and division are performed elementwise for $\rho_{ij|\neq{
 
 \subsection{Estimating the Error Precision}
 \label{subsec:est_err_pr}
-As we have seen in the previous section, the CMI calculation relies heavily upon finding a fit of $\pmb{A}_\tau$, as well as $\pmb{\Omega}_\varepsilon$. We have discussed many choices of $\pmb{A}_\tau$ in \ref{subsec:reg_as_graph_sel}. We now turn our attention to choosing $\pmb{\Omega}_\varepsilon$. In \ref{subsec:intro_reg_as_graph_sel} we discussed a fast algorithm for finding a BIC optimal estimation of $\pmb{\Omega}_\varepsilon$. This estimation is shown in \ref{fig:err_pr_l0} compared with the inverse of the sample covariance of the error under a basic $VAR(2)$ model fit.
+As we have seen in the previous section, the CMI calculation relies heavily upon finding a fit of $\pmb{A}_\tau$, as well as $\pmb{\Omega}_\varepsilon$. We have discussed many choices of $\pmb{A}_\tau$ in \ref{subsec:reg_as_graph_sel}. We now turn our attention to choosing $\pmb{\Omega}_\varepsilon$. In \ref{subsec:intro_reg_as_graph_sel} we discussed a fast algorithm for finding a BIC optimal estimation of $\pmb{\Omega}_\varepsilon$. This estimation is shown in Fig. \ref{fig:err_pr_l0} compared with the inverse of the sample covariance of the error under a basic $VAR(2)$ model fit.
 
 \begin{figure}[!ht]
     \centering
@@ -1395,7 +1396,7 @@ As we have seen in the previous section, the CMI calculation relies heavily upon
 The $l_0$ estimate of $\pmb{\Omega}$ retains only 60.34\% of the matrix entries that are in the sample precision matrix, providing a simpler model of the error structure. The max and min on the colourbars are tighter than the whole range of values in the plot to accentuate how the $l_0$ fit is more robust to noise than the regular fit.
 
 \subsection{CMI Evaluation Variants}
-We now have two selections to make before computing the CMI. First, how to compute the VAR regression matrices. The two major choices we have here are the simple choice of direct VAR regression, and the more computationally expensive choice of the BIC-optimal $l_0$ regression. Second, how to compute the error precision matrix. Again, we can either take the sample precision, or the BIC-optimal $l_0$ estimate of the error precision. This gives us four choices of how to calculate the CMI. Another key point is that the integral that gives the CMI does not have a closed form solution, so we must integrate numerically. Fortunately, the computations are fast, so even a very fine numerical integration is fairly fast. All the information of Fourier transform of a length $n$ digital signal is contained within $n$ evenly spaced samples of its frequency spectrum. Hence, in order to retain all the fidelity of an exact computation of the CMI, our numerical integration needs to have $n$ samples. We can observe some important geographic patterns in these estimations of the CMI in \ref{fig:cmi_options}.
+We now have two selections to make before computing the CMI. First, how to compute the VAR regression matrices. The two major choices we have here are the simple choice of direct VAR regression, and the more computationally expensive choice of the BIC-optimal $l_0$ regression. Second, how to compute the error precision matrix. Again, we can either take the sample precision, or the BIC-optimal $l_0$ estimate of the error precision. This gives us four choices of how to calculate the CMI. Another key point is that the integral that gives the CMI does not have a closed form solution, so we must integrate numerically. Fortunately, the computations are fast, so even a very fine numerical integration is fairly fast. All the information of Fourier transform of a length $n$ digital signal is contained within $n$ evenly spaced samples of its frequency spectrum. Hence, in order to retain all the fidelity of an exact computation of the CMI, our numerical integration needs to have $n$ samples. We can observe some important geographic patterns in these estimations of the CMI in Fig. \ref{fig:cmi_options}.
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=.8\linewidth]{CMI_edges_options.png}
@@ -1404,15 +1405,167 @@ We now have two selections to make before computing the CMI. First, how to compu
 \end{figure}
 There are a number of interesting observations to note here. The first and clearest is that strong connections between timeseries tend aswell to be short in geographical distance. Secondarily, that the bottom two plots which utilise an $l_0$ $VAR(2)$ regression rather than a plain $VAR(2)$ regression assign a much more significant CMI to far-reaching coastal connections across the great Australian bite, as well as between the two northern tips of the country. This seems somewhat contrary to a simple expectation - that temperature relationships should be mostly connections between nearby stations, as these are most related in their distributions, and additionally, and that $l_0$ regressions should reduce spurious connections that arise from noise. In response, we can interpret this phenomenon either as suggesting that $l_0$ regression, especially $l_0$ VAR regression, as in the bottom two plots, is innappropriate here for some reason, as it attaches high CMI to spurious connections, or that these long-range connections are an integral part of this model of temperature evolution over time.
 
-These many significant long-range connections are especially odd given that 
+A reasonable interpretation of the effect of these connections is that although the stations may not physically be effecting each other on a time scale of a 2-day VAR connection, the supersystems that influence both of them over time may be a significant contributing factor to the information between each side of the country. These long connections do not only run across the coast, but also runs from the left to the right of the country across the inland as well. This certainly seems to suggest some interesting long-range connection between either side of the country. It is important to note that for the most part too it is a west-east running effect, rather than a north-south running effect.
 
-The distance between perth and tasmania is about 3000km.
+\subsection{Frequency-domain Interpretation of CMI}
+The CMI formula aggregates a per-frequency component across the range of digital frequencies. It is of importance to be able to intuitively understand what these components represent. In particular, we can consider the simple case of the mutual information of two sinusoids of the same frequency, $x_1(t)$ and $x_2(t)$, with multivariate normally distributed amplitude and phase. That is to say, there may be some predictive power in knowing the amplitude or phase of one of the signals. In this non-conditional case, $\rho_{12}(\omega)$ can be computed as below.
+\begin{align*}
+    x_1(t)&=A_1\cos(\omega_0 t+\phi_1)\\
+    x_2(t)&=A_2\cos(\omega_0 t+\phi_2)\\
+    \rho_{12}(\omega_0)&=\frac{S_{12}(\omega)}{\sqrt{S_{11}(\omega)S_{22}(\omega)}}\\
+    &\text{for simplicity, considering only }\omega>0\\
+    S_{11}(\omega)&=\mathbb{E}(\frac{A_1^2}{2}\delta(\omega-\omega_0))\\
+    &=\frac{\mu_{A1}^2+\sigma_{A1}^2}{2}\delta(\omega-\omega_0)\\
+    S_{22}(\omega)&=\frac{\mu_{A2}^2+\sigma_{A2}^2}{2}\delta(\omega-\omega_0)\\
+    S_{12}(\omega)&=\mathbb{E}(X_1(\omega)X_2^*(\omega))\\
+    &=\mathbb{E}(\frac{A_1A_2}{2}e^{-j(\phi_1-\phi_2)}\delta(\omega-\omega_0))\\
+    &=\frac{\mu_{A1}\mu_{A2}+\sigma_{A1,A2}}{2}e^{-j(\phi_1-\phi_2)}\delta(\omega-\omega_0)\\
+    |\rho_{12}(\omega_0)|^2&=\frac{\mu_{A1}^2\mu_{A2}^2+\sigma_{A1,A2}^2+2\mu_{A1}\mu_{A2}\sigma_{A1,A2}}{(\mu_{A1}^2+\sigma_{A1}^2)(\mu_{A2}^2+\sigma_{A2}^2)}\\
+\end{align*}
+In the case that we allow for negative amplitudes, and give each sinusoid a mean amplitude of $0$, we see an interesting result.
+\begin{align*}
+    |\rho_{12}(\omega_0)|^2&=(\frac{\sigma_{A1,A2}}{\sigma_{A1}\sigma_{A2}})^2\\
+    &=\rho_{A1,A2}^2
+\end{align*}
+We can interpret $|\rho_{12}(\omega)|^2$ then as measuring, in the case of $0$ mean amplitude, the squared correlation between the amplitudes of the signal at $\omega$. This of course cannot be measured for a single signal sample, but can only be measured if many samples of the signal can be taken. Additionally, for two random variables, the wrapping function we see in the CMI formula, as shown below, represents the mutual information between the variables whose correlation we are plugging in.
+\begin{align*}
+    CMI_{ij}(\omega)=-\frac12\ln(1-|\rho_{ij}(\omega)|^2)
+\end{align*}
+That is, each frequency component tells us how much the information we gain about the amplitude of one of the signals when we learn the amplitude of the other. The conditional component tells us that we account for all other information sources before determining this. A major limitation of this measure is that while it encodes information between the amplitudes at each frequency component, it does not convey the information shared between phases at each frequency component. A good source of future work would be to develop and investigate the validity of such a measure, but this task is left to future research.
 
-% TODO:
+At first this lack of phase information seems like a massive drawback, but there is something to be salvaged here. In particular, an extreme example of where this predictivity is still useful is where two signals have significant CMI at all frequencies, but a sample of one of the related signals exhibits a particularly large contribution at a particular frequency. This informs us that we expect the other signal to also have large contribution at that frequency. That is, rather then telling us how much trends are exactly predicted between the two signals, the periodicity of effects in one signal can inform us of the periodicity of effects in another signal, but not whether the effect will be leading or lagging.
+
+We can then look back to the CMI formula before to extract and interpret its per-frequency contribution, as has been little applied and reflected on in the literature. We recall the CMI formula and extract its per-frequency contribution below.
+\begin{align*}
+    CMI_{ij}&=-\frac12\int_{-\pi}^\pi\ln(1-|\rho_{ij|\neq{ij}}(\omega)|^2)\frac{d\omega}{2\pi}\\
+    CMI_{ij}(\omega)&=-\frac{1}{4\pi}\ln(1-|\rho_{ij|\neq{ij}}(\omega)|^2)\\
+    &-\frac{1}{4\pi}\ln(1-|\rho_{ij|\neq{ij}}(-\omega)|^2)
+\end{align*}
+If we can identify an interest in a particular frequency band of the CMI, it is also useful to define the bandpass cmi (BPCMI), defined below.
+\begin{align*}
+    BPCMI_{ij}(\omega_0,\omega_1)&=-\frac12\int_{\omega_0}^{\omega_1}\ln(1-|\rho_{ij|\neq{ij}}(\omega)|^2)\frac{d\omega}{2\pi}\\
+    &-\frac12\int_{-\omega_1}^{-\omega_0}\ln(1-|\rho_{ij|\neq{ij}}(\omega)|^2)\frac{d\omega}{2\pi}
+\end{align*}
+As an intuitive description for example, a low pass filter measure of CMI aggregates the extent to which low frequency, that is to say, longer term trends in two signals are conditionally predictive of each other. Higher frequency components describe the conditional predictive power between short term trends in two signals. This has the potential to be a powerful effect. The bandpass CMIs for the four equally sized bands from $0$ to $\pi$ are shown in Fig. \ref{fig:aus_bp_cmi}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{aus_bp_cmi.png}
+    \caption{Australian Bandpass CMI Maps}
+    \label{fig:aus_bp_cmi}
+\end{figure}
+
+This figure reveals a few significant features. First, that a lot of the content between the bands is very similar. At least in this example it is the case that if we know that the amplitude of the high-frequency components of two signals covary, we can bet (with some uncertainty), that their low frequency components will covary as well. It seems at first that the lowpass CMI is very similar to that in the highpass CMI. We are then interested in plotting them against each other, as is done in Fig. \ref{fig:cmi_freq_comp}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{aus_bp_cmi_comparison.png}
+    \caption{Australian lowpass vs highpass CMI comparison}
+    \label{fig:cmi_freq_comp}
+\end{figure}
+
+Based on the figure, the relationship between low and high pass CMI is rougher than the map initially shows. Although the CMI in different bands has similar structure, that is significant components tend to still be significant, the CMI values themselves vary greatly.
+
+A significant foreseeable advantage of frequency band interpretation of CMI is in the fact that when computing total CMI, we make the total summation across all frequencies, where indeed we may be more concerned about our capacity for prediction only in the frequency band containing the most power in the signal. Part of the desire for this correction is the fact that the $\rho_{ij}(\omega)$ term explicitly adjusts for signal power at the considered frequency, normalising out the power of the signals at each frequency. One can imagine how with two random sinusoids, the CMI of interest would in fact be at a single frequency, and any other frequency contributions, though equally weighted, may constitute mostly noise.
+
+A lot more work is available to be done here in the bandpass interpretation of CMI, but further discussion here is limited by the time constraints of this thesis.
+
+\section{Verifying and Disputing Results with NOAA Data}
+Throughout this work, we have observed a variety of results on Australian mean daily temperature data. Some key results that we can seek to verify using the US data set include:
+\begin{itemize}
+    \item $8.54\%$ RMSE for a compression ratio of 1:50 using the space-time graph fourier transform.
+    \item Geographical predictors of seasonality phase and amplitude.
+    \item Predictors of temperature variance and skew.
+    \item Fitting the correlation vs distance function with a 3D Matern kernel with $\lambda=0.0019km^{-1}$.
+    \item Observations of the anisotropies in the correlation vs distance function.
+    \item BIC success and superiority of the $l_0$ coordinate descent regression.
+    \item Stronger long-range CMI connections when $l_0$ regression is used.
+\end{itemize}
+\subsection*{Compression Results}
+Compression results on NOAA data vs the BOM data are shown below.
+\begin{figure}[!ht]
+    \centering
+        \begin{tabular}{|c|c|c|c|c|c|c|c|}
+         \hline
+         Fraction of Coefficients Used & 1/50 & 1/20 & 1/15 & 1/10 & 1/7 & 1/5 & 1/3 \\
+         \hline
+         RMSE BOM (\%) & 8.54 & 6.95 & 6.47 & 5.80 & 5.18 & 4.54 & 3.43 \\
+         \hline
+         RMSE NOAA (\%) & 13.71 & 11.14 & 10.29 & 9.05 & 7.91 & 6.78 & 4.93 \\
+         \hline
+    \end{tabular}
+    \caption{Australian Mean Daily Temperature Data (1975-2023) Compression Results}
+    \label{fig:noaa_compression}
+\end{figure}\\
+The NOAA data contains data with much greater variation that the BOM data, and as such it is more difficult to compress efficiently. Despite this it shows the same behaviour of being effectively compressed by use of a graph fourier transform dependent only on the distances in the system.
+\subsection*{Geographical Predictors}
+In the BOM dataset, we observed in \ref{subsec:seasonality} that seasonal phase varied in great part with latitude, the areas nearer to the equator lagging those further south. In the NOAA dataset, we see a much larger variation in phase, with extreme results close the the equator, as in Fig. \ref{fig:noaa_seasons}. This is explained in part by the seasonal amplitude variation; in the NOAA dataset, the seasonal amplitude for stations near the equator is minimal, leaving phase freer to wander arbitrarily.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{mean_params_by_loc_noaa.png}
+    \caption{Seasonal phase and amplitude of mean daily temperature in north America}
+\end{figure}
+Unlike the Australian dataset, the seasonal amplitude varies less by coastality, but by latitude, with Canadian temperatures being much more variable than those in the United States. This is a significant difference, and shows that the relationship of geography to climate is more complicated than simply looking at latitude and coastality.
+\subsection*{Correlation vs Distance Fit and its Anisotropies}
+The NOAA dataset exhibits significant similarity in its correlation vs distance function with that found for the BOM dataset.
+\subsection*{L0 Coordinte Descent}
+\subsection*{CMI Connectivity and Frequency Dependence}
+
+
+\section{Difficulties with Inverse-Covariance System Identification}
+Throughout this work, we have treated the inverse covariance (precision) matrix as a more viable option for describing the behaviour of a graphical system and the covariance matrix itself. This is not without good reason. In particular, the covariance matrix entries do not identify a unique relationship between variables, as relationships between confounding variables are included. The precision matrix expressely looks at the relationship between two variables, conditioned on the values of other variables. This is a much better method generally for measuring direct relationships between variables, rather than relationships due to confounding variables. Fig. \ref{fig:causal} demonstrates this problem, where rain causes both umbrellas and traffic, so umbrella use may be correlated with traffic, but clearly there is no causal relationship between them.
+\begin{figure}[!ht]
+    \centering
+    \begin{tikzpicture}[baseline={(0,0)}]
+        \node[circle, draw, inner sep=2pt, minimum size=20mm] (n1) at (0,0) {Rain};
+        \node[circle, draw, inner sep=2pt, minimum size=20mm] (n2) at (1.5,-2.6) {Umbrellas};
+        \node[circle, draw, inner sep=2pt, minimum size=20mm] (n3) at (-1.5,-2.6) {Traffic};
+        \draw[->, line width=1.5pt] (n1) -- (n2);
+        \draw[->, line width=1.5pt] (n1) -- (n3);
+    \end{tikzpicture}
+    \hspace{0.5cm}
+    \begin{tikzpicture}[baseline={(0,0)}]
+        \node[circle, draw, inner sep=2pt, minimum size=20mm] (n1) at (0,0) {Rain};
+        \node[circle, draw, inner sep=2pt, minimum size=20mm] (n2) at (1.5,-2.6) {Umbrellas};
+        \node[circle, draw, inner sep=2pt, minimum size=20mm] (n3) at (-1.5,-2.6) {Traffic};
+        \draw[line width=1.5pt] (n1) -- (n2);
+        \draw[line width=1.5pt] (n1) -- (n3);
+        \draw[line width=1.5pt] (n2) -- (n3);
+    \end{tikzpicture}
+    \caption{Causal relationship between three variables (left), vs the correlation relationship between the variables (right)}
+    \label{fig:causal}
+\end{figure}
+
+This analogy breaks down however when describing a continuous spatiotemporal process like temperature. We expect all points to have a causal effect only on those points right next to them, as all other influences are via those points. When such a system is sampled, that is we record the time series data at a discrete set of points, the correlation between these points is retained, but the precision information changes drastically. This is to say that the choice of sampling has a significant effect on the precisions between timeseries.
+
+Not all hope is lost here for the case of identifying subsampled graphical systems, or indeed continuous systems, using the precision matrix. As we see in the case of Kriging, as discussed in \ref{subsec:kriging} and demonstrated in \ref{subsec:kriging_implementation}, the sampling structure provides useful information about how to usefully interpolate out of sample data.
+
+In terms of parameter efficiency, as we have seen in \ref{subsec:geographical}, the Mat\'{e}rn kernel provides an okay fit to the covariance matrix, but not a good enough one to allow for accurate representation contained within parameter-reduced $l_0$ coordinate descent models.
+
+For accurate predictive results, it seems that the precision matrix is the appropriate choice of mathematical tool for feature extraction, especially in domains that are naturally graphical. In continuous domains, or heavily subsampled graphs, finding an accurate correlation function, through identification of its Mat\'{e}rn kernel dimension, and analysis of appropriate anisotropies, is a key step in understanding the underlying process that is driving the system.
+
+In order to determine the manner in which the precision matrix is effected by subsampling, we can consider how the precision matrix changes when one variable is removed, as was seen in the derivation of the graphical $l_0$ coordinate descent algorithm in \ref{subsec:intro_reg_as_graph_sel}, shown below.
+\begin{align*}
+    \pmb{\Omega}&=\begin{pmatrix}
+        \pmb{\Omega}_0&\ve{w}\\
+        \ve{w}^\top&\omega
+    \end{pmatrix}\\
+    \pmb{\Sigma}=\pmb{\Omega}^{-1}&=\begin{pmatrix}
+        \pmb{\Sigma}_0&\ve{s}\\
+        \ve{s}^\top&\sigma
+    \end{pmatrix}\\
+    \pmb{\Sigma}_0^{-1}&=\pmb{\Omega}_0-\omega^{-1}\ve{w}\ve{w}^\top\\
+\end{align*}
+First, we must carefully note that off-diagonal entries of the precision matrix are inverted in their relationship between sign and covariance. That is, positive entries reflect negatively correlated variables (after accounting for conditional relationships), and negative entries reflect positively correlated variables.
+Intuitively, this formula tells us that when one graph vertex is removed, each pair of variables connected to the removed vertex have their connection strengthed (made more negative) when their connections to the removed variable are in the same direction, and weakened when their connections are in the opposite direction.
+
+We can highlight the difficulty of interpretting these relationships as defining underlying graph structure by turning back to the simulations discussed in \ref{subsec:matern_sims}. We have a discretised 2D lattice domain upon which the screened Poisson equation acts, and when we randomly choose subsets of the lattice points as "sensor points", identifying the inverse covariance matrix gives us a graph that may help in optimal interpolation or prediction, through processes like Kriging, does not actually identify the underlying structure of the system, that is a lattice. Whereas, if we look at the distance-correlation function in the subsampled system, we can observe a strong fit with the appropriate 2D Mat\'{e}rn kernel. That is, the distance-correlation function reveals an underlying topological truth about the nature of the system, where the inverse covariance does not.
 % - Sims justifying issues with low-resolution sampling of Matern-corr type data & CMI
-% - Conceptual problems with identifying the system with a graph
-% - American data, differences, verification of results on American data
+\section{Further Work}
 % - Where to from here?
+\section{Conclusion}
+
+
 % - cleaning and appendixing code.
 
 % \newpage

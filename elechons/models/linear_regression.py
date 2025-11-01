@@ -30,25 +30,36 @@ class Prediction:
         return np.prod(self.data.shape) * 2 * np.log(self.rmse()) + self.num_params * np.log(np.prod(self.data.shape))
     
     # this function only works when param_history is a VAR autoregression matrix
-    def CMI(self, l0=False):
+    prE = None
+    prEl0 = None
+    Ecov = None
+    def CMI(self, l0=False, omega0=0, omega1=np.pi):
         E = self.residuals()
         N = E.shape[0]
         p = self.param_history.shape[1] // self.param_history.shape[0]
-        Ecov = np.cov(E)
-        prE = np.linalg.inv(Ecov)
-        if (l0):
-            prE = FastGL0(Ecov, p)
+
+        if self.Ecov is None:
+            self.Ecov = np.cov(E)
+        Ecov = self.Ecov
+        if self.prE is None:
+            self.prE = np.linalg.inv(Ecov)
+        prE = self.prE
+        if self.prEl0 is None and l0:
+            self.prEl0 = FastGL0(Ecov, p)
+            prE = self.prEl0
+        
         Atau = np.split(self.param_history, p, axis=1)
         def R(omega):
             Aomega = np.eye(N) - sum(Atau[i]*np.exp(-1j*omega*i) for i in range(p))
             Finvomega = Aomega.conj().T @ prE @ Aomega
             return - Finvomega / np.sqrt(np.outer(Finvomega.diagonal(), Finvomega.diagonal()))
-        
+
         CMI = np.zeros((N,N))
         D = self.data.shape[1]
-        dw = 2 * np.pi / D
-        for omega in np.linspace(-np.pi,np.pi,D):
+        dw = 2 * (omega1-omega0) / D
+        for omega in np.linspace(omega0,omega1, int(D * (omega1 - omega0) / np.pi)):
             CMI += - 0.5 * (1/(2*np.pi)) * np.log(1 - np.pow(np.abs(R(omega)),2)) * dw
+            CMI += - 0.5 * (1/(2*np.pi)) * np.log(1 - np.pow(np.abs(R(-omega)),2)) * dw
         
         return CMI
 

@@ -49,4 +49,9 @@
 \contentsline {subsection}{\numberline {6.1}Calculating CMI for VAR(p) Models}{54}{subsection.6.1}%
 \contentsline {subsection}{\numberline {6.2}Estimating the Error Precision}{55}{subsection.6.2}%
 \contentsline {subsection}{\numberline {6.3}CMI Evaluation Variants}{55}{subsection.6.3}%
-\contentsline {section}{Bibliography}{57}{section*.6}%
+\contentsline {subsection}{\numberline {6.4}Frequency-domain Interpretation of CMI}{57}{subsection.6.4}%
+\contentsline {section}{\numberline {7}Verifying and Disputing Results with NOAA Data}{60}{section.7}%
+\contentsline {section}{\numberline {8}Difficulties with Inverse-Covariance System Identification}{62}{section.8}%
+\contentsline {section}{\numberline {9}Further Work}{64}{section.9}%
+\contentsline {section}{\numberline {10}Conclusion}{64}{section.10}%
+\contentsline {section}{Bibliography}{65}{section*.11}%

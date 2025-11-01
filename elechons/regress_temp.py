@@ -13,6 +13,7 @@ import datetime
 from elechons.models import spatial_methods as s
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.stats.diagnostic import acorr_ljungbox
+import os
 
 stat = None
 lat = sh.STATIONS['lat'].to_numpy()
@@ -68,26 +69,32 @@ def plot_all():
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
     
-    print('plotting save_hist_qq_subplots')
-    save_hist_qq_subplots()
-    print('plotting plot_dist_by_loc')
-    plot_dist_by_loc()
+    # print('plotting save_hist_qq_subplots')
+    # save_hist_qq_subplots()
+    # print('plotting plot_dist_by_loc')
+    # plot_dist_by_loc()
     print('plotting plot_seasonality_by_loc')
     plot_seasonality_by_loc()
-    print('plotting plot_autoregression_by_loc')
-    plot_autoregression_by_loc()
-    print('plotting plot_autoregression_partial_corrs delay 20')
-    plot_autoregression_partial_corrs()
-    print('plotting plot_autoregression_partial_corrs delay 5')
-    plot_autoregression_partial_corrs(5)
-    print('plotting plot_correlation_v_dist')
-    plot_correlation_v_dist()
-    print('plotting plot_regression_coeff_v_dist')
-    plot_regression_coeff_v_dist()
-    print('plotting plot_precision_v_dist')
-    plot_precision_v_dist()
-    print('plotting plot_autoreg_residues')
-    plot_autoreg_residues()
+    # print('plotting plot_autoregression_by_loc')
+    # plot_autoregression_by_loc()
+    # print('plotting plot_autoregression_partial_corrs delay 20')
+    # plot_autoregression_partial_corrs()
+    # print('plotting plot_autoregression_partial_corrs delay 5')
+    # plot_autoregression_partial_corrs(5)
+    # print('plotting plot_correlation_v_dist')
+    # plot_correlation_v_dist(regression_error)
+    # print('plotting plot_regression_coeff_v_dist')
+    # plot_regression_coeff_v_dist()
+    # print('plotting plot_precision_v_dist')
+    # plot_precision_v_dist()
+    # print('plotting plot_autoreg_residues')
+    # plot_autoreg_residues()
+    # print('plotting corr v dist')
+    # plot_correlation_v_dist(regression_error)
+    # print('plotting corr v dist angle')
+    # plot_correlation_v_dist_angle(regression_error)
+    # print('plotting kriging')
+    # plot_kriging_from_cov_model(t=0, l=0.0019375)
 
 def save_hist_qq_subplots():
     if not _INIT:
@@ -116,7 +123,9 @@ def save_hist_qq_subplots():
         axes[1,1].set_title(f'sin-adj {stat} temp q-q plot')
 
         plt.tight_layout()
-        fig.savefig(f'{config.PLOTS_DIR}/distribution_imgs/{stat}_dist_{sh.STATIONS.iloc[st]['station number']}.png', bbox_inches='tight')
+        path = f'{config.PLOTS_DIR}/distribution_imgs'
+        os.makedirs(path, exist_ok=True)
+        fig.savefig(path + f'/{stat}_dist_{sh.STATIONS.iloc[st]['station number']}.png', bbox_inches='tight')
         plt.close()
 
 def test_normality(st):
@@ -159,7 +168,9 @@ def plot_ar_lb_success(lags=10, arima=False):
     plt.ylabel('No. timeseries with p>0.05')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_ljung_box.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path, exist_ok=True)
+    plt.savefig(path + f'/{stat}_ljung_box.png', bbox_inches='tight')
     plt.close()
 
 
@@ -187,7 +198,9 @@ def plot_dist_by_loc():
     axes[2].set_title(f'kurtosis in sin-adj {stat} temp data by location')
 
     plt.tight_layout()
-    fig.savefig(f'{config.PLOTS_DIR}/distribution_imgs/{stat}_dists_by_loc.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/distribution_imgs'
+    os.makedirs(path, exist_ok=True)
+    fig.savefig(path+f'/{stat}_dists_by_loc.png', bbox_inches='tight')
     plt.close()
 
 def plot_seasonality_by_loc():
@@ -214,7 +227,9 @@ def plot_seasonality_by_loc():
     axes[1].set_ylabel('lat (deg)')
 
     plt.tight_layout()
-    fig.savefig(f'{config.PLOTS_DIR}/sin_fit_imgs/{stat}_params_by_loc.png', bbox_inches='tight')
+    path=f'{config.PLOTS_DIR}/sin_fit_imgs'
+    os.makedirs(path, exist_ok=True)
+    fig.savefig(path+f'/{stat}_params_by_loc.png', bbox_inches='tight')
     plt.close()
 
 def plot_autocorrs(max_delay = 1000):
@@ -238,7 +253,9 @@ def plot_autocorrs(max_delay = 1000):
         plt.legend()
 
         plt.tight_layout()
-        plt.savefig(f'{config.PLOTS_DIR}/autocorr_levinson/{stat}_autocorr_{sh.STATIONS.iloc[st]['station number']}.png', bbox_inches='tight')
+        path=f'{config.PLOTS_DIR}/autocorr_levinson'
+        os.makedirs(path,exist_ok=True)
+        plt.savefig(path+f'/{stat}_autocorr_{sh.STATIONS.iloc[st]['station number']}.png', bbox_inches='tight')
         plt.close()
 
         autoreg = s.gohberg_inverse(s.seasonal_autocorr_model(autocorr_model_params, days))
@@ -285,7 +302,9 @@ def plot_mean_v_variance():
     plt.title(f'{stat} Daily Temperature Mean v Variance')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/distribution_imgs/{stat}_mean_v_var', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/distribution_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_mean_v_var', bbox_inches='tight')
     plt.close()
 
 def plot_windowed_regression_v_time(station, W=182, overlap=164):
@@ -315,7 +334,9 @@ def plot_windowed_regression_v_time(station, W=182, overlap=164):
     axes[1].set_ylabel('autoregression coefficient')
 
     plt.tight_layout()
-    fig.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{station}_{stat}_autoreg_v_time', bbox_inches='tight', dpi=300)
+    path=f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    fig.savefig(path+f'/{station}_{stat}_autoreg_v_time', bbox_inches='tight', dpi=300)
     plt.close()
 
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(6,7))
@@ -333,7 +354,9 @@ def plot_windowed_regression_v_time(station, W=182, overlap=164):
     axes[1].set_ylabel('autoregression coefficient')
 
     plt.tight_layout()
-    fig.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{station}_{stat}_autoreg_v_time_fft', bbox_inches='tight', dpi=300)
+    path=f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    fig.savefig(path+f'/{station}_{stat}_autoreg_v_time_fft', bbox_inches='tight', dpi=300)
     plt.close()
 
 def fit_seasonal_autoregression():
@@ -381,7 +404,9 @@ def plot_windowed_regression_std(W=182):
     axes[1].set_ylabel('lat')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_regression_std_by_loc.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_regression_std_by_loc.png', bbox_inches='tight')
     plt.close()
     
     # we expect stds to be ~ 1 - \xi_2^2, so we compare.
@@ -404,7 +429,9 @@ def plot_windowed_regression_std(W=182):
     axes[1].set_ylabel('lat')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_regression_std_ratio_by_loc.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_regression_std_ratio_by_loc.png', bbox_inches='tight')
     plt.close()
 
 def plot_largest_backfill():
@@ -421,7 +448,9 @@ def plot_largest_backfill():
     plt.ylabel('lat (deg)')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_backfills_by_loc.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_backfills_by_loc.png', bbox_inches='tight')
     plt.close()
             
 
@@ -452,7 +481,9 @@ def autoregression_with_yj_transform(skew_coeff=0.25):
     plt.colorbar(scatter, label='RMSE (degC)')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/YJ/{stat}_RMSE_by_loc.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/YJ'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_RMSE_by_loc.png', bbox_inches='tight')
     plt.close()
 
     temps_skew = stats.skew(yj_data, axis=1)
@@ -464,7 +495,7 @@ def autoregression_with_yj_transform(skew_coeff=0.25):
     plt.ylabel('lat')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/YJ/{stat}_dists_by_loc.png', bbox_inches='tight')
+    plt.savefig(path+f'/{stat}_dists_by_loc.png', bbox_inches='tight')
     plt.close()
 
 def plot_autoregression_by_loc():
@@ -487,7 +518,9 @@ def plot_autoregression_by_loc():
     axes[1].set_ylabel('lat (deg)')
 
     plt.tight_layout()
-    fig.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_coeff_by_loc.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    fig.savefig(path+f'/{stat}_coeff_by_loc.png', bbox_inches='tight')
     plt.close()
 
 def plot_autoregression_partial_corrs(max_delay = 20):
@@ -509,7 +542,9 @@ def plot_autoregression_partial_corrs(max_delay = 20):
     plt.title(f'{stat} temp autoregression partial correlations for max delay = {max_delay}')
     
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_partial_corr_by_delay_{max_delay}.png', bbox_inches='tight', dpi=300)
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_partial_corr_by_delay_{max_delay}.png', bbox_inches='tight', dpi=300)
     plt.close()
 
 def plot_kriging_from_cov_model(t=0, l=0.0019375):
@@ -533,12 +568,12 @@ def plot_kriging_from_cov_model(t=0, l=0.0019375):
 
     day_temp = temps[:, t]
 
-    la_left = -45
-    la_right = -10
-    lo_left = 110
-    lo_right = 155
-    lats = np.linspace(la_left, la_right, (la_right - la_left)*4)
-    longs = np.linspace(lo_left, lo_right, (lo_right - lo_left)*4)
+    la_left = min(lat)-10
+    la_right = max(lat)+10
+    lo_left = min(long)-10
+    lo_right = max(long)+10
+    lats = np.linspace(la_left, la_right, int(la_right - la_left)*4)
+    longs = np.linspace(lo_left, lo_right, int(lo_right - lo_left)*4)
     
     interpolation = np.zeros([len(lats), len(longs)])
     interpolation_variance = np.zeros([len(lats), len(longs)])
@@ -565,12 +600,14 @@ def plot_kriging_from_cov_model(t=0, l=0.0019375):
 
     ax.scatter(long, lat, c=day_temp, cmap='rainbow', edgecolors="black", linewidths=0.5, s=3, zorder=5)
 
-    date = (datetime.datetime.strptime(sh.latest_start, "%Y-%m-%d") + datetime.timedelta(days=t)).strftime('%d/%m/%Y')
+    # date = (datetime.datetime.strptime(config.LATEST_START, "%Y-%m-%d") + datetime.timedelta(days=t)).strftime('%d/%m/%Y')
 
-    ax.set_title(f'Kriging estimate of Australian {stat} temperature on {date}')
+    ax.set_title(f'Kriging estimate of Australian {stat} temperature')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/kriging/{stat}_temp_model_krig.png', bbox_inches='tight', dpi=300)
+    path = f'{config.PLOTS_DIR}/kriging'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_temp_model_krig.png', bbox_inches='tight', dpi=300)
     plt.close()
 
     # Kriging error
@@ -582,22 +619,22 @@ def plot_kriging_from_cov_model(t=0, l=0.0019375):
 
     ax.scatter(long, lat, c='black', s=3, zorder=5)
 
-    date = (datetime.datetime.strptime(sh.latest_start, "%Y-%m-%d") + datetime.timedelta(days=t)).strftime('%d/%m/%Y')
+    # date = (datetime.datetime.strptime(sh.latest_start, "%Y-%m-%d") + datetime.timedelta(days=t)).strftime('%d/%m/%Y')
 
-    ax.set_title(f'Kriging standard error of Australian {stat} temperature on {date}')
+    ax.set_title(f'Kriging standard error of Australian {stat} temperature')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/kriging/{stat}_temp_model_krig_error.png', bbox_inches='tight', dpi=300)
+    plt.savefig(path+f'/{stat}_temp_model_krig_error.png', bbox_inches='tight', dpi=300)
     plt.close()
 
-def plot_correlation_v_dist():
+def plot_correlation_v_dist(data):
     if not _INIT:
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
 
-    space_error_correlation = np.corrcoef(regression_error).flatten()
+    space_error_correlation = np.corrcoef(data).flatten()
     dist = ec.distance_matrix(sh.STATIONS).flatten()
-    print(len(sh.STATIONS), temps_mean_sin_adj.shape, regression_error.shape, space_error_correlation.shape, dist.shape)
+    print(len(sh.STATIONS), temps_mean_sin_adj.shape, data.shape, space_error_correlation.shape, dist.shape)
 
     cov_3d_model_min_obj = minimize(s.least_squares, np.array([0.01]), args=(s.cov_3d_model, dist, space_error_correlation), method='Nelder-Mead')
     if not cov_3d_model_min_obj.success:
@@ -622,26 +659,31 @@ def plot_correlation_v_dist():
     plt.legend()
     
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_error_corr_by_dist.png', bbox_inches='tight', dpi=300)
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_error_corr_by_dist.png', bbox_inches='tight', dpi=300)
     plt.close()
 
-def plot_correlation_v_dist_angle():
+def plot_correlation_v_dist_angle(data):
     if not _INIT:
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
         return
 
-    space_error_correlation = np.corrcoef(temps_mean_sin_adj).flatten()
+    space_correlation = np.corrcoef(data).flatten()
     dist = ec.distance_matrix(sh.STATIONS).flatten()
+    filt = dist < 4000
+    dist = dist[filt]
+    space_correlation = space_correlation[filt]
     d_long = long[:, np.newaxis] - long[np.newaxis, :]
     d_lat = lat[:, np.newaxis] - lat[np.newaxis, :]
-    angle = np.where(d_long == 0, np.pi/2, np.arctan(d_lat/d_long))
+    angle = np.where(d_long == 0, np.pi/2, np.arctan(d_lat/d_long)).flatten()[filt]
     # m_lat = np.abs((lat[:, np.newaxis] + lat[np.newaxis, :]).flatten()) / 2
     # m_long = np.abs((long[:, np.newaxis] + long[np.newaxis, :]).flatten()) / 2
     
     # fig = plt.figure()
     # ax = fig.add_subplot(111, projection='3d')
     
-    # scatter = ax.scatter(m_lat, m_long, dist, s=2, c=space_error_correlation, cmap='rainbow', depthshade=False)
+    # scatter = ax.scatter(m_lat, m_long, dist, s=2, c=space_correlation, cmap='rainbow', depthshade=False)
     # ax.set_xlabel('lat (1000km)')
     # ax.set_ylabel('long (1000km)')
     # ax.set_zlabel('correlation coefficient')
@@ -650,24 +692,26 @@ def plot_correlation_v_dist_angle():
     # cbar = fig.colorbar(scatter, ax=ax)
     # cbar.set_label('correlation')
 
-    scatter = plt.scatter(dist, angle, s=2, c=space_error_correlation, cmap='rainbow')
+    scatter = plt.scatter(dist, angle, s=2, c=space_correlation, cmap='rainbow')
     plt.xlabel('distance (km)')
     plt.ylabel('angle (rad)')
     plt.title(f'distance v correlation for seasonality-adjusted {stat} temperature')
     plt.colorbar(scatter, label='correlation')
     
     # plt.show()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_error_corr_by_dist_angle_2.png', bbox_inches='tight', dpi=300)
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_error_corr_by_dist_angle_2.png', bbox_inches='tight', dpi=300)
     plt.close()
 
-    scatter = plt.scatter(dist, space_error_correlation, s=2, c=angle, cmap='hsv')
+    scatter = plt.scatter(dist, space_correlation, s=2, c=angle, cmap='hsv')
     plt.xlabel('distance (km)')
     plt.ylabel('correlation')
     plt.title(f'distance v correlation for seasonality-adjusted {stat} temperature')
     plt.colorbar(scatter, label='angle (rad)')
     
     # plt.show()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_error_corr_by_dist_angle.png', bbox_inches='tight', dpi=300)
+    plt.savefig(path+f'/{stat}_error_corr_by_dist_angle.png', bbox_inches='tight', dpi=300)
     plt.close()
 
 def fit_correlation():
@@ -721,7 +765,9 @@ def plot_regression_coeff_v_dist():
     plt.title(f'{stat} temp dist v single regression coefficient for regression error')
     
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_error_regression_coeff_by_dist.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_error_regression_coeff_by_dist.png', bbox_inches='tight')
     plt.close()
 
 def plot_precision_v_dist():
@@ -793,7 +839,9 @@ def plot_precision_v_dist():
     plt.colorbar(scatter, label='distance order')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_nearest_error_precision_by_dist.png', bbox_inches='tight', dpi=300)
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_nearest_error_precision_by_dist.png', bbox_inches='tight', dpi=300)
     plt.close()
 
     scatter = plt.scatter(space_error_cov, space_error_precision, s=1, c=cov_order, cmap='rainbow', alpha=0.4)
@@ -803,7 +851,7 @@ def plot_precision_v_dist():
     plt.colorbar(scatter, label='covariance order')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_nearest_error_precision_by_cov.png', bbox_inches='tight', dpi=300)
+    plt.savefig(path+f'/{stat}_nearest_error_precision_by_cov.png', bbox_inches='tight', dpi=300)
     plt.close()
 
 def plot_autoreg_residues():
@@ -819,7 +867,9 @@ def plot_autoreg_residues():
     plt.title(f'error after autoregression for {stat} temp data by location')
 
     plt.tight_layout()
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_RMSE_by_loc.png', bbox_inches='tight')
+    path = f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_RMSE_by_loc.png', bbox_inches='tight')
     plt.close()
 
 def spatial_spectra(l=0.0019375):
@@ -873,7 +923,9 @@ def spatial_spectra(l=0.0019375):
     plt.xscale('log')
     plt.legend()
 
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/{stat}_spatial_spectra.png', bbox_inches='tight')
+    path=f'{config.PLOTS_DIR}/autoregression_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    plt.savefig(path+f'/{stat}_spatial_spectra.png', bbox_inches='tight')
     plt.close()
 
     noise_spectra = GFT @ np.random.normal(size=temps.shape)
@@ -890,7 +942,7 @@ def spatial_spectra(l=0.0019375):
     plt.ylim([0, 1.5])
     plt.legend()
 
-    plt.savefig(f'{config.PLOTS_DIR}/autoregression_fit_imgs/noise_spatial_spectra.png', bbox_inches='tight')
+    plt.savefig(path+f'/noise_spatial_spectra.png', bbox_inches='tight')
     plt.close()
 
     # temp_rmse = s.rmse(temps_mean_sin_adj)
@@ -964,7 +1016,9 @@ def direct_error_regressed_on_spatial_data():
     ax3.set_title('Distances Matrix')
 
     plt.tight_layout()
-    fig.savefig(f'{config.PLOTS_DIR}/spatial_fit_imgs/{stat}_error_regressed_on_spatial_data.png', bbox_inches='tight', dpi=300)
+    path=f'{config.PLOTS_DIR}/spatial_fit_imgs'
+    os.makedirs(path,exist_ok=True)
+    fig.savefig(path+f'/{stat}_error_regressed_on_spatial_data.png', bbox_inches='tight', dpi=300)
     plt.close()
 
 if __name__ == '__main__':

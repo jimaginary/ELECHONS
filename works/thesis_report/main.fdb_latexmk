@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex main"] 1761459912.71182 "main.aux" "main.bbl" "main" 1761511884.72115 0
+["bibtex main"] 1761994193.28685 "main.aux" "main.bbl" "main" 1761995848.60247 0
   "./bibliography.bib" 1761448108.00394 8806 e6f897bf0122af64e6195505474f146a ""
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/plain.bst" 1737590400 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1761511884.26842 23457 72a79407ba0200289baf89c61cde96c8 "pdflatex"
+  "main.aux" 1761995848.18611 25576 001d7b2cf999392723a2c33b05060080 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1761511878.00284 "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" "main.pdf" "main" 1761511884.7215 0
-  "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" 1761511877.45379 133771 65ebbfc089ea314b0356fc1b99eb2500 ""
+["pdflatex"] 1761995842.63734 "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" "main.pdf" "main" 1761995848.60281 0
+  "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" 1761995842.05211 150359 d1ed331d43a01836cf276fb102afa08d ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1737590400 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
@@ -188,13 +188,15 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1758437073.17899 4602002 62dba5fc29055c16380d7393a2adb07a ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1758436586 7753794 0b6227a8726be7d4e63f1129d7541864 ""
   "7045_monthly.png" 1759736463.9695 55266 d8932525308c7ffd5f37d69734fafb5d ""
-  "CMI_edges_options.png" 1761459468.19694 621789 00f25f7d21a244dee1d93d1f453f18e8 ""
+  "CMI_edges_options.png" 1761995776.57801 527859 b58ba934f7251f7eeb8ccf3fc16f1301 ""
   "VAR_Gl0_err_pr.png" 1761453123.94448 147197 3de9691400f7771ca0e75241fc3b3458 ""
-  "main.aux" 1761511884.26842 23457 72a79407ba0200289baf89c61cde96c8 "pdflatex"
-  "main.bbl" 1761459912.86772 6493 026bb9a5e09f6cdd397da7df44787efb "bibtex main"
-  "main.out" 1761511884.27042 10210 70897e494cd81a0239c8254e6378eca3 "pdflatex"
-  "main.tex" 1761511877.45379 133771 65ebbfc089ea314b0356fc1b99eb2500 ""
-  "main.toc" 1761511884.27142 4992 28937ccca55ebc29fb2167887f13837f "pdflatex"
+  "aus_bp_cmi.png" 1761995019.11962 500404 236682a9182f224ced9ca49409f96394 ""
+  "aus_bp_cmi_comparison.png" 1761993321.2242 112342 16e472a208cc55a5a56661af3a48f89f ""
+  "main.aux" 1761995848.18611 25576 001d7b2cf999392723a2c33b05060080 "pdflatex"
+  "main.bbl" 1761994193.41774 6493 026bb9a5e09f6cdd397da7df44787efb "bibtex main"
+  "main.out" 1761995848.18811 11308 1e7077a1f5386588a68567f7c177c60d "pdflatex"
+  "main.tex" 1761995842.05211 150359 d1ed331d43a01836cf276fb102afa08d ""
+  "main.toc" 1761995848.18911 5454 85728632a8be806d2147fac0fee79d27 "pdflatex"
   "mean_dist_7045.png" 1759736463.9985 68209 a9aa52247ef70f8badeaf7010a33d107 ""
   "mean_dist_7045_dif.png" 1759736463.9985 64791 e18c58297a34dfd97c9c59bd84b7cc56 ""
   "mean_dists_by_loc.png" 1759736463.9995 124616 b017d23eee40ebd04311a0aa0dd20f24 ""
@@ -205,6 +207,7 @@
   "mean_nearest_error_precision_by_cov.png" 1759736464.0115 355375 3347b8dd1c9ff45288d6decb02e506bf ""
   "mean_nearest_error_precision_by_dist.png" 1759736464.0135 357292 1bc684db458777485c7ec15b747adbdf ""
   "mean_params_by_loc.png" 1759736464.0135 78353 a0c247cf1288d0cad9b50cd53cf6a104 ""
+  "mean_params_by_loc_noaa.png" 1761805001.30982 88499 7df39438898c7a03fed2e2c32f8bddbc ""
   "mean_partial_corr_by_delay_5.png" 1759736464.0145 80162 516fae658253118085de59d620d31d2c ""
   "mean_temp_model_krig.png" 1759736464.0155 159800 561ebedc3a0549846777bc58a77c7e1b ""
   "mean_temp_model_krig_error.png" 1759736464.0165 170986 5cfa8abf91367ad87dc057cdba31a345 ""
