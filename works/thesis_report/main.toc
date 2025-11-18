@@ -1,57 +1,66 @@
-\contentsline {section}{\numberline {1}Introduction}{6}{section.1}%
-\contentsline {section}{\numberline {2}Background}{7}{section.2}%
-\contentsline {subsection}{\numberline {2.1}An Introduction to Graphs, Graph Signals, and Graph Spectra}{7}{subsection.2.1}%
-\contentsline {section}{\numberline {3}Literature Review}{9}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Graph Products and Fast GFTs}{9}{subsection.3.1}%
-\contentsline {subsubsection}{\numberline {3.1.1}Application to Compression Problems}{11}{subsubsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.2}Graph Windowing and Convolution with the GFT}{12}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Temporal Stochastic Processes; Predictive Filters}{13}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Continuous-Domain Spatial Stochastic Processes}{14}{subsection.3.4}%
-\contentsline {subsubsection}{\numberline {3.4.1}The Mat\'{e}rn Kernel}{15}{subsubsection.3.4.1}%
-\contentsline {subsubsection}{\numberline {3.4.2}Kriging}{16}{subsubsection.3.4.2}%
-\contentsline {subsection}{\numberline {3.5}Least Squares Estimation}{17}{subsection.3.5}%
-\contentsline {subsubsection}{\numberline {3.5.1}Linear Regression}{17}{subsubsection.3.5.1}%
-\contentsline {subsubsection}{\numberline {3.5.2}The Wiener Filter}{18}{subsubsection.3.5.2}%
-\contentsline {subsection}{\numberline {3.6}Regularisation as Graph Selection}{18}{subsection.3.6}%
-\contentsline {subsubsection}{\numberline {3.6.1}Fast L0 Spare Inverse Covariance}{20}{subsubsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.7}Conditional Mutual Information}{23}{subsection.3.7}%
-\contentsline {section}{\numberline {4}Spatiotemporal Analysis of BOM Dataset}{25}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Bureau of Meteorology ACORN SAT dataset}{25}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Efficient Lossy Compression Implementation}{25}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Temporal Predictive Filters}{26}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}Explicit Seasonality Modelling}{27}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Differencing}{28}{subsubsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.3}Geographical Analysis}{28}{subsubsection.4.3.3}%
-\contentsline {subsubsection}{\numberline {4.3.4}Autoregression}{29}{subsubsection.4.3.4}%
-\contentsline {subsection}{\numberline {4.4}Spatial Autoregressive Processes}{30}{subsection.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.1}Modelling}{33}{subsubsection.4.4.1}%
-\contentsline {subsubsection}{\numberline {4.4.2}Connection to the Mat\'{e}rn Kernel}{33}{subsubsection.4.4.2}%
-\contentsline {subsubsection}{\numberline {4.4.3}The 1D Correlation Function}{33}{subsubsection.4.4.3}%
-\contentsline {subsubsection}{\numberline {4.4.4}Numerical Confirmation}{34}{subsubsection.4.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.5}Kriging}{35}{subsubsection.4.4.5}%
-\contentsline {subsubsection}{\numberline {4.4.6}Limitations of the Mat\'{e}rn Kernel}{36}{subsubsection.4.4.6}%
-\contentsline {subsection}{\numberline {4.5}Deterministic Graph Filters}{37}{subsection.4.5}%
-\contentsline {subsubsection}{\numberline {4.5.1}Introduction}{37}{subsubsection.4.5.1}%
-\contentsline {subsubsection}{\numberline {4.5.2}Well-Chosen Graph Fourier Transforms}{38}{subsubsection.4.5.2}%
-\contentsline {subsubsection}{\numberline {4.5.3}Empirical Results Across GFTs}{40}{subsubsection.4.5.3}%
-\contentsline {section}{\numberline {5}Regularisation as Space-Time Graph Selection}{43}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Model Selection with BIC}{43}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}The VAR(p) model}{44}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Regularisation as Graph Selection}{45}{subsection.5.3}%
-\contentsline {subsubsection}{\numberline {5.3.1}Lasso Regression}{46}{subsubsection.5.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.2}l0 Regularisation}{46}{subsubsection.5.3.2}%
-\contentsline {subsubsection}{\numberline {5.3.3}Masking}{47}{subsubsection.5.3.3}%
-\contentsline {subsubsection}{\numberline {5.3.4}l0 Coordinate Descent}{48}{subsubsection.5.3.4}%
-\contentsline {subsubsection}{\numberline {5.3.5}Group l0}{50}{subsubsection.5.3.5}%
-\contentsline {subsection}{\numberline {5.4}Dynamic Modelling with SGD}{51}{subsection.5.4}%
-\contentsline {subsubsection}{\numberline {5.4.1}Implicit Updates}{53}{subsubsection.5.4.1}%
-\contentsline {section}{\numberline {6}Application of Conditional Mutual Information}{54}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Calculating CMI for VAR(p) Models}{54}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Estimating the Error Precision}{55}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}CMI Evaluation Variants}{55}{subsection.6.3}%
-\contentsline {subsection}{\numberline {6.4}Frequency-domain Interpretation of CMI}{57}{subsection.6.4}%
-\contentsline {section}{\numberline {7}Verifying and Disputing Results with NOAA Data}{60}{section.7}%
-\contentsline {section}{\numberline {8}Difficulties with Inverse-Covariance System Identification}{62}{section.8}%
-\contentsline {section}{\numberline {9}Further Work}{64}{section.9}%
-\contentsline {section}{\numberline {10}Conclusion}{64}{section.10}%
-\contentsline {section}{Bibliography}{65}{section*.11}%
+\contentsline {section}{\numberline {1}Introduction}{7}{section.1}%
+\contentsline {section}{\numberline {2}Background}{8}{section.2}%
+\contentsline {subsection}{\numberline {2.1}An Introduction to Graphs, Graph Signals, and Graph Spectra}{8}{subsection.2.1}%
+\contentsline {section}{\numberline {3}Literature Review}{10}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Graph Products and Fast GFTs}{10}{subsection.3.1}%
+\contentsline {subsubsection}{\numberline {3.1.1}Application to Compression Problems}{12}{subsubsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.2}Graph Windowing and Convolution with the GFT}{13}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Temporal Stochastic Processes; Predictive Filters}{14}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Continuous-Domain Spatial Stochastic Processes}{15}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}The Mat\'{e}rn Kernel}{16}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.2}Kriging}{17}{subsubsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.5}Least Squares Estimation}{18}{subsection.3.5}%
+\contentsline {subsubsection}{\numberline {3.5.1}Linear Regression}{18}{subsubsection.3.5.1}%
+\contentsline {subsubsection}{\numberline {3.5.2}The Wiener Filter}{19}{subsubsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.6}Regularisation as Graph Selection}{19}{subsection.3.6}%
+\contentsline {subsubsection}{\numberline {3.6.1}Fast L0 Spare Inverse Covariance}{21}{subsubsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.7}Conditional Mutual Information}{24}{subsection.3.7}%
+\contentsline {section}{\numberline {4}Spatiotemporal Analysis of BOM Dataset}{26}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Bureau of Meteorology ACORN SAT dataset}{26}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Efficient Lossy Compression Implementation}{26}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Temporal Predictive Filters}{27}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Explicit Seasonality Modelling}{28}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Differencing}{29}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}Geographical Analysis}{29}{subsubsection.4.3.3}%
+\contentsline {subsubsection}{\numberline {4.3.4}Autoregression}{30}{subsubsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.4}Spatial Autoregressive Processes}{31}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Modelling}{34}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Connection to the Mat\'{e}rn Kernel}{34}{subsubsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.3}The 1D Correlation Function}{34}{subsubsection.4.4.3}%
+\contentsline {subsubsection}{\numberline {4.4.4}Numerical Confirmation}{35}{subsubsection.4.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.5}Kriging}{36}{subsubsection.4.4.5}%
+\contentsline {subsubsection}{\numberline {4.4.6}Limitations of the Mat\'{e}rn Kernel}{37}{subsubsection.4.4.6}%
+\contentsline {subsection}{\numberline {4.5}Extending the Mat\'{e}rn Kernel to deal with Anisotropies and Negative Correlations}{38}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Deterministic Graph Filters}{42}{subsection.4.6}%
+\contentsline {subsubsection}{\numberline {4.6.1}Introduction}{42}{subsubsection.4.6.1}%
+\contentsline {subsubsection}{\numberline {4.6.2}Well-Chosen Graph Fourier Transforms}{43}{subsubsection.4.6.2}%
+\contentsline {subsubsection}{\numberline {4.6.3}Empirical Results Across GFTs}{44}{subsubsection.4.6.3}%
+\contentsline {section}{\numberline {5}Regularisation as Space-Time Graph Selection}{48}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Model Selection with BIC}{48}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}The VAR(p) model}{49}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Regularisation as Graph Selection}{50}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Lasso Regression}{50}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}l0 Regularisation}{51}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Masking}{51}{subsubsection.5.3.3}%
+\contentsline {subsubsection}{\numberline {5.3.4}l0 Coordinate Descent}{52}{subsubsection.5.3.4}%
+\contentsline {subsubsection}{\numberline {5.3.5}Group l0}{54}{subsubsection.5.3.5}%
+\contentsline {subsection}{\numberline {5.4}Dynamic Modelling with SGD}{56}{subsection.5.4}%
+\contentsline {subsubsection}{\numberline {5.4.1}Implicit Updates}{57}{subsubsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.5}Issues with BIC and overuse of l0}{58}{subsection.5.5}%
+\contentsline {section}{\numberline {6}Application of Conditional Mutual Information}{59}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Calculating CMI for VAR(p) Models}{60}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Estimating the Error Precision}{60}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}CMI Evaluation Variants}{61}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Frequency-domain Interpretation of CMI}{62}{subsection.6.4}%
+\contentsline {section}{\numberline {7}Verifying and Disputing Results with NOAA Data}{67}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Compression Results}{67}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Geographical Predictors}{67}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Correlation vs Distance Fit and its Anisotropies}{68}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}L0 Coordinate Descent}{71}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}CMI Connectivity and Frequency Dependence}{71}{subsection.7.5}%
+\contentsline {section}{\numberline {8}Difficulties with Inverse-Covariance System Identification}{72}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Simulations Demonstrating Utility of Covariance Modelling vs Inverse Covariance Modelling}{74}{subsection.8.1}%
+\contentsline {section}{\numberline {9}Further Work}{76}{section.9}%
+\contentsline {section}{\numberline {10}Conclusion}{77}{section.10}%
+\contentsline {section}{Bibliography}{78}{section*.6}%
+\contentsline {section}{\numberline {11}Appendix A - Python Code}{81}{section.11}%

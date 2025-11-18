@@ -7,6 +7,7 @@ from matplotlib import cm, colors
 from elechons.processing import edges as ec
 from elechons.data import station_handler as sh
 from matplotlib.colors import Normalize
+import elechons.config as config
 
 def print_info(pred):
     print(f'rmse: {pred.rmse():.4f}, rmse (%): {pred.rmse_percent():.2f}')
@@ -19,8 +20,10 @@ long = sh.STATIONS['long'].to_numpy()
 
 N = r.temps_mean_sin_adj.shape[0]
 p = 2
-init = np.hstack([np.eye(N) for _ in range(p)])
-pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005)
+alpha = 0.005
+if config.DATASET == 'noaa':
+    alpha = 0.0125
+pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, lr.VAR(r.temps_mean_sin_adj, p).param_history, alpha = alpha)
 print(f'--- var {p} l0 model')
 print(f'alpha={0.005:.4f}')
 print_info(pred)
@@ -51,42 +54,53 @@ plt.savefig(f'plts/CMI_comparison.png', dpi=300, bbox_inches='tight')
 
 # --- mapped ---
 
+# k nearest neighbours visible
+k = 12
+p = np.nanpercentile(
+    np.hstack([CMI[i] for i in range(0,4)]), 100 * (1 - k / (4 * (N - 1)))
+)
+# cut off at top 1% of those...
+m = np.nanpercentile(
+    np.hstack([CMI[i] for i in range(0,4)]), 100 * (1 - 0.01*k / (4 * (N - 1)))
+)
+print(p, m, p / m)
+
 segments = [((long[i],lat[i]),(long[j],lat[j])) for i in range(N) for j in range(N)]
 
 base_cmap = cm.get_cmap('viridis')
 colors_with_alpha = base_cmap(np.linspace(0, 1, 256))
-colors_with_alpha[:, -1] = np.linspace(0, 1, 256)  # alpha goes from 0 → 1
+colors_with_alpha[:, -1] = np.hstack((np.linspace(0, 0, int(256 * p / m)), np.linspace(0, 1, 256 - int(256 * p / m))))  # alpha goes from 0 → 1
 transparent_cmap = colors.ListedColormap(colors_with_alpha)
 
 lc00 = LineCollection(
     segments,
     cmap=transparent_cmap,
     linewidths=2,
-    norm = Normalize(vmin=0, vmax=0.06)
+    norm = Normalize(vmin=0, vmax=m)
 )
 
 lc01 = LineCollection(
     segments,
     cmap=transparent_cmap,
     linewidths=2,
-    norm = Normalize(vmin=0, vmax=0.06)
+    norm = Normalize(vmin=0, vmax=m)
 )
 
 lc10 = LineCollection(
     segments,
     cmap=transparent_cmap,
     linewidths=2,
-    norm = Normalize(vmin=0, vmax=0.06)
+    norm = Normalize(vmin=0, vmax=m)
 )
 
 lc11 = LineCollection(
     segments,
     cmap=transparent_cmap,
     linewidths=2,
-    norm = Normalize(vmin=0, vmax=0.06)
+    norm = Normalize(vmin=0, vmax=m)
 )
 
-fig, axes = plt.subplots(2, 2, figsize=(8, 4))
+fig, axes = plt.subplots(2, 2, figsize=(16, 8))
 
 lc00.set_array(CMI[0].flatten())
 axes[0,0].add_collection(lc00)

@@ -73,8 +73,8 @@ def plot_all():
     # save_hist_qq_subplots()
     # print('plotting plot_dist_by_loc')
     # plot_dist_by_loc()
-    print('plotting plot_seasonality_by_loc')
-    plot_seasonality_by_loc()
+    # print('plotting plot_seasonality_by_loc')
+    # plot_seasonality_by_loc()
     # print('plotting plot_autoregression_by_loc')
     # plot_autoregression_by_loc()
     # print('plotting plot_autoregression_partial_corrs delay 20')
@@ -92,7 +92,7 @@ def plot_all():
     # print('plotting corr v dist')
     # plot_correlation_v_dist(regression_error)
     # print('plotting corr v dist angle')
-    # plot_correlation_v_dist_angle(regression_error)
+    plot_correlation_v_dist_angle(regression_error)
     # print('plotting kriging')
     # plot_kriging_from_cov_model(t=0, l=0.0019375)
 
@@ -695,7 +695,7 @@ def plot_correlation_v_dist_angle(data):
     scatter = plt.scatter(dist, angle, s=2, c=space_correlation, cmap='rainbow')
     plt.xlabel('distance (km)')
     plt.ylabel('angle (rad)')
-    plt.title(f'distance v correlation for seasonality-adjusted {stat} temperature')
+    plt.title(f'distance v correlation for regression error')
     plt.colorbar(scatter, label='correlation')
     
     # plt.show()
@@ -707,7 +707,7 @@ def plot_correlation_v_dist_angle(data):
     scatter = plt.scatter(dist, space_correlation, s=2, c=angle, cmap='hsv')
     plt.xlabel('distance (km)')
     plt.ylabel('correlation')
-    plt.title(f'distance v correlation for seasonality-adjusted {stat} temperature')
+    plt.title(f'distance v correlation for regression error')
     plt.colorbar(scatter, label='angle (rad)')
     
     # plt.show()
@@ -723,25 +723,26 @@ def fit_correlation():
     quadruples = np.array([[lat[i], long[i], lat[j], long[j]] for j in range(len(lat)) for i in range(len(long))])
 
     def anisotropic_model(params, inputs):
-        l, k, mu_dist, mu_angle, sigma_dist, sigma_angle = params
+        A, B = params.reshape(2, 2, 2)
         lat1 = inputs[:, 0]
         long1 = inputs[:, 1]
         lat2 = inputs[:, 2]
         long2 = inputs[:, 3]
 
-        d_lat = np.abs(lat2 - lat1)
-        d_long = np.abs(long2 - long1)
-        m_lat = (lat2 + lat1) / 2
-        m_long = (long2 + long1) / 2
+        d_lat = lat2 - lat1
+        d_long = long2 - long1
+        x = np.array([d_lat,d_long])
 
-        dist = ec.earth_distance(lat1, long1, lat2, long2)
-        angle = np.where(d_long == 0, np.pi/2, np.arctan(d_lat/d_long))
-        angle_to_mu = np.min([np.pow(angle - mu_angle, 2), np.pow(angle - mu_angle - np.pi, 2)])
-        phase_dist_to_mu = np.sqrt(angle_to_mu*sigma_angle + np.pow(dist - mu_dist, 2)*sigma_dist)
+        ax = np.linalg.norm(A @ x, axis=0)
+        # cx = np.linalg.norm(C @ x, axis=0)
+        sax = np.where(ax == 0, 1, np.sin(ax)/ax)
+        # scx = np.where(cx == 0, 1, np.sin(cx)/cx)
 
-        return np.exp(-l*dist) - k * np.exp(-np.pow(phase_dist_to_mu,2)/2)
+        return np.exp(-np.linalg.norm(B @ x, axis=0)) * sax #+ np.exp(-np.linalg.norm(D @ x, axis=0)) * scx
     
-    min_obj = minimize(s.least_squares, np.array([0.01, 0.2, 2250.0, 0.0, 200.0, 1.0]), args=(anisotropic_model, quadruples, space_error_correlation), method='Nelder-Mead')
+    min_obj = minimize(s.least_squares, \
+                    np.array([0.001*np.eye(2),0.001*np.eye(2)]).flatten(), \
+                    args=(anisotropic_model, quadruples, space_error_correlation), method='Nelder-Mead')
     if not min_obj.success:
         print(f'failed to minimise with anisotropic model')
     min_params = min_obj.x

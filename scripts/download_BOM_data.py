@@ -2,7 +2,6 @@ from ftplib import FTP
 from elechons import config
 import tarfile
 import os
-import subprocess
 
 def acorn_ftp_download(filename):
     ftp = FTP(config.FTP_SERVER)

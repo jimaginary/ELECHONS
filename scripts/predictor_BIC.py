@@ -20,51 +20,51 @@ print()
 
 p = 2
 L = lr.VAR(r.temps_mean_sin_adj, p)
-init = L.param_history.T
-print(f'finished initialising, rmse {L.rmse()}')
-for i in range(0,4):
-    pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005*i)
-    print(f'--- var {p} l0 model')
-    print(f'alpha={0.005*i:.4f}')
-    print_info(pred)
-
-print()
-
-p = 2
-L = lr.solve_VAR_with_mask(r.temps_mean_sin_adj, p, np.hstack([dist < 1200 for _ in range(p)]))
 init = L.param_history
 print(f'finished initialising, rmse {L.rmse()}')
-for i in range(0,4):
-    pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005*i)
+for i in range(0,10):
+    pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.0025*i)
     print(f'--- var {p} l0 model')
-    print(f'alpha={0.005*i:.4f}')
+    print(f'alpha={0.0025*i:.4f}')
     print_info(pred)
 
 print()
 
-p = 2
-init = np.hstack([np.eye(N) for _ in range(p)])
-for i in range(0,4):
-    pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005*i)
-    print(f'--- var {p} l0 model')
-    print(f'alpha={0.005*i:.4f}')
-    print_info(pred)
+# p = 2
+# L = lr.solve_VAR_with_mask(r.temps_mean_sin_adj, p, np.hstack([dist < 1200 for _ in range(p)]))
+# init = L.param_history
+# print(f'finished initialising, rmse {L.rmse()}')
+# for i in range(0,4):
+#     pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005*i)
+#     print(f'--- var {p} l0 model')
+#     print(f'alpha={0.005*i:.4f}')
+#     print_info(pred)
 
-print()
+# print()
 
-p = 2
-pred = lr.VAR_lasso(r.temps_mean_sin_adj, 2, 0.008)
-mask = (pred.param_history != 0).T
-print('lasso completed')
-L = lr.solve_VAR_with_mask(r.temps_mean_sin_adj, 2, mask)
-init = L.param_history
-print('lasso reregression completed')
-pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005)
-print(f'--- var {p} l0 model')
-print(f'alpha={0.005:.4f}')
-print_info(pred)
+# p = 2
+# init = np.hstack([np.eye(N) for _ in range(p)])
+# for i in range(0,4):
+#     pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005*i)
+#     print(f'--- var {p} l0 model')
+#     print(f'alpha={0.005*i:.4f}')
+#     print_info(pred)
 
-print()
+# print()
+
+# p = 2
+# pred = lr.VAR_lasso(r.temps_mean_sin_adj, 2, 0.008)
+# mask = (pred.param_history != 0).T
+# print('lasso completed')
+# L = lr.solve_VAR_with_mask(r.temps_mean_sin_adj, 2, mask)
+# init = L.param_history
+# print('lasso reregression completed')
+# pred = lr.VAR_l0_coord_descent(r.temps_mean_sin_adj, p, init, alpha = 0.005)
+# print(f'--- var {p} l0 model')
+# print(f'alpha={0.005:.4f}')
+# print_info(pred)
+
+# print()
 
 # for i in range(1, 6):
 #     pred = lr.VAR_lasso(r.temps_mean_sin_adj, 2, 0.02*i)

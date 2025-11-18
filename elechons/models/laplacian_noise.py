@@ -74,13 +74,22 @@ def two_D_cov(n = 50, samples = 5000, l=0.5, g=1):
     def singles_to_dist(i, j):
         t1 = single_to_tuple(i)
         t2 = single_to_tuple(j)
-        dx = min(abs(t1[0] - t2[0]), n - abs(t1[0] - t2[0]))
-        dy = min(abs(t1[1] - t2[1]), n - abs(t1[1] - t2[1]))
+        dx = abs(t1[0] - t2[0])
+        dy = abs(t1[1] - t2[1])
         return np.sqrt(np.pow(dx, 2) + np.pow(dy, 2))
 
     def edge_locations(v):
         i, j = single_to_tuple(v)
-        tuples = [((i + 1) % n, j), ((i - 1) % n, j), (i, (j + 1) % n), (i, (j - 1) % n)]
+        tuples = []
+        if i < n-1:
+            tuples.append((i+1, j))
+        if i > 0:
+            tuples.append((i - 1, j))
+        if j < n-1:
+            tuples.append((i, j+1))
+        if j > 0:
+            tuples.append((i,j-1))
+        # tuples = [((i + 1) % n, j), ((i - 1) % n, j), (i, (j + 1) % n), (i, (j - 1) % n)]
         return np.array([tuple_to_single(t) for t in tuples])
 
     dist = np.zeros((n**2, n**2))
@@ -95,6 +104,9 @@ def two_D_cov(n = 50, samples = 5000, l=0.5, g=1):
     solution = np.linalg.inv(screened_poisson)
     stim = -g * np.random.normal(size=(n ** 2, samples))
     result = solution @ stim
+
+    return result, dist, single_to_tuple
+
     cov = np.corrcoef(result)
 
     dist_set = np.sort(np.unique(dist))

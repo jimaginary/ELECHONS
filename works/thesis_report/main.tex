@@ -625,7 +625,7 @@ As discussed in \ref{subsec:graph_product}, the spatiotemporal GFT is just a com
     \caption{Australian Mean Daily Temperature Data (1975-2023) Time-Only Compression Results}
     \label{fig:aus_compression2}
 \end{figure}\\
-Clearly, the GFT is a significant factor in the compression performance. Compression results almost identical (to within $\pm0.05\%$ RMSE) were achieved using the Laplacian matrix operator with inverse distance weights, rather than a Gaussian weighted adjacency matrix, demonstrating some amount of arbitrarity both in choosing appropriate edge weights and matrix structure employed. This is addressed further when we discuss graph filters in \ref{subsec:filters_intro}
+Clearly, the GFT is a significant factor in the compression performance. Compression results almost identical (to within $\pm0.05\%$ RMSE) were achieved using the Laplacian matrix operator with inverse distance weights, rather than a Gaussian weighted adjacency matrix, demonstrating some amount of arbitrarity both in choosing appropriate edge weights and matrix structure employed. A significant advantage of inverse distance weights over Gaussian weights is that they do not have a scale parameter, or even if distance is scaled, the GFT does not change, as the adjacency matrix only experiences a scalar multiplication. This makes the inverse distance model parameter-free for spatial data. This is addressed further when we discuss graph filters in \ref{subsec:filters_intro}.
 
 \subsection{Temporal Predictive Filters}
 \label{subsec:prediction}
@@ -726,7 +726,7 @@ For $\alpha$ and $\gamma$ functions of $h$, $B_{n,h}$ the $n$ dimensional ball o
 \end{align*}
 In the limit as $h\to0$, this degenerates to $X_{\ve{x}}$ having either no autoregressive component or no noise, or no limit unless $\alpha_1=0$ and $\gamma(h)=\gamma h^2 + O(h^3)$. In the non-degenerate case, we can work as follows to find a limit.
 \begin{align*}
-    -\frac{\gamma h^2 + O(h)}{h^2}n(\ve{x})&=\frac{1}{S_nh^{n+1}}\int_{\partial B_{n,h}}X_{\ve{x}+\ve{dx}}-X_{\ve{x}}\ve{dx}-(\alpha_2+O(h))X_{\ve{x}}\\
+    -\frac{\gamma h^2 + O(h^3)}{h^2}n(\ve{x})&=\frac{1}{S_nh^{n+1}}\int_{\partial B_{n,h}}X_{\ve{x}+\ve{dx}}-X_{\ve{x}}\ve{dx}-(\alpha_2+O(h))X_{\ve{x}}\\
     h&\to0\\
     -\gamma n(\ve{x})&=\frac{1}{2n}\nabla^2X_{\ve{x}}-\alpha_2 X_{\ve{x}}
 \end{align*}
@@ -833,6 +833,106 @@ In this figure we can see smoothly varying trends in the angle, as colours follo
 \end{figure}
 As we can see, there is still some disagreement between nearby points, but broadly the function exhibits far less noise that the original fit, suggesting part of the data is simply explicable by anisotropy, rather than local effects. Again, without analytical analysis, this is a difficult function to fit empirically without advanced techniques from machine learning.
 
+\subsection{Extending the Mat\'{e}rn Kernel to deal with Anisotropies and Negative Correlations}
+\label{subsec:anisotropic_kernel}
+To make the matern kernel able to deal with anisotropies, we can take replace our diffusion constant with a diffusion matrix, as in the correlation function below for the displacement vector $\ve{dx}$.
+\begin{align*}
+    c(\ve{dx})&=\exp(-||\pmb{A}\ve{dx}||_2)
+\end{align*}
+Using pyTorch Autograd to optimise the least squares error with gradient descent, this model reduces the correlation fit RMSE by $10\%$ from 0.1061 to 0.0892. Because $||\pmb{A}\ve{dx}||_2=\sqrt{\ve{dx}^\top\pmb{A}^\top\pmb{A}\ve{dx}}$, and there are many such $\pmb{A}$ matrices yielding the relevant symettric $\pmb{A}^\top\pmb{A}$ matrix, we just present that matrix below.
+\begin{align*}
+    \pmb{A}^\top\pmb{A}&=10^{-7}\begin{pmatrix}
+        0.35 & 0.024 \\
+        0.024 & 0.35
+    \end{pmatrix}
+\end{align*}
+We can identify how this changes the distance measurement by eigendecomposing the matrix as below. Note we look at $\sqrt{\lambda}$ rather than $\lambda$ as this measure is in the same units as the diffusion constant from the simpler model, $km^{-1}$.
+\begin{align*}
+    \sqrt{\lambda}&=\begin{pmatrix}
+        0.0011 & 0.0024
+    \end{pmatrix}\\
+    \pmb{V}&\approx0.71\begin{pmatrix}
+        -1&1\\
+        1&1
+    \end{pmatrix}
+\end{align*}
+This tells us that the correlation drops off slowest in the north-west/south-east running direction, by the first column of $\pmb{V}$, and fastest in the north-east/south-west running direction, by the second column of $\pmb{V}$.
+
+As of the writing of this thesis, I have not been able to connect this strong implication about the anisotropy fit with the geography literature.
+
+Next, we can deal with negative correlations. A common equation, suspiciously similar to our screened Poisson equation, is the white noise-driven Helmholtz equation with correlation function below.
+\begin{align*}
+    -\gamma n(\ve{x})&=(\nabla^2+\lambda^2)T_{\ve{x}}\\
+    c(\ve{dx})&=\exp(-j\lambda||\ve{dx}||_2)
+\end{align*}
+This equation leads to oscillatory behaviour. If we allow the single system to have multiple diffusion coefficients in such a way so that the correlation function is a sum of solutions, we can get correlations of the form below.
+\begin{align*}
+    c(\ve{dx})&=a\cos(\lambda||\ve{dx}||_2+\phi)
+\end{align*}
+In order for this function to have a nicely behaved curvature around $\ve{dx}\approx\ve{0}$, we need $\phi=0$, which enforces $a=1$, because correlation must be 1 when $\ve{dx}=\ve{0}$.
+
+The physical intuition of the screened poisson equation with a real diffusion constant is fairly simple, it just describes a continuous autoregressive stationary spatial process. The helmholtz equation arises rather when waves become involved, describing oscillatory effects through the space. When temperature effects take time to distribute, they can cause oscillatory effects.
+
+This oscillating correlation function on its own is dubious, because it does not decay in space. This is easily fixed by allowing the original $\lambda$ in the screened Poisson equation to be complex, $\lambda=a+bj$. We then get the generic stationary correlation model below.
+\begin{align*}
+    c(\ve{dx})&=\sum_{k=1}^N \exp(-a||\ve{dx}||_2)\cos(b||\ve{dx}||_2)
+\end{align*}
+This model could admit a phase in the cosine function and a constant out the front and still achieve a correlation of 1 at $||\ve{dx}||_2=0$, but it does not help the fit, so we ignore this case for simplicity. We can combine this model with the anisotropic correction below.
+\begin{align*}
+    c(\ve{dx})&=\sum_{k=1}^N w_k\exp(-||\pmb{A}_k\ve{dx}||_2)\cos(||\pmb{B}_k\ve{dx}||_2)\\
+    \sum_k w_k&=1
+\end{align*}
+Again using PyTorch Autograd, we can minimise this equation. For $N=1$, we get a small improvement from 0.0892 RMSE to 0.0824, and with $N=2$ we get a large improvement down to 0.0746. $N=3$ does not improve the model much, achieving an RMSE of 0.0739. The parameters (and eigendecompositions) for the well-performing $N=2$ model are given below.
+\begin{align*}
+    \pmb{A}_1^\top\pmb{A}_1&=10^{-8}\begin{pmatrix}
+        0.943&0.269\\
+        0.269&0.291
+    \end{pmatrix}\\
+    \sqrt{\lambda_{A1}}&=\begin{pmatrix}
+        0.00044&0.00102
+    \end{pmatrix}\\
+    \pmb{V}_{A_1}&=\begin{pmatrix}
+        -0.34&0.94\\
+        0.94&0.34
+    \end{pmatrix}\\
+    \pmb{A}_2^\top\pmb{A}_2&=10^{-6}\begin{pmatrix}
+        0.111&0.057\\
+        0.057&0.169
+    \end{pmatrix}\\
+    \sqrt{\lambda_{A2}}&=\begin{pmatrix}
+        0.0028&0.0045
+    \end{pmatrix}\\
+    \pmb{V}_{A_2}&=\begin{pmatrix}
+        -0.85&0.52\\
+        0.52&0.85
+    \end{pmatrix}\\
+    \pmb{B}_1^\top\pmb{B}_1&=10^{-8}\begin{pmatrix}
+        0.597&0.711\\
+        0.711&0.998
+    \end{pmatrix}\\
+    \sqrt{\lambda_{B1}}&=\begin{pmatrix}
+        0.00024&0.00124
+    \end{pmatrix}\\
+    \pmb{V}_{B_1}&=\begin{pmatrix}
+        -0.797&0.604\\
+        0.604&0.797
+    \end{pmatrix}\\
+    \pmb{B}_2^\top\pmb{B}_2&\approx\pmb{0}\\
+    w_1,w_2&=0.53,0.47
+\end{align*}
+From this fit, we see that the second fit component is non-oscillatory, and decays faster than the other components. The first component is oscillatory, and decays on a slower lengthspan (lower $\sqrt{\lambda}$s) than the second component.
+
+We plot how this fit maps to a correlation-distance-angle plot in \ref{fig:anisotropy_fit}. This figure clearly displays some of the desired anisotropic features for a fit of \ref{fig:anisotropy_2}, including the different diffusion speeds by angle, and wells of negative correlation.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.8\linewidth]{anisotropy_fit.png}
+    \caption{Correlation fit vs distance and direction. $-\pi/2$ is south, $0$ is east, $\pi/2$ is north.}
+    \label{fig:anisotropy_fit}
+\end{figure}
+
+Interestingly, in three dimensions the fundamental distance-covariance function is naturally decomposed by a laplace transform. This is not true in one or two (spatial) dimensions, where the fundamental decomposition is into other functions, given by convolutions of appropriate Mat\'ern kernels. In one-directional one-dimensional environments, a laplace transform again becomes appropriate.
+
 \subsection{Deterministic Graph Filters}
 \subsubsection{Introduction}
 \label{subsec:filters_intro}
@@ -916,7 +1016,7 @@ There is no perfect structure in the precision values for either distance or dis
 
 As expected, high precision tends to occur with high covariance, but the opposite is not true. Note the stronger relationship here is surprisingly distance vs precision, as it is closer to a one-to-one function. In particular, the significant precisions appear to roughly follow a $-c/d_{ij}$ relationship for a constant $c=16.25$. These are the off-diagonal weights of the Laplacian operator with inverse distance weights.
 
-We compare matrix structure for the Laplacian with Gaussian weights, as in \ref{subsec:efficient_GFT} and with inverse distance weights, as appears useful in the precision vs distance graph. We also compare results for the precision matrix found by inverting the sample covariance, and found by inverting the fitted covariance, found by multiplying the correlation model in \ref{subsec:spatial_model} by $\sqrt{\text{Var}(X_i)\text{Var}(X_j)}$ using sample variances. RMSE is a poor norm for measuring matrix structure similarity, as it penalises the specific magnitudes significantly, where we mainly care about structure. To ensure that the matrices have similar structure, we stack the entries in a vector and compute the directional agreement, $\frac{\ve{u}\cdot\ve{v}}{||u||_2||v||_2}$. We compare this directional measure across operators in Fig. \ref{fig:matrix_angle}.
+We compare matrix structure for the Laplacian with Gaussian weights, as in \ref{subsec:efficient_GFT} and with inverse distance weights, as appears useful in the precision vs distance graph. We also compare results for the precision matrix found by inverting the sample covariance, and found by inverting the (non-anisotropic) fitted covariance, found by multiplying the correlation model in \ref{subsec:spatial_model} by $\sqrt{\text{Var}(X_i)\text{Var}(X_j)}$ using sample variances. RMSE is a poor norm for measuring matrix structure similarity, as it penalises the specific magnitudes significantly, where we mainly care about structure. To ensure that the matrices have similar structure, we stack the entries in a vector and compute the directional agreement, $\frac{\ve{u}\cdot\ve{v}}{||u||_2||v||_2}$. We compare this directional measure across operators in Fig. \ref{fig:matrix_angle}.
 \begin{figure}[!ht]
     \centering
         \begin{tabular}{|c|c|c|c|c|}
@@ -1235,7 +1335,7 @@ The $l_0$ loss due to this parameter is then either $MSE_{ij}(0)=0$ if the param
         \hline
         $\lambda$ & RMSE ($^\circ C$) & BICa ($\times10^6$) & no. params \\
         \hline
-        0.005 & 1.66 & 1.946 & 3875 \\
+        0.005 & 1.66 & 1.946 & 3904 \\
         \hline
     \end{tabular}
     \caption{$l_0$ coordinate descent optimal BICa result.}
@@ -1277,7 +1377,7 @@ Running $l_0$ coordinate descent with time-domain grouping like this yields very
         0.01 & 1.67 & 1.960 & 4090 \\
         \hline
     \end{tabular}
-    \caption{$l_0$ coordinate descent optimal BICa result.}
+    \caption{$l_0$ group coordinate descent optimal BICa result.}
     \label{fig:group_l0_table}
 \end{figure}
 \subsection{Dynamic Modelling with SGD}
@@ -1361,6 +1461,28 @@ For brevity we will omit the full working for the simplification, but the expres
 \end{align*}
 Which appears as a stabilised version of explicit SGD, scaling down updates with very large inputs. The results of applying this are very similar to that of explicit SGD and normalised SGD, so we will not discuss this method further.
 
+\subsection{Issues with BIC and overuse of l0}
+BIC is essentially a variant on l0 regularisation. It evaluates a model based upon both its likelihood and how many parameters it uses. A difficulty arises when we consider what consitutes a parameter. We additionally should recall Goodhart's law, a cautionary saying within machine learning: "When a measure becomes a target, it ceases to be a good measure".
+
+BIC typically is only used to quantify the impact of the real parameters of a system. We can imagine a pathological example of $l_0$ regression where we regress an output signal against many signals equal to the output plus a little noise. Typical regression assigns a significant regression coefficient to each input. Ridge ($l_2$) regression acts to homogenise the regression coefficients, which can be more robust because the different sources of noise may cancel out more than otherwise, i.e. it reduces our confidence in large regression coefficients. $l_0$ regression may choose just one input to rely upon, as it is seen as a "simpler" model than taking for example the average of all inputs, but exposes the model to the noise of just one input, which may worsen signal-to-noise ratio.
+
+The issue here is that "number of parameters" is a fickle thing. $l_0$ purports to restrict the number of parameters by selecting between an exponential number of models, not accounting for the parameters in choice of model (i.e. the space of choices of which matrix entries are 0). This contributes significantly to the effective number of parameters in the overall $l_0$ model, rather than just the number of parameters in the particular lucky choice of which inputs should be chosen for each output.
+
+In the literature for example, when discussing ridge regression, it does not set any entries to 0, yet is often considered to reduce the effective number of parameters used. Tibshirani, Hastie, and Friedman \cite{tibfried} define the effective number of parameters by how sensitive the output prediction of a model is to the output of the data, as below.
+\begin{align*}
+    p&=\sum_i^N\frac{\partial \hat{y_i}}{\partial y_i}\\
+    &=\sum_i^N\frac{\partial}{\partial y_i}\pmb{X}(\pmb{X}^\top \pmb{X})^{-1}\pmb{X}^\top y_i\\
+    &=\text{tr}(\pmb{X}(\pmb{X}^\top \pmb{X})^{-1}\pmb{X}^\top)\\
+    &=\text{tr}(\pmb{X})\\
+    &=N
+\end{align*}
+This is exactly the number of effective parameters we expect. $H$ is called the smoothing matrix, that takes the sample output to the predicted output. For ridge regression, the smoothing matrix is as below.
+\begin{align*}
+    \pmb{H}&=\pmb{X}(\pmb{X}^\top \pmb{X}+\lambda \pmb{I})^{-1} \pmb{X}^\top
+\end{align*}
+Which shrinks the total "effective dimension" of the fit, by making the output fit to the sample data, $\hat{y}$, less sensitive to the input data $y$.
+
+The choice of regularisation we use informs our choice of prior. The $l_0$ prior biases towards two signals having either no predictive power on each other at all, or as much as measured in the sample. In a setting like spatial temperature modelling, this fit may be innappropriate - our prior may be that we expect two temperature signals in the same space to have some predictive power over each other, no matter how far apart they are, simply by nature of being in the same environment.
 \section{Application of Conditional Mutual Information}
 As discussed in \ref{subsec:cmi_intro}, once we choose a prior distribution in parameter space, like the one induced by a VAR model, or a VAR model with $l_0$ regularisation, or by another prior, and we fit the model to the data, we can determine the conditional mutual information between each pair of timeseries. Once we fit our model with the maximum likelihood estimate, we can evaluate the conditional mutual information between each pair of timeseries, which gives a clearer picture than either correlation or precision can about how interrelated two variables are. Then, from the modelled distribution, we can analytically determine the conditional information between two timeseries modelled by the distribution.
 
@@ -1455,7 +1577,7 @@ As an intuitive description for example, a low pass filter measure of CMI aggreg
     \label{fig:aus_bp_cmi}
 \end{figure}
 
-This figure reveals a few significant features. First, that a lot of the content between the bands is very similar. At least in this example it is the case that if we know that the amplitude of the high-frequency components of two signals covary, we can bet (with some uncertainty), that their low frequency components will covary as well. It seems at first that the lowpass CMI is very similar to that in the highpass CMI. We are then interested in plotting them against each other, as is done in Fig. \ref{fig:cmi_freq_comp}.
+This figure reveals a few significant features. First, that a lot of the content between the bands is very similar. At least in this example it is the case that if we know that the amplitude of the high-frequency components of two signals covary, we can predict (with some uncertainty), that their low frequency components will covary as well. Some interesting edges vary in strength significantly between the frequency bands. It seems at first that the lowpass CMI is very similar to that in the highpass CMI. We are then interested in plotting them against each other, as is done in Fig. \ref{fig:cmi_freq_comp}.
 
 \begin{figure}[!ht]
     \centering
@@ -1468,7 +1590,15 @@ Based on the figure, the relationship between low and high pass CMI is rougher t
 
 A significant foreseeable advantage of frequency band interpretation of CMI is in the fact that when computing total CMI, we make the total summation across all frequencies, where indeed we may be more concerned about our capacity for prediction only in the frequency band containing the most power in the signal. Part of the desire for this correction is the fact that the $\rho_{ij}(\omega)$ term explicitly adjusts for signal power at the considered frequency, normalising out the power of the signals at each frequency. One can imagine how with two random sinusoids, the CMI of interest would in fact be at a single frequency, and any other frequency contributions, though equally weighted, may constitute mostly noise.
 
-A lot more work is available to be done here in the bandpass interpretation of CMI, but further discussion here is limited by the time constraints of this thesis.
+We wish to see if we can make any mathematical interpretation about whether the bandpass distance threshholding relationship in CMI has any clear explanation. For simplicity, lets consider the $F^{-1}(\omega)$ matrix for a $VAR(1)$ autoregression.
+\begin{align*}
+    F^{-1}(\omega)&=(I-e^{-j\omega}\pmb{A})^H\pmb{\Sigma}_\varepsilon^{-1}(I-e^{-j\omega}\pmb{A})\\
+    &=\pmb{\Sigma}_\varepsilon^{-1}+\pmb{A}^\top\pmb{\Sigma}_\varepsilon^{-1}\pmb{A}-e^{j\omega}\pmb{A}^\top\pmb{\Sigma}_\varepsilon^{-1}-e^{-j\omega}\pmb{\Sigma}_\varepsilon^{-1}\pmb{A}\\
+    &=\pmb{\Sigma}_\varepsilon^{-1}+\pmb{A}^\top\pmb{\Sigma}_\varepsilon^{-1}\pmb{A}-((e^{-j\omega}\pmb{\Sigma}_\varepsilon^{-1}\pmb{A})^H+(e^{-j\omega}\pmb{\Sigma}_\varepsilon^{-1}\pmb{A}))
+\end{align*}
+The similarity across bands is demonstrated by the fact that the most significant term (as $\pmb{A}$ tends to shrink inputs in stable autoregression), is not frequency dependent, $\pmb{\Sigma}_\varepsilon^{-1}+\pmb{A}^\top\pmb{\Sigma}_\varepsilon^{-1}\pmb{A}$. The frequency-dependent terms are constructed from $\pmb{\Sigma}_\varepsilon^{-1}\pmb{A}$, for which each entry $ij$ is a precision-weighted description of how input $j$ predicts output $i$, accounting for indirect relationships where $j$ predicts $k$ through the regression/transition matrix $\pmb{A}$, and then through the smoothing precision matrix $\pmb{\Sigma}_\varepsilon^{-1}$ predicts $i$. One can reason that for higher order $VAR(p)$ models, a similar thing occurs, where each of the cross terms account from splitting the prediction into two steps of length $k+l\leq 2p$.
+
+If we neglect the small $\pmb{A}^\top\pmb{\Sigma}_\varepsilon^{-1}\pmb{A}$ factor, for entries $\pmb{\Sigma}_{\varepsilon ij}^{-1}<0$, i.e. when $i$ and $j$'s errors conditionally covary, at low frequencies, e.g. DC $\omega=0$, $i$ and $j$'s magnitude predicting each other via $\pmb{A}$ increases the magnitude of the entry $F_{ij}^{-1}(\omega)$. Exactly the opposite occurs at high frequencies, e.g. $\omega=\pi$, where $i$ and $j$'s magnitudes predicting each other through $\pmb{A}$ decreases CMI if $i$ and $j$'s errors covary. What this suggests, is that at low frequencies, predictions across different time scales (immediately through the error covariance, as well as over a lag through the regression matrix) compound in CMI, whereas for high frequencies they negate. This is not quite as simple as the relationship we observe, but it is quite similar - low-frequency CMI compounds influence across lags, whereas high-frequency CMI contrasts influence across lags.
 
 \section{Verifying and Disputing Results with NOAA Data}
 Throughout this work, we have observed a variety of results on Australian mean daily temperature data. Some key results that we can seek to verify using the US data set include:
@@ -1476,12 +1606,12 @@ Throughout this work, we have observed a variety of results on Australian mean d
     \item $8.54\%$ RMSE for a compression ratio of 1:50 using the space-time graph fourier transform.
     \item Geographical predictors of seasonality phase and amplitude.
     \item Predictors of temperature variance and skew.
-    \item Fitting the correlation vs distance function with a 3D Matern kernel with $\lambda=0.0019km^{-1}$.
+    \item Fitting the correlation vs distance function with a 3D Matern kernel with $\lambda=0.0019km^{-1}$, and with an anisotropic kernel.
     \item Observations of the anisotropies in the correlation vs distance function.
     \item BIC success and superiority of the $l_0$ coordinate descent regression.
     \item Stronger long-range CMI connections when $l_0$ regression is used.
 \end{itemize}
-\subsection*{Compression Results}
+\subsection{Compression Results}
 Compression results on NOAA data vs the BOM data are shown below.
 \begin{figure}[!ht]
     \centering
@@ -1494,23 +1624,86 @@ Compression results on NOAA data vs the BOM data are shown below.
          RMSE NOAA (\%) & 13.71 & 11.14 & 10.29 & 9.05 & 7.91 & 6.78 & 4.93 \\
          \hline
     \end{tabular}
-    \caption{Australian Mean Daily Temperature Data (1975-2023) Compression Results}
+    \caption{NOAA Mean Daily Temperature Data (1975-2023) Compression Results}
     \label{fig:noaa_compression}
 \end{figure}\\
 The NOAA data contains data with much greater variation that the BOM data, and as such it is more difficult to compress efficiently. Despite this it shows the same behaviour of being effectively compressed by use of a graph fourier transform dependent only on the distances in the system.
-\subsection*{Geographical Predictors}
+\subsection{Geographical Predictors}
 In the BOM dataset, we observed in \ref{subsec:seasonality} that seasonal phase varied in great part with latitude, the areas nearer to the equator lagging those further south. In the NOAA dataset, we see a much larger variation in phase, with extreme results close the the equator, as in Fig. \ref{fig:noaa_seasons}. This is explained in part by the seasonal amplitude variation; in the NOAA dataset, the seasonal amplitude for stations near the equator is minimal, leaving phase freer to wander arbitrarily.
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.8\linewidth]{mean_params_by_loc_noaa.png}
-    \caption{Seasonal phase and amplitude of mean daily temperature in north America}
+    \caption{Seasonal phase and amplitude of mean daily temperature in north America.}
 \end{figure}
 Unlike the Australian dataset, the seasonal amplitude varies less by coastality, but by latitude, with Canadian temperatures being much more variable than those in the United States. This is a significant difference, and shows that the relationship of geography to climate is more complicated than simply looking at latitude and coastality.
-\subsection*{Correlation vs Distance Fit and its Anisotropies}
-The NOAA dataset exhibits significant similarity in its correlation vs distance function with that found for the BOM dataset.
-\subsection*{L0 Coordinte Descent}
-\subsection*{CMI Connectivity and Frequency Dependence}
+\subsection{Correlation vs Distance Fit and its Anisotropies}
+The NOAA dataset exhibits some similarity in its correlation vs distance function with that found for the BOM dataset. Fig. \ref{fig:noaa_dist_corr} shows how the loose 3D Mat\'{e}rn kernel fits the NOAA data with a fairly similar $\lambda=0.0022km^{-1}$ diffusion constant to that found in the BOM dataset, $\lambda=0.0019km^{-1}$. It is important to note here that the NOAA data we are looking at covers a much larger geographical area than the BOM dataset, including many more longer-range connections. An interesting idea would be to regress both systems with an up/downweighting of important of some samples based on the distribution of how many relationships fall into a certain distance bucket. For example, if there are many fewer $100km$ connections than $2000km$ connections, though we may care more about accurately fitting the short-range connections, perhaps it would be pertinent to regress with this accounted for. Regardless, the fit here exhibits similar behaviour to the BOM dataset - the 3D kernel fits better than the 2D kernel, and the diffusion constant is very similar.
 
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{mean_error_corr_by_dist_noaa.png}
+    \caption{Correlation vs distance for connections in north America.}
+    \label{fig:noaa_dist_corr}
+\end{figure}
+
+Similar to the BOM dataset, we exhibit significant noise in the fit, and especially interestingly we observe the same bump in negative correlations for some connections peaking around $2000km$. The envelope of the two functions is very similar in structure, suggesting great similarity between the two systems. As in the BOM dataset, we can add a third coloured dimension through connection angle, as in Fig. \ref{fig:noaa_anisotropy_1}. To aptly compare the similarities to the BOM dataset, we restrict connections to those below $4000km$.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{mean_error_corr_by_dist_angle_noaa.png}
+    \caption{Correlation vs distance and angle for connections in north America. 0 is east, $\pi/2$ is north, $-\pi/2$ is south.}
+    \label{fig:noaa_anisotropy_1}
+\end{figure}
+
+The addition of angle, like in the BOM dataset exhibits intriguing striation in the correlations, with the lower and negative band of correlations running north-west to south-east, the upper band of correlations running north-east to south-west, and the middling correlations running either north-south or east-west. This pattern is exactly opposed to the relationship seen in the Australian data. A clear hypothesis here is that this swapping is due to the BOM data coming from the southern hemisphere, and the NOAA data from the northern hemisphere. More datasets, or a more advanced model of the correlation function is required here. 
+
+The addition of angle here, although it reveals similar patterns to the BOM model, is much noiser, and does not seem as simply explained by distance and angle alone. One theory here is that the NOAA dataset contains a much larger area, and thus contains patterns that change gradually over large areas. This noise is better exhibited in Fig. \ref{fig:noaa_anisotropy_2}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{mean_error_corr_by_dist_angle_2_noaa.png}
+    \caption{Correlation vs distance and angle for connections in north America. 0 is east, $\pi/2$ is north, $-\pi/2$ is south.}
+    \label{fig:noaa_anisotropy_2}
+\end{figure}
+
+The fit of this correlation function achieved by the algorithm in \ref{subsec:anisotropic_kernel} is quite similar in nature to that achieved for the BOM dataset, and performs similarly in terms of RMSE, with an overall RMSE of 0.0598, though this may be dominated by the fact that the dataset has many more negligible long-distance relationship compared with the BOM dataset. As in \ref{fig:noaa_anisotropy_2}, the anisotropic relationship is reversed such that north-east/south-west running relationships tend to be higher correlated than those running north-west/south-east. This suggests this anisotropy may be caused by something hemispherical, but that it is of the same nature in both the southern hemisphere and northern hemisphere, although more work is needed here. Interestingly, in the distance-angle-correlation plot in \ref{fig:noaa_anisotropy_2}, we see not just noise but bimodality, i.e. layering, especially for very negative values and values closer to 0 around $2000km$. This may suggest some positional dependence due to non-stationarity of the system.
+
+\subsection{L0 Coordinate Descent}
+We compare the quality of the $l_0$ coordinate descent fit, optimising parameter $\lambda$ choice for BIC for the NOAA model. We can note first that the seasonality-adjusted RMSE of the NOAA data is much higher than that of the BOM data, $6.8081^\circ C$ vs $2.8429^\circ C$. We choose the $VAR(2)$ regression as the initial solution for the optimisation. The results are shown in \ref{fig:noaa_l0_table}.
+\begin{figure}[!ht]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        $\lambda$ & RMSE ($^\circ C$) & BICa ($\times10^6$) & no. params \\
+        \hline
+        0.005 (BOM) & 1.66 & 1.946 & 3904 \\
+        0.0 (VAR) & 1.865 & 4.983 & 43808 \\
+        0.0125 & 1.886 & 4.497 & 6222 \\
+        \hline
+    \end{tabular}
+    \caption{$l_0$ coordinate descent optimal BICa result on NOAA data, with raw VAR and BOM fit results for comparison.}
+    \label{fig:noaa_l0_table}
+\end{figure}
+Even after VAR regression, the RMSE for the NOAA data has higher variance than the BOM dataset, but it experiences a more significant reduction in prediction error from the seasonal model (1.886/2.8429=0.66 for NOAA vs 1.67/2.0616=0.81) than the BOM dataset. The BICa achieved in the NOAA fit looks worse, but it is not valid to compare BICa across models with a differing number of observations. More appropriately, we still see comparable improvements in RMSE and reduction in parameters when using an $l_0$ fitted $VAR(2)$ model on the NOAA dataset, as we also saw on the BOM dataset. In order to achieve a BICa optimal fit, the $\lambda$ value in the $l_0$ regression differs, in some great part due to differences in the number of observations between the two datasets. This represents a limitation of interpretting the $\lambda$ choice in $l_0$ regression.
+
+\subsection{CMI Connectivity and Frequency Dependence}
+The CMI connectivity graph across the full frequency spectrum, both with and without use of $l_0$ regularisation on the VAR regression matrix and on the error precision matrix is shown in \ref{fig:noaa_cmi_options}. This plot shows vastly more sporadicity that the BOM dataset, and seems much less interpretable. In the BOM dataset, most connections represented short-range connections to nearest neighbours. This dataset exhibits some wildly long connections. Either this implies some unknown deep connection between some far away sections of the data, which may be the case, due to spatially periodic processes, or the much larger noise exhibited in this dataset causes the CMI measurment to be much poorer quality than that in the BOM dataset.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{noaa_cmi_options.png}
+    \caption{CMI connectivity graph for NOAA dataset with various choices of use of $l_0$ regularisation.}
+    \label{fig:noaa_cmi_options}
+\end{figure}
+
+Fig. \ref{fig:noaa_cmi_bp} shows the bandpass CMI for the $l_0$ regularised CMI prediction on the NOAA dataset. Like the previous figure, we also see a significant amount of sporadicity in the relationships. Although all frequency bands exhibit this behaviour, the low frequency relationships exhibit many more long-range relationships. This is as we see in the BOM data, somewhat expected, as long-range effects in space have more of an opportunity to occur over longer spans of time rather than shorter ones. A possible basic explanation for this is simply delays in the progression of effects between two locations. We see a similar possibility of this effect in the BOM dataset, but it is much weaker and therefore the observation could be spurious. Additionally, the north American dataset covers a much larger geographic area, allowing for more of these long-range effects to be applicable.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{noaa_cmi_bp.png}
+    \caption{CMI connectivity graph for NOAA dataset in various frequency bands, using $l_0$ regularisation for both the VAR and precision matrices.}
+    \label{fig:noaa_cmi_bp}
+\end{figure}
 
 \section{Difficulties with Inverse-Covariance System Identification}
 Throughout this work, we have treated the inverse covariance (precision) matrix as a more viable option for describing the behaviour of a graphical system and the covariance matrix itself. This is not without good reason. In particular, the covariance matrix entries do not identify a unique relationship between variables, as relationships between confounding variables are included. The precision matrix expressely looks at the relationship between two variables, conditioned on the values of other variables. This is a much better method generally for measuring direct relationships between variables, rather than relationships due to confounding variables. Fig. \ref{fig:causal} demonstrates this problem, where rain causes both umbrellas and traffic, so umbrella use may be correlated with traffic, but clearly there is no causal relationship between them.
@@ -1557,13 +1750,52 @@ In order to determine the manner in which the precision matrix is effected by su
     \pmb{\Sigma}_0^{-1}&=\pmb{\Omega}_0-\omega^{-1}\ve{w}\ve{w}^\top\\
 \end{align*}
 First, we must carefully note that off-diagonal entries of the precision matrix are inverted in their relationship between sign and covariance. That is, positive entries reflect negatively correlated variables (after accounting for conditional relationships), and negative entries reflect positively correlated variables.
+
 Intuitively, this formula tells us that when one graph vertex is removed, each pair of variables connected to the removed vertex have their connection strengthed (made more negative) when their connections to the removed variable are in the same direction, and weakened when their connections are in the opposite direction.
 
-We can highlight the difficulty of interpretting these relationships as defining underlying graph structure by turning back to the simulations discussed in \ref{subsec:matern_sims}. We have a discretised 2D lattice domain upon which the screened Poisson equation acts, and when we randomly choose subsets of the lattice points as "sensor points", identifying the inverse covariance matrix gives us a graph that may help in optimal interpolation or prediction, through processes like Kriging, does not actually identify the underlying structure of the system, that is a lattice. Whereas, if we look at the distance-correlation function in the subsampled system, we can observe a strong fit with the appropriate 2D Mat\'{e}rn kernel. That is, the distance-correlation function reveals an underlying topological truth about the nature of the system, where the inverse covariance does not.
-% - Sims justifying issues with low-resolution sampling of Matern-corr type data & CMI
+\subsection{Simulations Demonstrating Utility of Covariance Modelling vs Inverse Covariance Modelling}
+We can highlight the difficulty of interpretting these relationships as defining underlying graph structure by turning back to the simulations discussed in \ref{subsec:matern_sims}. We have a discretised 2D lattice domain upon which the screened Poisson equation acts, and when we randomly choose subsets of the lattice points as "sensor points", identifying the inverse covariance matrix gives us a graph that may help in optimal interpolation or prediction, through processes like Kriging, does not actually identify the underlying structure of the system, that is a 2D lattice, rather than say just a 2D array of sensor points embedded in a 3D space where the diffusion process is occuring. Whereas, if we look at the distance-correlation function in the subsampled system, we can observe a strong fit with the appropriate 2D Mat\'{e}rn kernel. That is, the distance-correlation function reveals an underlying topological truth about the nature of the system, where the inverse covariance does not.
+
+Like as in \ref{subsec:matern_sims}, we run a discretised screened Poisson problem on a 2D lattice with $\lambda=0.5$ and unit distances between lattice points. To make things clearer in this case, we do not use a flat torus $\mathbb{T}^2$, but just use a 2D plane on its own. When we sample densely, that is at every point, the CMI perfectly informs us of the structure of the graph, as in \ref{fig:CMI_1.0}. The correlation-distance plot on the other hand provides us only some hazy information about the underlying topology and process producing the data.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{laplacian_noise_CMI_1.0.png}
+    \caption{CMI (left) vs correlation-distance plot on a densely sampled 2D lattice.}
+    \label{fig:CMI_1.0}
+\end{figure}
+
+When we sample more sparsely, say sampling only 30\% of points for the same process, the situation is quite different. As in \ref{fig:CMI_0.3}, the CMI gives us very little semblance of the underlying causal structure in the system, exactly because it is unaware of many of the causes. On the other hand, the correlation-distance plot encodes incredibly similar information to the more densely sampled version, experiencing very little degradation in quality.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{laplacian_noise_CMI_0.3.png}
+    \caption{CMI (left) vs correlation-distance plot on a sparsely sampled 2D lattice.}
+    \label{fig:CMI_0.3}
+\end{figure}
+
+What we can gather from this is that CMI is a superior tool for defining the structure of a graphical process when almost all of the relevant variables are observed. When some or many variables are unobserved, the correlation-distance plot delivers a lot of information about the underlying system that the CMI cannot provide. In the continuous temporal and spatial case, like for weather data, and many other data types, CMI requires dense sampling to serve significant utility, whereas direct covariance/correlation prediction can still serve to identify features of the system like topology and the diffusion coefficients acting on the system, defining the scale of the spatial process.
 \section{Further Work}
-% - Where to from here?
+This thesis has identified areas of interest in the graph-signal processing literature. It has implemented some works and verified their results, and has identified its own results. It has also made a thrust at questioning the possible overuse of inverse covariance modelling in many graph signal processing applications. Despite this, we are left with more questions than we are answers. Some major questions are those below.
+\begin{itemize}
+    \item Can we quantify the seasonality amplitude and phase, and other geographic predictors of mean, variance, and skew, reasonably from geographic principles, across the entire globe?
+    \item How do we model non-stationary diffusion processes effectively?
+    \item If the natural autoregressive distance-correlation functions in space are Mat\'{e}rn kernels, what are the natural distance-time-correlation functions for space-time autoregressive processes?
+    \item Is there a measure of mutual information similar to CMI that accounts for phase information?
+    \item Given limited samples, exactly how well can we identify the topology and differential equation acting on a system from its correlation function? For systems not driven by noise, but by a chosen input, are there superior methods for system identification?
+    \item Is there a stronger geographic predictor of the partial correlations than either distance or nearest-neighbours?
+    \item How relevant are correlation function fitting and inverse covariance fitting when an application comes with an explicitly defined graph?
+\end{itemize}
 \section{Conclusion}
+This thesis has shown how traditional digital signal processing can be extended to new domains. Just as digital signal processing provides good solutions to practical and fundamental problems such as data compression, prediction, filtration, and interpolation, graph signal processing expands these problems to be solvable on graphical domains.
+
+Through analysis of the Australian and North American daily temperature datasets, graph-time data can be efficiently compressed, similar to the JPEG compression algorithm. Sparsely sampled (non-radar) temperature information can still yield a reasonable prediction of next-day temperatures, with RMSEs respectively of $1.66^\circ C$ and $1.89^\circ C$. The graph fourier transform allows for effective filtration of noisy spatial data, akin to the Weiner filter from traditional signal processing. Kriging allows us to efficiently interpolate temperature data from a limited number of temperature sensors, conditioned on effective fitting of a correlation function. The development of a fundamental autoregressive spatial model allowed us to develop high-quality correlation function fits, allowing for system identification necessary for interpolation.
+
+Another avenue of investigation for graph system identification was conditional mutual information, allowing for the effective identification of graph edges in a system. The development of the bandpass CMI concept allowed for the seperation of graphical relationships into long-term predictive relationships and short-term predictive relationships, and the similarity between the graph identifications was noted.
+
+The two forms of graph system identification - correlation fitting, and the use of CMI via the inverse correlation fit, were compared and contrasted. It was proposed that CMI is always the best tool for both within-graph predictive applications, and for natural graph domains, whereas correlation fitting serves to identify the differential equation acting on a system more effectively. CMI suffers from degradation of interpretibility with sparse subsampling, where correlation fitting tends to maintain its benefits even for sparsely sampled settings.
+
+Overall, this thesis has presented graph signal processing as a field for future research and interest with a myriad of practical applications, and a wealth of fundamental theory that has many opportunities for future development.
 
 
 % - cleaning and appendixing code.
@@ -1670,7 +1902,125 @@ We can highlight the difficulty of interpretting these relationships as defining
 
 
 \newpage
-\section*{Appendix A - Python Code}
-All figures in this report were produced using python code available at: \url{https://github.com/jimaginary/ELECHONS}.
+\section{Appendix A - Python Code}
+All figures in this report were produced using python code available at: \url{https://github.com/jimaginary/ELECHONS}. To produce the figures from this thesis, both python, and the python modules from ELECHONS\/requirements.txt must be installed as below. All commands should be run from the root of the ELECHONS directory.
+\begin{verbatim}
+    python -m pip install -r requirements.txt
+\end{verbatim}
+Next the BOM/NOAA data should be downloaded. Each take quite some time, so it is recommended to only install the dataset that will be used. They can be downloaded as below.
+\begin{verbatim}
+    python -m scripts.download_BOM_data
+    python -m scripts.download_NOAA_data
+\end{verbatim}
+The data then needs to be cleaned and processed, which can be done as below.
+\begin{verbatim}
+    python -m scripts.process_BOM_data
+    python -m scripts.process_NOAA_data
+\end{verbatim}
+Then, we are ready to reproduce the figures from the report. Each figure can be reproduced by running the below command, with \{n\} replaced with the figure number from the report.
+\begin{verbatim}
+    python -m fig_scripts.fig_{n}
+\end{verbatim}
+The figure or its results (for a table) will be reproduced and outputted into either the terminal in the case of tabular results, or into the plts folder, or a subfolder. Note that some figures, such as demonstrative diagrams, that do not result from running an analysis script, do not have a corresponding generation script. Some figures are generated by the same command, in which case only the earliest such figure has a script, for example figures 5 and 6.
+
+
+%\/ELECHONS, python should be run. the table in Fig. \ref{fig:script_table} then denotes what commands will produce the figures, or their results, from throughout this thesis. Before running any of these scripts, the BOM\/NOAA data should be downloaded and cleaned. The BOM data can be downloaded by running "", and the NOAA data with "".
+
+% \begin{figure}[!ht]
+%     \centering
+%     \begin{tabular}{|c|c|c|}
+%         \hline
+%        \textbf{Fig} & \textbf{Title} & \textbf{Commands}\\
+%        \hline
+%        5 & BOM Temperature Data Compression Results & \\
+%        \hline
+%        6 & BOM Temperature Data Time-Only Compression Results & \\
+%        \hline
+%        7 & Monthly Mean Temperature at Meekatharra Airport, WA & \\
+%        \hline
+%        8 & Seasonal Temperature Across Australia & \\
+%        \hline
+%        9 & Meekatharra Temperature Distribution after Seasonality Adjustment & \\
+%        \hline
+%        10 & Temperature Distribution at Meekatharra after Differencing & \\
+%        \hline
+%        11 & Geographical Summary Statistics & \\
+%        \hline
+%        12 & Autoregression Coefficients & \\
+%        \hline
+%        13 & Ljung-Box Tests & \\
+%        \hline
+%        14 & Mat\'ern Error Correlation Fitting & \\
+%        \hline
+%        15 & 1-2 Dimensional Mat\'ern Kernel Simulation & \\
+%        \hline
+%        16 & Temperature Kriging & \\
+%        \hline
+%        17 & Kriging Error & \\
+%        \hline
+%        18 & Distance v Correlation + Angle & \\
+%        \hline
+%        19 & Distance + Angle v Correlation & \\
+%        \hline
+%        20 & Anisotropic Correlation Fit & \\
+%        \hline
+%        21 & Spatial Noise Reduction via Wiener Filter & \\
+%        \hline
+%        22 & Precision vs Distance and Distance Order & \\
+%        \hline
+%        23 & Precision vs Covariance and Covariance Order & \\
+%        \hline
+%        24 & Structural Agreement with Precision Matrix & \\
+%        \hline
+%        25 & Measured Spectra Filtration & \\
+%        \hline
+%        26 & Implicit Spectra Filtration & \\
+%        \hline
+%        27 & $VAR(p)$ RMSE and BICa & \\
+%        \hline
+%        28 & $VAR(2)$ Lasso RMSE and BICa & \\
+%        \hline
+%        29 & $VAR(2)$ Masked Fits RMSE and BICa & \\
+%        \hline
+%        30 & $l_0$ Optimal BICa Result & \\
+%        \hline
+%        31 & Group-$l_0$ Optimal BICa Result & \\
+%        \hline
+%        32 & $VAR(2)$ SGD fit results & \\
+%        \hline
+%        33 & $VAR(2)$ SGD normalised fit results & \\
+%        \hline
+%        34 & $l_0$ Precision Estimate & \\
+%        \hline
+%        35 & CMI variants & \\
+%        \hline
+%        36 & Bandpass CMI & \\
+%        \hline
+%        37 & Lowpass vs Highpass CMI & \\
+%        \hline
+%        38 & NOAA Compression Results & \\
+%        \hline
+%        39 & NOAA Seasonal Temperature & \\
+%        \hline
+%        40 & NOAA Distance v Correlation Fit & \\
+%        \hline
+%        41 & NOAA Distance v Correlation + Angle & \\
+%        \hline
+%        42 & NOAA Distance + Angle v Correlation & \\
+%        \hline
+%        43 & NOAA $l_0$ Fit & \\
+%        \hline
+%        44 & NOAA CMI Variants & \\
+%        \hline
+%        45 & NOAA Bandpass CMI & \\
+%        \hline
+%        47 & CMI vs Correlation Distance Densely Sampled & \\
+%        \hline
+%        48 & CMI vs Correlation Distance Sparsely Sampled & \\
+%        \hline
+%     \end{tabular}
+%     \caption{CMI (left) vs correlation-distance plot on a sparsely sampled 2D lattice.}
+%     \label{fig:script_table}
+% \end{figure}
 
 \end{document}

@@ -35,6 +35,11 @@
 \newblock {\em Statistical Models: Theory and Practice}.
 \newblock Cambridge University Press, 2009.
 
+\bibitem{tibfried}
+{Friedman, J. and Hastie, T. and Tibshirani, R.}
+\newblock {\em The Elements of Statistical Learning}.
+\newblock 2001.
+
 \bibitem{friedmanglasso}
 {Friedman, Jerome and Hastie, Trevor and Tibshirani, Robert}.
 \newblock Sparse inverse covariance estimation with the graphical lasso.

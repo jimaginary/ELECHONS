@@ -1,24 +1,9 @@
 import os
 
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-
-PLOTS_DIR = os.path.join(PROJECT_ROOT, "..", "plts")
-LOG_DIR = os.path.join(PROJECT_ROOT, "..", "output", "logs")
-
-EARTH_RADIUS_KM = 6371.0
-W_YEARLY = 2 * 3.141592653589793 / 365.25
-
-SCALE_KM = 1000
-
-### change this to NOAA/BOM to use the USA/AUS data
-DATASET = 'bom'
-###
-
-DATA_DIR = os.path.join(PROJECT_ROOT, "..", "data", DATASET)
-RAW_DATA_DIR = os.path.join(DATA_DIR, "raw")
-PROCESSED_DATA_DIR = os.path.join(DATA_DIR, "processed")
-
-if DATASET == 'bom':
+def load_bom():
+    global FTP_SERVER, FTP_DIR, ACORN_VERSION, ACORN_PREFIX, STATION_LOCATION_FILE, \
+           RAW_STATIONS_FILE, STATIONS_FILE, MAX_DIR, MIN_DIR, MEAN_DIR, STAT_DIR,  \
+           OVERLAP_LENGTH, LATEST_START, STAT_TYPES
     FTP_SERVER = "ftp.bom.gov.au"
     FTP_DIR = "/anon/home/ncc/www/change/ACORN_SAT_daily/"
 
@@ -40,7 +25,10 @@ if DATASET == 'bom':
     LATEST_START = "1975-03-01"
 
     STAT_TYPES = {"max": "maximum", "min": "minimum", "mean": "mean"}
-elif DATASET == 'noaa':
+
+def load_noaa():
+    global DOWNLOAD, DOWNLOAD_STATIONS, DOWNLOAD_STATION_GUIDE, RAW_STATIONS_FILE, STATIONS_FILE, \
+           TEMP_DIR, RAW_DATA_DIR, OVERLAP_LENGTH, LATEST_START, EARLIEST_END, STAT_DIR, STAT_TYPES
     DOWNLOAD = "https://www.ncei.noaa.gov/pub/data/ghcn/daily/by_station/"
     DOWNLOAD_STATIONS = "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt"
     DOWNLOAD_STATION_GUIDE = "https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-inventory.txt"
@@ -56,6 +44,28 @@ elif DATASET == 'noaa':
 
     STAT_DIR = {"mean" : TEMP_DIR}
     STAT_TYPES = {"mean" : "mean"}
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+PLOTS_DIR = os.path.join(PROJECT_ROOT, "..", "plts")
+LOG_DIR = os.path.join(PROJECT_ROOT, "..", "output", "logs")
+
+EARTH_RADIUS_KM = 6371.0
+W_YEARLY = 2 * 3.141592653589793 / 365.25
+
+SCALE_KM = 1000
+
+### change this to NOAA/BOM to use the USA/AUS data
+DATASET = 'noaa'
+###
+
+DATA_DIR = os.path.join(PROJECT_ROOT, "..", "data", DATASET)
+RAW_DATA_DIR = os.path.join(DATA_DIR, "raw")
+PROCESSED_DATA_DIR = os.path.join(DATA_DIR, "processed")
+
+if DATASET == 'bom':
+    load_bom()
+elif DATASET == 'noaa':
+    load_noaa()
 else:
     raise ValueError('config dataset does not exist')
-

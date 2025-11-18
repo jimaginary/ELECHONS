@@ -45,7 +45,7 @@ class Prediction:
             self.prE = np.linalg.inv(Ecov)
         prE = self.prE
         if self.prEl0 is None and l0:
-            self.prEl0 = FastGL0(Ecov, p)
+            self.prEl0 = FastGL0(Ecov, self.data.shape[1])
             prE = self.prEl0
         
         Atau = np.split(self.param_history, p, axis=1)

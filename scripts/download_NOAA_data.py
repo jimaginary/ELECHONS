@@ -2,7 +2,6 @@ from elechons import config
 import gzip
 import requests
 import os
-import subprocess
 import io
 import pandas as pd
 
