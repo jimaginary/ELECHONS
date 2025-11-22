@@ -33,18 +33,18 @@
 \contentsline {subsection}{\numberline {4.5}Extending the Mat\'{e}rn Kernel to deal with Anisotropies and Negative Correlations}{38}{subsection.4.5}%
 \contentsline {subsection}{\numberline {4.6}Deterministic Graph Filters}{42}{subsection.4.6}%
 \contentsline {subsubsection}{\numberline {4.6.1}Introduction}{42}{subsubsection.4.6.1}%
-\contentsline {subsubsection}{\numberline {4.6.2}Well-Chosen Graph Fourier Transforms}{43}{subsubsection.4.6.2}%
+\contentsline {subsubsection}{\numberline {4.6.2}Well-Chosen Graph Fourier Transforms}{42}{subsubsection.4.6.2}%
 \contentsline {subsubsection}{\numberline {4.6.3}Empirical Results Across GFTs}{44}{subsubsection.4.6.3}%
-\contentsline {section}{\numberline {5}Regularisation as Space-Time Graph Selection}{48}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Model Selection with BIC}{48}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}The VAR(p) model}{49}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Regularisation as Graph Selection}{50}{subsection.5.3}%
+\contentsline {section}{\numberline {5}Regularisation as Space-Time Graph Selection}{47}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Model Selection with BIC}{47}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}The VAR(p) model}{48}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Regularisation as Graph Selection}{49}{subsection.5.3}%
 \contentsline {subsubsection}{\numberline {5.3.1}Lasso Regression}{50}{subsubsection.5.3.1}%
-\contentsline {subsubsection}{\numberline {5.3.2}l0 Regularisation}{51}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.2}l0 Regularisation}{50}{subsubsection.5.3.2}%
 \contentsline {subsubsection}{\numberline {5.3.3}Masking}{51}{subsubsection.5.3.3}%
 \contentsline {subsubsection}{\numberline {5.3.4}l0 Coordinate Descent}{52}{subsubsection.5.3.4}%
 \contentsline {subsubsection}{\numberline {5.3.5}Group l0}{54}{subsubsection.5.3.5}%
-\contentsline {subsection}{\numberline {5.4}Dynamic Modelling with SGD}{56}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.4}Dynamic Modelling with SGD}{55}{subsection.5.4}%
 \contentsline {subsubsection}{\numberline {5.4.1}Implicit Updates}{57}{subsubsection.5.4.1}%
 \contentsline {subsection}{\numberline {5.5}Issues with BIC and overuse of l0}{58}{subsection.5.5}%
 \contentsline {section}{\numberline {6}Application of Conditional Mutual Information}{59}{section.6}%

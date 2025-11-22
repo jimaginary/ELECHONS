@@ -17,6 +17,31 @@ dist = edges.distance_matrix(sh.STATIONS)
 N = r.temps_mean_sin_adj.shape[0]
 
 print()
+print('results of VAR autoregressions:')
+
+for i in range(1,6):
+    pred = lr.VAR(r.temps_mean_sin_adj, i)
+    print(f'--- var {i} model ---')
+    print_info(pred)
+
+print()
+print('results of Lasso regression')
+
+for i in range(1,6):
+    pred = lr.VAR_lasso(r.temps_mean_sin_adj, 2, 0.02*i)
+    print(f'--- var 2 lasso ({0.02*i:.2f}) model ---')
+    print_info(pred)
+
+print()
+
+for i in range(1,10):
+    mask = dist < 200*i
+    mask = np.hstack([mask, mask])
+    pred = lr.solve_VAR_with_mask(r.temps_mean_sin_adj, 2, mask)
+    print(f'--- var 2 dist < {200*i}km mask model')
+    print_info(pred)
+
+print()
 
 p = 2
 L = lr.VAR(r.temps_mean_sin_adj, p)
@@ -94,28 +119,6 @@ print()
 
 # print()
 
-# for i in range(1,10):
-#     mask = dist < 200*i
-#     mask = np.hstack([mask, mask])
-#     pred = lr.solve_VAR_with_mask(r.temps_mean_sin_adj, 2, mask)
-#     print(f'--- var 2 dist < {200*i}km mask model')
-#     print_info(pred)
-
-# print()
-
-# for i in range(1,6):
-#     pred = lr.VAR_lasso(r.temps_mean_sin_adj, 2, 0.02*i)
-#     print(f'--- var 2 lasso ({0.02*i:.2f}) model ---')
-#     print_info(pred)
-
-# print()
-
-# for i in range(1,6):
-#     pred = lr.VAR(r.temps_mean_sin_adj, i)
-#     print(f'--- var {i} model ---')
-#     print_info(pred)
-
-# print()
 
 # for i in range(0, 100, 10):
 #     pred = lr.VAR(r.temps_mean_sin_adj, 2, percentile=i)

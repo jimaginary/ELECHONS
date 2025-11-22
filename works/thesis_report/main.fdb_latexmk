@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex main"] 1763453257.11732 "main.aux" "main.bbl" "main" 1763453373.42404 0
+["bibtex main"] 1763771899.77898 "main.aux" "main.bbl" "main" 1763771910.67548 0
   "./bibliography.bib" 1763413416.09482 8986 3c49d28bd4c3129222282d3a819187bb ""
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/plain.bst" 1737590400 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1763453372.96273 30352 e318f6c3e80180d96604dedd2ffbc1ac "pdflatex"
+  "main.aux" 1763771909.91467 30101 ea15e71130728e57b55c72d84e6bcdf5 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1763453362.45121 "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" "main.pdf" "main" 1763453373.42474 0
-  "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" 1763453361.97872 182375 4158a998f433969488e006595bd14b14 ""
+["pdflatex"] 1763771899.98736 "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" "main.pdf" "main" 1763771910.67581 0
+  "/home/zacpetersen/Documents/elechons/works/thesis_report/main.tex" 1763771886.15542 182230 47c78a5e03b63efd17c8101e2b020a8e ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1737590400 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
@@ -194,13 +194,14 @@
   "anisotropy_fit.png" 1762427292.69896 117934 6c14230c31712524bd3a11086d4c0b0a ""
   "aus_bp_cmi.png" 1762657330.95241 740004 f31ac0f59f827b42db5eb8ef7d49278a ""
   "aus_bp_cmi_comparison.png" 1761993321.2242 112342 16e472a208cc55a5a56661af3a48f89f ""
+  "coversheet.pdf" 1763771647.76627 97114 2f5385db6a04c7bd7c0fb239b60bd985 ""
   "laplacian_noise_CMI_0.3.png" 1762562771.81005 167736 b75d306ae4165d10b54c9b194cde73fc ""
   "laplacian_noise_CMI_1.0.png" 1762562592.04877 181345 7938e33621c0ca8dd7a9a49ff3ccf53f ""
-  "main.aux" 1763453372.96273 30352 e318f6c3e80180d96604dedd2ffbc1ac "pdflatex"
-  "main.bbl" 1763453257.28656 6632 cd42633906739a356c251767c4b8ac77 "bibtex main"
-  "main.out" 1763453372.96673 13833 cedba560bff7c1b06e57ca83ea6ef59a "pdflatex"
-  "main.tex" 1763453361.97872 182375 4158a998f433969488e006595bd14b14 ""
-  "main.toc" 1763453372.96673 6431 8e05b3dbd51386da68f7cadaaadc1233 "pdflatex"
+  "main.aux" 1763771909.91467 30101 ea15e71130728e57b55c72d84e6bcdf5 "pdflatex"
+  "main.bbl" 1763771899.97263 6632 cd42633906739a356c251767c4b8ac77 "bibtex main"
+  "main.out" 1763771909.91767 13833 cedba560bff7c1b06e57ca83ea6ef59a "pdflatex"
+  "main.tex" 1763771886.15542 182230 47c78a5e03b63efd17c8101e2b020a8e ""
+  "main.toc" 1763771909.91867 6431 bfdcbbbc1dc49126c5415d87794d0b1d "pdflatex"
   "mean_dist_7045.png" 1759736463.9985 68209 a9aa52247ef70f8badeaf7010a33d107 ""
   "mean_dist_7045_dif.png" 1759736463.9985 64791 e18c58297a34dfd97c9c59bd84b7cc56 ""
   "mean_dists_by_loc.png" 1759736463.9995 124616 b017d23eee40ebd04311a0aa0dd20f24 ""

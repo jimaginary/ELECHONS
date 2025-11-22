@@ -24,7 +24,7 @@
 
 \begin{document}
 
-% \includepdf[pages=-]{cover.pdf}
+\includepdf[pages=-]{coversheet.pdf}
 
 \begin{titlepage}
     \centering
@@ -77,9 +77,9 @@ I would like to thank my supervisor, Professor V. Solo, for pushing me in the ri
 \section{Introduction}
 Graphs were first introduced into the literature through Euler's solution to the K\"{o}nigsberg bridge problem in 1741 \cite{euler}. Through the ages, graph theory became relevant to a variety of problems including circuit theory, chemistry, and eventually computer science. Many of these original problems are naturally represented by graphs, but many problems on continuous spaces are simplified by endowing them with a graph structure. One of the earliest such examples is the statistical technique invented by Krige to estimate mineral deposit concentration based on a limited number of samples from boreholes \cite{krige}. Despite the age of this field, techniques are not well known, sometimes reinvented across different fields in different forms, and have not uniformly been assessed in practical circumstances.
 
-The present literature has established techniques for compression \cite{moura}, prediction \cite{krige}, filtering \cite{taubin}, and computer vision \cite{grady_shah} on graphs. Such techniques have been relevant to highly influential areas, including advertising and ranking as in the Google PageRank algorithm \cite{page}, risk and stability analysis in econometrics \cite{acemoglu}, and the application of graph techniques to neural networks as has been used in drug discovery and development \cite{sun}. We will explore examples and replicate some of these techniques.
+The present literature has established techniques for compression \cite{moura}, prediction \cite{krige}, filtering \cite{taubin}, and computer vision \cite{grady_shah} on graphs. Such techniques have been relevant to highly influential areas, including advertising and ranking as in the Google PageRank algorithm \cite{page}, risk and stability analysis in econometrics \cite{acemoglu}, and the application of graph techniques to neural networks as has been used in drug discovery and development \cite{sun}. We will explore examples and replicate some of these techniques both on and off graphs. We will also seek to develop new techniques in these areas in order to improve on results.
 
-In this report, we replicate techniques and empirically confirm results both with synthetic data sets and a real data set. Two real datasets are used: homogenised daily mean temperature data across Australia as reported by the Bureau of Meteorology (BOM) \cite{bom}, and daily mean temperature data over north America, extracted as a subset of the global surface temperature data provided by the National Oceanic and Atmospheric Administration of the United States (NOAA) \cite{noaa}. The BOM dataset is broadly used for developing and exhibiting methods covered, whilst the NOAA dataset is used to validate the broad utility of models created, as well as to investigate how model parameters change over different samples of the same type of data (temperature networks).
+In this report, we replicate techniques and empirically confirm results both with synthetic data sets and a real data set. We also develop a number of new techniques which we apply to these datasets. Two real datasets are used: homogenised daily mean temperature data across Australia as reported by the Bureau of Meteorology (BOM) \cite{bom}, and daily mean temperature data over north America, extracted as a subset of the global surface temperature data provided by the National Oceanic and Atmospheric Administration of the United States (NOAA) \cite{noaa}. The BOM dataset is broadly used for developing and exhibiting methods covered, whilst the NOAA dataset is used to validate the broad utility of models created, as well as to investigate how model parameters change over different samples of the same type of data (temperature networks).
 
 \newpage
 \section{Background}\subsection{An Introduction to Graphs, Graph Signals, and Graph Spectra}
@@ -938,23 +938,9 @@ Interestingly, in three dimensions the fundamental distance-covariance function 
 \label{subsec:filters_intro}
 Just as time domain signal processing can be used to filter noise, so too can graph signal processing. The most natural port from the temporal domain to the graphical domain would be to use the GFT to bring graphical data into the frequency domain, before applying a filter, and then inverting the GFT to get the filtered signal. In order to filter noise efficiently, we need to know what both the noise spectra is, and the signal spectra. We then keep the components of the spectra that have the most signal and least noise (high SNR). This is very similar to the compression process in \ref{subsec:compression}, where frequencies containing the most signal are preferred. In our dataset, we have no ground truth to compare the data to, so we will artificially introduce Gaussian sensor noise, then attempt to remove it using a spatial filter, reporting the RMSE between the original and filtered signals for different amounts of injected noise.
 
-\begin{figure}[!ht]
-    \centering
-    \begin{tabular}{|c|c|c|c|c|c|c|}
-        \hline
-        $\sigma_{noise}/\sigma_{signal}$ (\%) & 1.00 & 5.00 & 10.0 & 20.0 & 50.0 & 100 \\
-        \hline
-        RMSE (\%) & 1.00 & 4.98 & 9.81 & 18.69 & 37.63 & 54.34\\
-        \hline
-    \end{tabular}
-    \caption{Spatial noise reduction via Wiener filter.}
-    \label{fig:spatial_noise}
-\end{figure}
-
-Clearly, the filter is more effective at noise reduction at high levels of noise, as low levels of noise are hard to distinguish from legitimate high frequency signal.
 \subsubsection{Well-Chosen Graph Fourier Transforms}
 \label{subsec:well_chosen_GFT}
-Throughout this subsection we consider a graph with $n$ vertices, and a graph operator operator $\pmb{A}$ with eigendecomposition $\pmb{V\Lambda V}^{-1}$, and hence graph Fourier transform $\pmb{V}^{-1}$.
+Throughout this subsection we consider a graph with $n$ vertices, and a graph shift operator $\pmb{A}$ with eigendecomposition $\pmb{V\Lambda V}^{-1}$, and hence graph Fourier transform $\pmb{V}^{-1}$.
 
 From the compression and filtering problems discussed, we note that problems are solved better when more of the data is contained in fewer eigenvectors of the graph Fourier transform. We analyse what happens when we apply the GFT to the data. Assuming the data is 0-mean and Gaussian, we can write the distribution before and after the GFT application.
 \begin{align*}
@@ -1470,13 +1456,14 @@ The issue here is that "number of parameters" is a fickle thing. $l_0$ purports 
 
 In the literature for example, when discussing ridge regression, it does not set any entries to 0, yet is often considered to reduce the effective number of parameters used. Tibshirani, Hastie, and Friedman \cite{tibfried} define the effective number of parameters by how sensitive the output prediction of a model is to the output of the data, as below.
 \begin{align*}
-    p&=\sum_i^N\frac{\partial \hat{y_i}}{\partial y_i}\\
-    &=\sum_i^N\frac{\partial}{\partial y_i}\pmb{X}(\pmb{X}^\top \pmb{X})^{-1}\pmb{X}^\top y_i\\
+    p&=\sum_{i=1}^N\frac{\partial \hat{y_i}}{\partial y_i}\\
+    &=\sum_{i=1}^N\frac{\partial}{\partial y_i}\pmb{X}(\pmb{X}^\top \pmb{X})^{-1}\pmb{X}^\top y_i\\
     &=\text{tr}(\pmb{X}(\pmb{X}^\top \pmb{X})^{-1}\pmb{X}^\top)\\
-    &=\text{tr}(\pmb{X})\\
+    &=\text{tr}((\pmb{X}^\top \pmb{X})^{-1}\pmb{X}^\top\pmb{X})\\
+    &=\text{tr}(\pmb{I}_N)\\
     &=N
 \end{align*}
-This is exactly the number of effective parameters we expect. $H$ is called the smoothing matrix, that takes the sample output to the predicted output. For ridge regression, the smoothing matrix is as below.
+This is exactly the number of effective parameters we expect. $\pmb{H}=\pmb{X}(\pmb{X}^\top \pmb{X})^{-1}\pmb{X}^\top$ is called the smoothing matrix, that takes the sample output to the predicted output. For ridge regression, the smoothing matrix is as below.
 \begin{align*}
     \pmb{H}&=\pmb{X}(\pmb{X}^\top \pmb{X}+\lambda \pmb{I})^{-1} \pmb{X}^\top
 \end{align*}
@@ -1785,6 +1772,7 @@ This thesis has identified areas of interest in the graph-signal processing lite
     \item Given limited samples, exactly how well can we identify the topology and differential equation acting on a system from its correlation function? For systems not driven by noise, but by a chosen input, are there superior methods for system identification?
     \item Is there a stronger geographic predictor of the partial correlations than either distance or nearest-neighbours?
     \item How relevant are correlation function fitting and inverse covariance fitting when an application comes with an explicitly defined graph?
+    \item How can we apply graph Fourier transforms and filtration to real control processes?
 \end{itemize}
 \section{Conclusion}
 This thesis has shown how traditional digital signal processing can be extended to new domains. Just as digital signal processing provides good solutions to practical and fundamental problems such as data compression, prediction, filtration, and interpolation, graph signal processing expands these problems to be solvable on graphical domains.

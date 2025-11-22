@@ -56,7 +56,7 @@ W_YEARLY = 2 * 3.141592653589793 / 365.25
 SCALE_KM = 1000
 
 ### change this to NOAA/BOM to use the USA/AUS data
-DATASET = 'noaa'
+DATASET = 'bom'
 ###
 
 DATA_DIR = os.path.join(PROJECT_ROOT, "..", "data", DATASET)

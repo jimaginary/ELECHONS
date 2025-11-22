@@ -128,6 +128,38 @@ def save_hist_qq_subplots():
         fig.savefig(path + f'/{stat}_dist_{sh.STATIONS.iloc[st]['station number']}.png', bbox_inches='tight')
         plt.close()
 
+def save_hist_qq_subplots_differencing():
+    if not _INIT:
+        print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')
+        return
+
+    for st in range(temps.shape[0]):
+        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12,6))
+        # Rice's rule: bins = 2*cbrt(obsv)
+        no_bins = int(2*np.cbrt(temps.shape[1]))
+
+        axes[0,0].hist(temps[st], bins=no_bins)
+        axes[0,0].set_title(f'{stat} temperature distribution for station {sh.STATIONS.iloc[st]['station number']}')
+        axes[0,0].set_xlabel('degC')
+        axes[0,0].set_ylabel('no. samples')
+
+        axes[0,1].hist(temps[st,1:]-temps[st,:-1], bins=no_bins)
+        axes[0,1].set_title(f'differences {stat} temperature distribution for station {sh.STATIONS.iloc[st]['station number']}')
+        axes[0,1].set_xlabel('degC')
+        axes[0,1].set_ylabel('no. samples')
+
+        stats.probplot(temps[st], plot=axes[1,0])
+        axes[1,0].set_title(f'{stat} temp q-q plot')
+
+        stats.probplot(temps[st,1:]-temps[st,:-1], plot=axes[1,1])
+        axes[1,1].set_title(f'diff {stat} temp q-q plot')
+
+        plt.tight_layout()
+        path = f'{config.PLOTS_DIR}/distribution_imgs/differencing'
+        os.makedirs(path, exist_ok=True)
+        fig.savefig(path + f'/{stat}_diff_dist_{sh.STATIONS.iloc[st]['station number']}.png', bbox_inches='tight')
+        plt.close()
+
 def test_normality(st):
     if not _INIT:
         print(f'Regress temp module uninitialised, run {__name__}.init(stat) with stat in {{\'max\', \'min\', \'mean\'}}')

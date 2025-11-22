@@ -107,6 +107,8 @@ def two_D_cov(n = 50, samples = 5000, l=0.5, g=1):
 
     return result, dist, single_to_tuple
 
+def plot_two_D_cov(n = 50, samples = 5000, l=0.5, g=1):
+    result, dist, single_to_tuple = two_D_cov(n,samples,l,g)
     cov = np.corrcoef(result)
 
     dist_set = np.sort(np.unique(dist))
