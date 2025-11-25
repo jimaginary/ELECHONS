@@ -389,7 +389,7 @@ def var_sgd(data, p, learning_rate = 0.1, div_by_zero_offset=1e-8, threshhold=0,
     return Prediction(data, func, 1 + (threshhold != 0) + (grad_learning_coeff != 0), delay=p)
 
 # no history
-def fast_var_sgd(data, p, learning_rate = 0.1, div_by_zero_offset=1e-8, threshhold=0, grad_learning_coeff=1):
+def fast_var_sgd(data, p, learning_rate = 0.1, norm=False, div_by_zero_offset=1e-8, threshhold=0, grad_learning_coeff=1):
     def func(data_in):
         params = np.zeros((data_in.shape[0], data_in.shape[0] * p))
         predictions = np.empty((data_in.shape[0], data_in.shape[-1] - p + 1))
@@ -405,7 +405,9 @@ def fast_var_sgd(data, p, learning_rate = 0.1, div_by_zero_offset=1e-8, threshho
                 break
 
             error = data_in[..., i+p] - predictions[..., i]
-            grad = - np.outer(error, z) / (np.sum(np.pow(z, 2)) + div_by_zero_offset)
+            grad = - np.outer(error, z)
+            if norm:
+                grad /= (np.sum(np.pow(z, 2)) + div_by_zero_offset)
             gradient = (1 - grad_learning_coeff) * gradient + grad_learning_coeff * grad
 
             params -= learning_rate * gradient
